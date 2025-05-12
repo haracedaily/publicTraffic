@@ -1,33 +1,31 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
+import {Button} from "antd";
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <header>
+        <img width={200} src={"/header_logo.svg"} alt={'logo'}/>
+          <nav>
+              <div>대구시 교통정보 열람</div>
+              <div>StarBus 소개</div>
+          </nav>
+          <Button>로그인</Button>
+      </header>
+      <main>
+        <nav>
+            <article id={"nav_header"}>
+                <img src="/bus.svg" alt="bus" />
+                <h4>버스정보조회</h4>
+            </article>
+        </nav>
+        <article>
+        {/*  지도*/}
+        </article>
+      </main>
+      <footer>
+
+      </footer>
     </>
   )
 }
