@@ -10,7 +10,7 @@ function Side(props) {
     }
     return (
         <nav className={styles.side_nav}>
-            <article id={"nav_header"}>
+            <article id={styles.nav_header}>
                 <img src="/bus.svg" alt="bus" />
                 <h4>버스정보조회</h4>
             </article>

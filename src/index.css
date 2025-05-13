@@ -17,6 +17,12 @@
     &>nav{
       display:flex;
       gap:5rem;
+      height:100%;
+      &>div{
+        height:100%;
+        align-content:center;
+        cursor:pointer;
+      }
     }
     &>Button{
       margin-right: 10vw;
@@ -28,6 +34,14 @@
     min-height:400px;
     display:flex;
     overflow-y:auto;
+    &>nav>div>label.ant-radio-button-wrapper-checked{
+      background:#D7E3DD;
+      border-color:transparent;
+      color:black;
+      &::before{
+        background-color: transparent;
+      }
+    }
   }
   &>footer{
     width:100%;
