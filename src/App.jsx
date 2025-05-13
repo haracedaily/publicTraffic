@@ -5,7 +5,7 @@ import Main from "./layout/Main.jsx";
 import SearchTotal from "./pages/SearchTotal.jsx";
 import BusRoute from "./pages/busRoute.jsx";
 import {useMediaQuery} from "react-responsive";
-import {Map} from "react-kakao-maps-sdk";
+import {Map, useKakaoLoader} from "react-kakao-maps-sdk";
 
 function App() {
     const [navTab, setNavTab] = useState('stop');
@@ -13,6 +13,7 @@ function App() {
     const handleTabClick = (e) => {
         setNavTab(e.target.value);
     }
+
   return (
     <>
       <header>
@@ -47,12 +48,9 @@ function App() {
                 </Radio.Button>
             </Radio.Group>
             {navTab === 'search' ? <SearchTotal />:<BusRoute />}
-            <Main />
         </nav>
         <article className={'main'}>
-            <Map>
-
-            </Map>
+            <Main />
         </article>
       </main>
       <footer>
