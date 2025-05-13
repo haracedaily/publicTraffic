@@ -1,13 +1,13 @@
 import React from 'react';
 import {BrowserRouter, Route, Routes} from "react-router-dom";
-import SideMenu from "../pages/SideMenu.jsx";
+import KaokaoMain from "../pages/KaokaoMain.jsx";
 
 function Main(props) {
     return (
         <>
             <BrowserRouter>
                 <Routes>
-                    <Route path="/" element={<SideMenu />} />
+                    <Route path="/" element={<KaokaoMain />} />
                 </Routes>
             </BrowserRouter>
         </>
