@@ -28,34 +28,6 @@
     min-height:400px;
     display:flex;
     overflow-y:auto;
-    &>nav{
-      width: 380px;
-      display:flex;
-      flex-direction: column;
-      height:100%;
-      box-shadow: #D7E3DD 1px 1px 2px;
-      &>article#nav_header{
-        width:100%;
-        background:#1D6633;
-        display:flex;
-        justify-content: center;
-        align-items: center;
-        gap: 1rem;
-        color:white;
-        padding: 1rem;
-      }
-      &>article#nav_result{
-        width:100%;
-        background:#C0D7CA;
-        padding: 0.7rem 2rem;
-        display:flex;
-        justify-content: space-between;
-      }
-    }
-    &>article.main{
-      width:calc(100% - 380px);
-      height:100%;
-    }
   }
   &>footer{
     width:100%;
@@ -63,4 +35,3 @@
     background:#333333;
   }
 }
-
