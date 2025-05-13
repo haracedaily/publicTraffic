@@ -1,0 +1,24 @@
+.side_nav{
+    width: 380px;
+    display:flex;
+    flex-direction: column;
+    height:100%;
+    box-shadow: #D7E3DD 1px 1px 2px;
+    &>article#nav_header{
+        width:100%;
+        background:#1D6633;
+        display:flex;
+        justify-content: center;
+        align-items: center;
+        gap: 1rem;
+        color:white;
+        padding: 1rem;
+    }
+    &>div>label{
+        padding: 0.5rem;
+        &:hover{
+            color:black;
+        }
+
+    }
+}
