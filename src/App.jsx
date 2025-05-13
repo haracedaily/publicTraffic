@@ -2,10 +2,10 @@ import './App.css'
 import {Button, Input, Space, Radio} from "antd";
 import {useState} from "react";
 import Main from "./layout/Main.jsx";
-import Stop from "./pages/Stop.jsx";
-import Bus from "./pages/Bus.jsx";
-import Favo from "./pages/Favo.jsx";
+import SearchTotal from "./pages/SearchTotal.jsx";
+import BusRoute from "./pages/busRoute.jsx";
 import {useMediaQuery} from "react-responsive";
+import {Map} from "react-kakao-maps-sdk";
 
 function App() {
     const [navTab, setNavTab] = useState('stop');
@@ -16,36 +16,43 @@ function App() {
   return (
     <>
       <header>
-          {isMobile ?<img width={70} src={"/logo.svg"} alt={"logo"}/> :<img width={200} src={"/header_logo.svg"} alt={'logo'}/>}
+          {isMobile ?<img width={150} src={"/logo_word.svg"} alt={"logo"}/> :<img width={200} src={"/header_logo.svg"} alt={'logo'}/>}
           {isMobile ? <Button>로그인</Button> : <nav>
-              <div>대구시 교통정보 열람</div>
-              <div>StarBus 소개</div>
+              <div>나의버스</div>
+              <div>주변정류장</div>
+              <div>이용안내</div>
           </nav>}
           {isMobile ? <></>:<Button>로그인</Button>}
       </header>
       <main>
         <nav>
             <article id={"nav_header"}>
-                <img src="/bus.svg" alt="bus" />
-                <h4>버스정보조회</h4>
-            </article>
-            <Space.Compact style={{ width: '100%', padding: '20px' }}>
-                <Input.Search placeholder="버스번호 및 정류소" allowClear />
-            </Space.Compact>
-            <article id={"nav_result"}>
-                <h3>검색결과</h3>
-                <img src="/reverse_triangle.svg" alt="triangle" />
-            </article>
-            <Radio.Group onChange={handleTabClick} value={navTab} style={{ width: '100%',display:'grid',gridTemplateColumns:'1fr 1fr 1fr' }} >
-                <Radio.Button value="stop">정류소</Radio.Button>
-                <Radio.Button value="bus">버스</Radio.Button>
-                <Radio.Button value="favo">즐겨찾기</Radio.Button>
+            <img src="/bus.svg" alt="bus" />
+            <h4>버스정보조회</h4>
+        </article>
+
+
+            <Radio.Group onChange={handleTabClick} value={navTab} style={{ width: '100%',display:'grid',gridTemplateColumns:'1fr 1fr' }} >
+                <Radio.Button value="search" style={{borderRadius:0,height:"auto"}}>
+                    <div style={{display:"flex",flexDirection:"column",justifyContent:"center",alignItems:"center"}}>
+                        <img src={"/search_i.svg"} width={30} alt={"search_i"}/>
+                        <h2 >통합검색</h2>
+                    </div>
+                </Radio.Button>
+                <Radio.Button value="route" style={{borderRadius:0, height:"auto"}}>
+                    <div style={{display:"flex",flexDirection:"column",justifyContent:"center",alignItems:"center"}}>
+                    <img src={"/crossArrow.svg"} width={30} alt={"cross_arrow"}/>
+                        <h2 >경로검색</h2>
+                    </div>
+                </Radio.Button>
             </Radio.Group>
-            {navTab === 'stop' ? <Stop />: navTab === 'bus' ? <Bus /> : <Favo />}
+            {navTab === 'search' ? <SearchTotal />:<BusRoute />}
             <Main />
         </nav>
         <article className={'main'}>
-        {/*  지도*/}
+            <Map>
+
+            </Map>
         </article>
       </main>
       <footer>

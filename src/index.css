@@ -4,14 +4,14 @@
   display:flex;
   flex-direction:column;
   &>header{
-    padding-left: 10vw;
+    padding-left: 20vw;
     width:100%;
     height:10vh;
     min-height:70px;
     display:flex;
     align-items:center;
-    justify-content: flex-start;
-    gap:3rem;
+    justify-content: space-between;
+    gap:5rem;
     box-shadow: 1px 1px 2px #D8E5DE;
     overflow:auto;
     &>nav{
@@ -19,7 +19,6 @@
       gap:5rem;
     }
     &>Button{
-      margin-left: auto;
       margin-right: 10vw;
     }
   }
@@ -54,7 +53,7 @@
       }
     }
     &>article.main{
-      width:100%;
+      width:calc(100% - 380px);
       height:100%;
     }
   }
@@ -64,3 +63,4 @@
     background:#333333;
   }
 }
+
