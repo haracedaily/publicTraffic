@@ -19,13 +19,6 @@
         &:hover{
             color:black;
         }
-        &.ant-radio-button-wrapper-checked{
-            background:#D7E3DD;
-            border-color:transparent;
-            color:black;
-            &::before{
-                background-color: transparent;
-            }
-        }
+
     }
 }
