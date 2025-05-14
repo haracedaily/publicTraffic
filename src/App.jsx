@@ -16,8 +16,8 @@ function App() {
     return (
         <>
             <header>
-                {isMobile ? <img width={150} src={"/logo_word.svg"} alt={"logo"}/> :
-                    <img width={200} src={"/header_logo.svg"} alt={'logo'}/>}
+                {isMobile ? <img width={150} src={"/logo_word.svg"} alt={"logo"} onClick={()=>{navigator("/")}} style={{cursor:"pointer"}} /> :
+                    <img width={200} src={"/header_logo.svg"} alt={'logo'} onClick={()=>{navigator("/")}} style={{cursor:"pointer"}} />}
                 {isMobile ? <Button>로그인</Button> : <nav>
                     <div onClick={()=>{navigator("/my")}}>나의버스</div>
                     <div>주변정류장</div>
