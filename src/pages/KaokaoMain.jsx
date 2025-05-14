@@ -1,12 +1,16 @@
 import React from 'react';
 import {Map, useKakaoLoader} from "react-kakao-maps-sdk";
-import Side from "../component/Side.jsx";
+import Side from "../components/Side.jsx";
 import styles from "../css/kakao_main.module.css";
+
 function KaokaoMain(props) {
     useKakaoLoader({
         appkey: import.meta.env.VITE_KAKAO_API_KEY,
         libraries: ["clusterer", "drawing", "services"],
     });
+
+    console.log("카카오 API KEY:", import.meta.env.VITE_KAKAO_API_KEY);
+
     return (
         <>
             <Side />
