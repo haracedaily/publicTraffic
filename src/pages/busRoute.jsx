@@ -1,9 +1,11 @@
 import React from 'react';
+import {Input, Space} from "antd";
 
 function BusRoute(props) {
     return (
         <div>
-            경로탐색 페이지
+
+
         </div>
     );
 }
