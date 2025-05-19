@@ -16,6 +16,7 @@
     "@supabase/supabase-js": "^2.49.4",
     "antd": "^5.24.9",
     "axios": "^1.9.0",
+    "proj4": "^2.17.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-kakao-maps-sdk": "^1.1.27",

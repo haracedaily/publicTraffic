@@ -1,6 +1,13 @@
 import React from 'react';
 import {Card, Input, List, message, Space} from "antd";
 import kakaoMap from "../js/kakaoMap.js";
+import proj4 from 'proj4';
+
+// EPSG:5182 (TM-동부원점) 좌표계 정의
+proj4.defs("EPSG:5182", "+proj=tmerc +lat_0=38 +lon_0=129 +k=1 +x_0=200000 +y_0=600000 +ellps=GRS80 +units=m +no_defs");
+
+// EPSG:4326 (WGS84) 좌표계 정의
+proj4.defs("EPSG:4326", "+proj=longlat +datum=WGS84 +no_defs");
 
 function SearchTotal(props) {
     console.log(props);
@@ -17,10 +24,9 @@ function SearchTotal(props) {
             });
     };
     const convertNGISToKakao = (x, y) => {
-        // NGIS 좌표를 카카오맵 좌표로 변환하는 공식
-        // 대구시 기준 변환 공식
-        const lat = 35.8693 + (y - 363760.41323086) * 0.00001;
-        const lng = 128.6062 + (x - 163696.53125238) * 0.00001;
+        const [longitude, latitude] = proj4("EPSG:5182", "EPSG:4326", [x, y]);
+        let lat = latitude;
+        let lng = longitude;
         return { lat, lng };
     };
     const searchTotal = async (value) =>{
