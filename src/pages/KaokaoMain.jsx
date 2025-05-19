@@ -1,9 +1,3 @@
-<<<<<<< HEAD
-import React from 'react';
-import {Map, useKakaoLoader} from "react-kakao-maps-sdk";
-import Side from "../components/Side.jsx";
-import styles from "../css/kakao_main.module.css";
-=======
 import React, {useState} from 'react';
 import {CustomOverlayMap, Map, MapMarker, MarkerClusterer, useKakaoLoader} from "react-kakao-maps-sdk";
 import Side from "../component/Side.jsx";
@@ -15,7 +9,6 @@ proj4.defs("EPSG:5182", "+proj=tmerc +lat_0=38 +lon_0=129 +k=1 +x_0=200000 +y_0=
 
 // EPSG:4326 (WGS84) 좌표계 정의
 proj4.defs("EPSG:4326", "+proj=longlat +datum=WGS84 +no_defs");
->>>>>>> main
 
 function KaokaoMain(props) {
     const [searchResults, setSearchResults] = useState([]);
