@@ -54,8 +54,11 @@ function SearchTotal(props) {
                         <List.Item
                             onClick={() => {
                                 fetchArrivalInfo(item.bsId);
+                                let {lat,lng} = convertNGISToKakao(item.ngisXPos, item.ngisYPos);
+                                item.lat = lat;
+                                item.lng = lng;
                                 props.setSelectedStop(item);
-                                props.setMapCenter(convertNGISToKakao(item.ngisXPos, item.ngisYPos));
+                                props.setMapCenter({lat,lng});
                             }}
                             style={{ cursor: 'pointer' }}
                         >
