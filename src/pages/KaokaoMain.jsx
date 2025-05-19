@@ -16,12 +16,7 @@ function KaokaoMain(props) {
     const [mapCenter, setMapCenter] = useState({ lat: 35.8693, lng: 128.6062 });
     const [selectedStop, setSelectedStop] = useState(null);
     const [hoveredStop, setHoveredStop] = useState(null);
-    const convertNGISToKakao = (x, y) => {
-        const [longitude, latitude] = proj4("EPSG:5182", "EPSG:4326", [x, y]);
-        let lat = latitude;
-        let lng = longitude;
-        return { lat, lng };
-    };
+
 
     useKakaoLoader({
         appkey: import.meta.env.VITE_KAKAO_API_KEY,
