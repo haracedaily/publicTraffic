@@ -71,7 +71,9 @@ function KaokaoMain(props) {
                     )}
                     {hoveredStop && (
                         <CustomOverlayMap
-                            position={{ lat: hoveredStop.lat+0.0005, lng: hoveredStop.lng+0.0020 }}
+                            position={{ lat: hoveredStop.lat, lng: hoveredStop.lng }}
+                            xAnchor={-0.1}
+                            yAnchor={0.91}
                         >
                             <div
                                 style={{
