@@ -36,7 +36,8 @@ function SearchTotal(props) {
                 message.warning("검색결과가 존재하지 않습니다.");
             }else{
                 props.setSearchResults(res);
-
+                props.setArrivalInfo(null);
+                props.setSelectedStop(null);
             }
         }
 
