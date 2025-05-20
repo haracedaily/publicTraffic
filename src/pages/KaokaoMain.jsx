@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   CustomOverlayMap,
   Map,
@@ -9,7 +9,8 @@ import {
 import Side from "../component/Side.jsx";
 import styles from "../css/kakao_main.module.css";
 import proj4 from "proj4";
-import MapView from "../components/MapView";
+import MapView from "../components/MapView.jsx";
+
 
 // EPSG:5182 (TM-동부원점) 좌표계 정의
 proj4.defs(
@@ -26,6 +27,9 @@ function KaokaoMain(props) {
   const [mapCenter, setMapCenter] = useState({ lat: 35.8693, lng: 128.6062 });
   const [selectedStop, setSelectedStop] = useState(null);
   const [hoveredStop, setHoveredStop] = useState(null);
+
+  const [myPosition, setMyPosition] = useState(null);
+
   const convertNGISToKakao = (x, y) => {
     const [longitude, latitude] = proj4("EPSG:5182", "EPSG:4326", [x, y]);
     let lat = latitude;
@@ -40,11 +44,24 @@ function KaokaoMain(props) {
 
   console.log("카카오 API KEY:", import.meta.env.VITE_KAKAO_API_KEY);
 
+  useEffect(() => {
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude, longitude } = pos.coords;
+        setMyPosition({
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude,
+        });
+        setMapCenter({ lat: latitude, lng: longitude });
+      },
+      (err) => {
+        console.error("위치 오류:", err);
+      }
+    );
+  }, []);
+
   return (
     <>
-      <div>
-        <MapView />
-      </div>
       <Side
         setMapCenter={setMapCenter}
         searchResults={searchResults}
@@ -64,6 +81,7 @@ function KaokaoMain(props) {
             averageCenter={true} // 클러스터에 포함된 마커들의 평균 위치를 클러스터 마커 위치로 설정
             minLevel={10} // 클러스터 할 최소 지도 레벨
           >
+            
             {selectedStop && (
               <MapMarker
                 position={{ lat: selectedStop.lat, lng: selectedStop.lng }}
@@ -145,18 +163,18 @@ function KaokaoMain(props) {
                                 item.arrState === "전"
                                   ? "#52c41a"
                                   : item.arrState === "전전"
-                                  ? "#faad14"
-                                  : "#1890ff",
+                                    ? "#faad14"
+                                    : "#1890ff",
                               fontWeight: "bold",
                             }}
                           >
                             {item.arrState === "전"
                               ? "곧 도착"
                               : item.arrState === "전전"
-                              ? "곧 도착 예정"
-                              : item.arrState === "도착예정"
-                              ? "차고지 대기"
-                              : `${item.arrState} 후 도착`}
+                                ? "곧 도착 예정"
+                                : item.arrState === "도착예정"
+                                  ? "차고지 대기"
+                                  : `${item.arrState} 후 도착`}
                           </div>
                         </div>
                       </>
@@ -167,6 +185,7 @@ function KaokaoMain(props) {
                 </div>
               </CustomOverlayMap>
             )}
+            {myPosition && <MapView position={myPosition} />}
           </MarkerClusterer>
         </Map>
       </article>
