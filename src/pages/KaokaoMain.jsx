@@ -16,12 +16,7 @@ function KaokaoMain(props) {
     const [mapCenter, setMapCenter] = useState({ lat: 35.8693, lng: 128.6062 });
     const [selectedStop, setSelectedStop] = useState(null);
     const [hoveredStop, setHoveredStop] = useState(null);
-    const convertNGISToKakao = (x, y) => {
-        const [longitude, latitude] = proj4("EPSG:5182", "EPSG:4326", [x, y]);
-        let lat = latitude;
-        let lng = longitude;
-        return { lat, lng };
-    };
+
 
     useKakaoLoader({
         appkey: import.meta.env.VITE_KAKAO_API_KEY,
@@ -73,7 +68,7 @@ function KaokaoMain(props) {
                         <CustomOverlayMap
                             position={{ lat: hoveredStop.lat, lng: hoveredStop.lng }}
                             xAnchor={-0.1}
-                            yAnchor={0.91}
+                            yAnchor={0.3}
                         >
                             <div
                                 style={{
@@ -83,12 +78,13 @@ function KaokaoMain(props) {
                                     fontSize: "1rem",
                                     boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
                                     whiteSpace: "nowrap",
-                                    width: "300px",
+                                    overflow: "hidden",
+                                    width: "220px",
                                 }}
                             >
-                                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",borderBottom:"2px solid black" }} >
+                                <div style={{display:"flex",flexDirection:"column",justifyContent:"center",alignItems:"flex-start",borderBottom:"2px solid black" }} >
                                 <h3 style={{padding:"0.5em 0"}}>{hoveredStop.bsNm}</h3>
-                                    <h4 style={{color:"#aaa"}}>도착 예정 정보</h4>
+                                    {/*<h4 style={{color:"#aaa",alignSelf:"flex-end"}}>도착 예정 정보</h4>*/}
                                 </div>
                                 {arrivalInfo.list?.length>0?arrivalInfo.list.map(item=>(
                                     <>
@@ -103,7 +99,7 @@ function KaokaoMain(props) {
                                                 fontWeight: "bold",
                                                 fontSize: "1.1em"
                                             }}>
-                                                {item.routeNo} {item.routeNote && `(${item.routeNote})`}
+                                                {item.routeNo}
                                             </div>
                                             <div style={{
                                                 color: item.arrState === "전" ? "#52c41a" :
