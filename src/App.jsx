@@ -7,7 +7,7 @@ import BusRoute from "./pages/busRoute.jsx";
 import { useMediaQuery } from "react-responsive";
 import useGeoLocation from "./hooks/GeoLocation.jsx";
 import { getNearbyStations, getArrivalInfo } from "./api/busApi.js";
-// import {Map, useKakaoLoader} from "react-kakao-maps-sdk";
+import {Map, useKakaoLoader} from "react-kakao-maps-sdk";
 
 function App() {
   const location = useGeoLocation();
@@ -18,7 +18,7 @@ function App() {
     if (!location) return;
     getNearbyStations(location.lat, location.lng).then(setStations);
   }, [location]);
-
+  console.log("stations", stations);
   return (
     <>
       <header>
