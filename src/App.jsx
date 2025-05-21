@@ -8,7 +8,8 @@ import { useMediaQuery } from "react-responsive";
 import useGeoLocation from "./hooks/GeoLocation.jsx";
 import { getNearbyStations, getArrivalInfo } from "./api/busApi.js";
 import {Map, useKakaoLoader} from "react-kakao-maps-sdk";
-import MapView from "./components/MapView.jsx";
+import InstallButton from "./components/InstallButton.jsx";
+
 
 function App() {
   const location = useGeoLocation();
@@ -19,7 +20,6 @@ function App() {
     if (!location) return;
     getNearbyStations(location.lat, location.lng).then(setStations);
   }, [location]);
-  console.log("stations", stations);
   return (
     <>
       <header>
@@ -29,7 +29,7 @@ function App() {
           <img width={200} src={"/header_logo.svg"} alt={"logo"} />
         )}
         {isMobile ? (
-          <Button>로그인</Button>
+          <InstallButton/>
         ) : (
           <nav>
             <div>나의버스</div>
@@ -37,7 +37,8 @@ function App() {
             <div>이용안내</div>
           </nav>
         )}
-        {isMobile ? <></> : <Button>로그인</Button>}
+        
+        {isMobile ? <></> : <InstallButton/>}
       </header>
       <main>
         <Main />
