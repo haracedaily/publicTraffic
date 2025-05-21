@@ -6,9 +6,9 @@ import SearchTotal from "./pages/SearchTotal.jsx";
 import BusRoute from "./pages/busRoute.jsx";
 import { useMediaQuery } from "react-responsive";
 import useGeoLocation from "./hooks/GeoLocation.jsx";
+import InstallButton from "./components/InstallButton.jsx";
 import { getNearbyStations, getArrivalInfo } from "./api/busApi.js";
 import {Map, useKakaoLoader} from "react-kakao-maps-sdk";
-import InstallButton from "./components/InstallButton.jsx";
 
 
 function App() {
@@ -17,7 +17,7 @@ function App() {
   const isMobile = useMediaQuery({ maxWidth: 768 });
 
   useEffect(() => {
-    if (!location) return;
+    if (location)
     getNearbyStations(location.lat, location.lng).then(setStations);
   }, [location]);
   return (
@@ -29,16 +29,15 @@ function App() {
           <img width={200} src={"/header_logo.svg"} alt={"logo"} />
         )}
         {isMobile ? (
-          <InstallButton/>
+          <InstallButton />
         ) : (
           <nav>
             <div>나의버스</div>
             <div>주변정류장</div>
             <div>이용안내</div>
+            <InstallButton />
           </nav>
         )}
-        
-        {isMobile ? <></> : <InstallButton/>}
       </header>
       <main>
         <Main />

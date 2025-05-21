@@ -21,6 +21,7 @@ const InstallButton = () => {
 
   const handleInstallClick = async () => {
     if (deferredPrompt) {
+      //???
       deferredPrompt.prompt();
       const { outcome } = await deferredPrompt.userChoice;
       console.log("설치 선택 결과:", outcome);
@@ -29,20 +30,22 @@ const InstallButton = () => {
     }
   };
 
-  if (!installReady) return null;
+  // if (!installReady) return null; 준비 안되어있으니 버튼 가지마라
 
   return (
+      <>
     <Button
       type="text"
       onClick={handleInstallClick}
       className="install-btn"
     >
       <img
-        src="/images/install.svg"
+        src="/install.svg"
         alt="앱 설치하기"
-        style={{ width: 140, height: "auto" }}
+        style={{ width: "140px", height: "auto" }}
       />
     </Button>
+      </>
   );
 };
 
