@@ -10,12 +10,12 @@ proj4.defs("EPSG:5182", "+proj=tmerc +lat_0=38 +lon_0=129 +k=1 +x_0=200000 +y_0=
 proj4.defs("EPSG:4326", "+proj=longlat +datum=WGS84 +no_defs");
 ///[^ㄱ-ㅎ가-힣a-zA-Z0-9]/g
 function SearchTotal(props) {
-    console.log(props);
+
     const fetchArrivalInfo = (bsId) => {
         kakaoMap.getArrivalInfo(bsId)
             .then(res => {
                 if(res!==404){
-                    console.log(res);
+                    console.log("도착 예정정보",res.list);
                     props.setArrivalInfo(res);
                 }
             })
@@ -54,6 +54,7 @@ function SearchTotal(props) {
                     renderItem={(item) => (
                         <List.Item
                             onClick={() => {
+                                props.setMarkerClicked(false);
                                 fetchArrivalInfo(item.bsId);
                                 let {lat,lng} = convertNGISToKakao(item.ngisXPos, item.ngisYPos);
                                 item.lat = lat;
@@ -114,11 +115,11 @@ function SearchTotal(props) {
                                             </div>
                                             <div style={{
                                                 color: item.arrState === "전" ? "#52c41a" :
-                                                    item.arrState === "전전" ? "#faad14" : "#1890ff",
+                                                    item.arrState === "전전" ? "#faad14" : item.arrState ==='도착예정' ? "#aaaaaa" :"#1890ff",
                                                 fontWeight: "bold"
                                             }}>
                                                 {item.arrState === "전" ? "곧 도착" :
-                                                    item.arrState === "전전" ? "곧 도착 예정" :
+                                                    item.arrState === "전전" ? "곧 도착 예정" : item.arrState ==='도착예정' ? "차고지 대기" :
                                                         `${item.arrState} 후 도착`}
                                             </div>
                                         </div>
@@ -129,6 +130,11 @@ function SearchTotal(props) {
                                             버스 번호: {item.vhcNo2}
                                         </div>
                                     </div>
+                                    {props.openedRoute && props?.selectedRoute?.routeId === item.routeId && (
+                                        <Card>
+
+                                        </Card>
+                                    )}
                                 </List.Item>
                             )}
                         />
