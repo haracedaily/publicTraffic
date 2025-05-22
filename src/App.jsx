@@ -10,7 +10,7 @@ import {BrowserRouter, useNavigate} from "react-router-dom";
 
 function App() {
 
-    const isMobile = useMediaQuery({maxWidth: 768});
+    const isMobile = useMediaQuery({maxWidth: 900});
     const navigator = useNavigate();
 
     return (
@@ -22,15 +22,29 @@ function App() {
                     <div onClick={()=>{navigator("/my")}}>나의버스</div>
                     <div>주변정류장</div>
                     <div>이용안내</div>
+                    <Button>로그인</Button>
                 </nav>}
-                {isMobile ? <></> : <Button>로그인</Button>}
             </header>
             <main>
                 <Main/>
             </main>
             <footer>
+                <div>
 
-                <img width={200} src="/white_logo.svg" alt="footer_logo"/>
+                <div>
+                    <h4>회사명 : StarBus</h4>
+                    <h4>주소 : 대구 중구 중앙대로 394 제일빌딩 5F</h4>
+                    <h4>대표 : 스타버스</h4>
+                </div>
+                <div>
+                    <h4>이메일 : starbus@naver.com</h4>
+                    <h4>문의전화 : 000-0000-0000</h4>
+                </div>
+                <div>
+                    <h4>Copyright(c) All Rights Reserved.</h4>
+                </div>
+                </div>
+
             </footer>
         </>
 
