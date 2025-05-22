@@ -1,0 +1,25 @@
+.origin_dir{
+    position:relative;
+    &::after{
+        content:"";
+        position:absolute;
+        top:0;
+        right:min(15%,3em);
+        width:4px;
+        height:100%;
+        background-color:blue;
+    }
+}
+
+.reverse_dir{
+    position:relative;
+    &::after{
+        content:"";
+        position:absolute;
+        top:0;
+        right:min(15%,3em);
+        width:4px;
+        height:100%;
+        background-color:red;
+    }
+}

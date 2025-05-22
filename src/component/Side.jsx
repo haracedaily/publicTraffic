@@ -4,13 +4,12 @@ import SearchTotal from "../pages/SearchTotal.jsx";
 import BusRoute from "../pages/busRoute.jsx";
 import styles from "../css/side.module.css";
 function Side(props) {
-    console.log(props);
     const [navTab, setNavTab] = useState('search');
     const handleTabClick = (e) => {
         setNavTab(e.target.value);
     }
     return (
-        <nav className={styles.side_nav}>
+        <nav ref={props.sideRef} className={styles.side_nav}>
             <article id={styles.nav_header}>
                 <img src="/bus.svg" alt="bus" />
                 <h4>버스정보조회</h4>
