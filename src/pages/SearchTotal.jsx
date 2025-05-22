@@ -8,9 +8,9 @@ proj4.defs("EPSG:5182", "+proj=tmerc +lat_0=38 +lon_0=129 +k=1 +x_0=200000 +y_0=
 
 // EPSG:4326 (WGS84) 좌표계 정의
 proj4.defs("EPSG:4326", "+proj=longlat +datum=WGS84 +no_defs");
-
+///[^ㄱ-ㅎ가-힣a-zA-Z0-9]/g
 function SearchTotal(props) {
-    console.log(props);
+    // console.log(props);
     const fetchArrivalInfo = (bsId) => {
         kakaoMap.getArrivalInfo(bsId)
             .then(res => {
@@ -36,7 +36,8 @@ function SearchTotal(props) {
                 message.warning("검색결과가 존재하지 않습니다.");
             }else{
                 props.setSearchResults(res);
-
+                props.setArrivalInfo(null);
+                props.setSelectedStop(null);
             }
         }
 

@@ -184,10 +184,10 @@ function MapView({ position, onClick }) {
         onClick={onClick}
         style={{
           position: "absolute",
-          bottom: "170px",
+          bottom: "20px",
           right: "20px",
-          width: "70px",
-          height: "70px",
+          width: "55px",
+          height: "55px",
           cursor: "pointer",
           zIndex: 1000,
         }}

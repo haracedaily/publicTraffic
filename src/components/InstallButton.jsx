@@ -40,9 +40,9 @@ const InstallButton = () => {
       className="install-btn"
     >
       <img
-        src="/install.svg"
+        src="/Install.svg"
         alt="앱 설치하기"
-        style={{ width: "140px", height: "auto" }}
+        style={{ width: "25px", height: "25px" }}
       />
     </Button>
       </>
@@ -50,3 +50,5 @@ const InstallButton = () => {
 };
 
 export default InstallButton;
+
+//현재 위치 끌고 오는 것과 현재 위치 검색 
