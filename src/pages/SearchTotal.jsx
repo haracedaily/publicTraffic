@@ -139,7 +139,7 @@ function SearchTotal(props) {
 
                                                 // if(item.bsId===props.selectedStop.bsId)document.querySelector(".jh_sideSelectedStop")?.scrollIntoView({behavior:"smooth",block:"center",inline:"nearest"});
                                                 return (
-                                                <Card className={item.moveDir==0?styles.origin_dir:styles.reverse_dir} >
+                                                <Card className={`${item.moveDir==0?styles.origin_dir:styles.reverse_dir} ${item.bsId===props.selectedStop.bsId?"jh_sideSelectedStop":""}`} >
                                                     <List.Item>
                                                         <div className={item.bsId===props.selectedStop.bsId?"jh_sideSelectedStop":""} style={{ width: "100%" }}>
                                                             <div style={{
