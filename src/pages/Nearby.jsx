@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { List, Card, Typography, Spin, message } from "antd";
 import { fetchArrivalInfo } from "../api/busApi";
-// import MapView from "../components/MapView";
 import KakaoMapView from "../components/KakaoMapView";
 import useGeoLocation from "../hooks/GeoLocation";
 
@@ -10,7 +9,7 @@ const { Title, Text } = Typography;
 const DAEGU_API_KEY = import.meta.env.VITE_DAEGU_DEC_KEY;
 
 function Nearby() {
-  const [location, setLocation] = useState(null);
+  const [location, setLocation] = useState({ lat: null, lng: null });
   const [busStops, setBusStops] = useState([]);
   const [selectedStop, setSelectedStop] = useState(null);
   const [arrivalData, setArrivalData] = useState([]);
@@ -19,12 +18,6 @@ function Nearby() {
   const locationHook = useGeoLocation();
 
   const [stops, setStops] = useState([]); // 초기 선언
-
-  useEffect(() => {
-    if (userLat && userLng) {
-      fetchNearbyStops(userLat, userLng); // 예시 API 호출
-    }
-  }, [userLat, userLng]);
 
   const fetchNearbyStops = async (lat, lng) => {
     try {
@@ -105,13 +98,15 @@ function Nearby() {
 
   return (
     <>
-      {locationHook && (
-        <KakaoMapView
-          center={{ lat: location.lat, lng: location.lng }}
-          markers={stops}
-        />
-      )}
-      <div style={{ display: "flex", gap: "24px", padding: "24px" }}>
+      <div style={{width:"1500px", display: "flex", gap: "24px", padding: "24px", justifyContent: "space-between", alignItems: "center" }}>
+        <Card style={{width: "100%", height: "50%"}}>
+          {locationHook && (
+            <KakaoMapView
+              center={{ lat: location.lat, lng: location.lng }}
+              markers={stops}
+            />
+          )}
+        </Card>
         {/* 왼쪽: 정류장 리스트 */}
         <div style={{ flex: 1 }}>
           <Title level={3}>📍 주변 정류장</Title>

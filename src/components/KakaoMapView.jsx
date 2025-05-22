@@ -7,7 +7,7 @@ export default function KakaoMapView({ center, markers = [] }) {
   return (
     <Map
       center={center}
-      style={{ width: "100%", height: "400px", borderRadius: "10px" }}
+      style={{ width: "100%", height: "300px", borderRadius: "15px" }}
       level={4}
     >
       {/* 현재 위치 마커 */}
