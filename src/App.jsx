@@ -1,6 +1,6 @@
 import "./App.css";
 import { Button, Input, Space, Radio } from "antd";
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import Main from "./layout/Main.jsx";
 import SearchTotal from "./pages/SearchTotal.jsx";
 import BusRoute from "./pages/busRoute.jsx";
@@ -9,7 +9,6 @@ import useGeoLocation from "./hooks/GeoLocation.jsx";
 import InstallButton from "./components/InstallButton.jsx";
 import { getNearbyStations, getArrivalInfo } from "./api/busApi.js";
 import {Map, useKakaoLoader} from "react-kakao-maps-sdk";
-
 
 function App() {
   const location = useGeoLocation();
@@ -35,7 +34,7 @@ function App() {
             <div>나의버스</div>
             <div>주변정류장</div>
             <div>이용안내</div>
-            <InstallButton />
+            <div style={{marginRight: "25px"}}><InstallButton /></div>
           </nav>
         )}
       </header>

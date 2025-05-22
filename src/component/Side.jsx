@@ -4,7 +4,7 @@ import SearchTotal from "../pages/SearchTotal.jsx";
 import BusRoute from "../pages/busRoute.jsx";
 import styles from "../css/side.module.css";
 function Side(props) {
-    console.log(props);
+    // console.log(props);
     const [navTab, setNavTab] = useState('search');
     const handleTabClick = (e) => {
         setNavTab(e.target.value);

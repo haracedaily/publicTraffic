@@ -44,8 +44,6 @@ function KaokaoMain(props) {
     libraries: ["clusterer", "drawing", "services"],
   });
 
-  console.log("카카오 API KEY:", import.meta.env.VITE_KAKAO_API_KEY);
-
   useEffect(() => {
     navigator.geolocation.getCurrentPosition(
       (pos) => {
