@@ -46,6 +46,7 @@ const MySearch = ({ onSelectStop, onToggleFavorite, favorites }) => {
                 `https://businfo.daegu.go.kr:8095/dbms_web_api/bs/search?searchText=${value}&wincId=`
             )
             .then((response) => {
+                // console.log(`response:${JSON.stringify(response)}`);
                 if (response.data.header.success) {
                     setSearchResults(response.data.body);
                 } else {
