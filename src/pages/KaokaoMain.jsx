@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {CustomOverlayMap, Map, MapMarker, MarkerClusterer, useKakaoLoader} from "react-kakao-maps-sdk";
 import Side from "../component/Side.jsx";
 import styles from "../css/kakao_main.module.css";
@@ -19,8 +19,11 @@ function KaokaoMain(props) {
     const [hoveredStop, setHoveredStop] = useState(null);
     const [markerClicked,setMarkerClicked] = useState(false);
     const [selectedRoute,setSelectedRoute] = useState(null);
+    const [selectedRouteList,setSelectedRouteList] = useState(null);
+    const [selectedRoutePosition,setSelectedRoutePosition] = useState(null);
     const [openedRoute,setOpenedRoute] = useState(false);
     const [isVisible, setIsVisible] = useState(true);
+    const sideRef = useRef(null);
 
     useKakaoLoader({
         appkey: import.meta.env.VITE_KAKAO_API_KEY,
@@ -28,9 +31,20 @@ function KaokaoMain(props) {
     });
 
     const searchRoute = (item) => {
-        console.log("검색 조건",item);
-        kakaoMap.getRouteInfo(item.routeId).then(res=>{console.log("노선정류장 : ",res)});
-        kakaoMap.getRouteLocation(item.routeId).then(res=>{console.log("노선위치 : ",res)});
+        // console.log("검색 조건",item);
+        setSelectedRoute(item);
+        kakaoMap.getRouteInfo(item.routeId).then(res=>{
+            // console.log("노선정류장 : ",res);
+        //     if(res?.data?.body?.items?.length>0)
+        //     console.log("확인 : ",res.data.body.items);
+        setSelectedRouteList(res.data.body.items);
+
+        });
+        kakaoMap.getRouteLocation(item.routeId).then(res=>{
+            // console.log("노선위치 : ",res);
+        // console.log("위치 확인 : ",res.data.body.items);
+        setSelectedRoutePosition(res.data.body.items);
+        });
     }
     return (
         <>
@@ -47,7 +61,9 @@ function KaokaoMain(props) {
                 setSelectedRoute={setSelectedRoute}
                 openedRoute={openedRoute}
                 setOpenedRoute={setOpenedRoute}
-
+                selectedRouteList={selectedRouteList}
+                selectedRoutePosition={selectedRoutePosition}
+                sideRef={sideRef}
             />
             <article className={styles.main}>
             <Map center={mapCenter} level={3}
@@ -125,7 +141,7 @@ function KaokaoMain(props) {
                                                     cursor:"pointer"
                                                     }}
                                                  onClick={()=>{
-                                                     setOpenedRoute(true);
+                                                     setOpenedRoute(!openedRoute);
                                                      searchRoute(item);
 
                                                     }}
