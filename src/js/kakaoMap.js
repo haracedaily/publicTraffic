@@ -16,7 +16,7 @@ async function getSearchTotal(nm) {
 async function getArrivalInfo(bsId) {
     try {
         let res = await axios.get(`https://businfo.daegu.go.kr:8095/dbms_web_api/realtime/arr/${bsId}`);
-        console.log("도착 정보 : ",res);
+        // console.log("도착 정보 : ",res);
         if (res.status === 200) {
             if (res?.data?.body?.list?.length > 0) {
                 let data = [...res.data.body.list].filter(item=>item.arrState==="도착예정");
@@ -44,7 +44,7 @@ async function getRouteInfo(routeNo) {
     try{
         // let res = await axios.get(`https://businfo.daegu.go.kr:8095/dbms_web_api/bs_new/route?routeId=${routeNo}`);
         let res = await axios.get(`https://apis.data.go.kr/6270000/dbmsapi01/getBs?serviceKey=${import.meta.env.VITE_DAEGU_ENC_KEY}&routeId=${routeNo}`);
-        console.log("노선경유정류장 : ",res);
+        // console.log("노선경유정류장 : ",res);
         return res;
     }catch (error) {
         let res = error.response;
@@ -56,7 +56,7 @@ async function getRouteInfo(routeNo) {
 async function getRouteLocation(routeId){
     try{
         let res = await axios.get(`https://apis.data.go.kr/6270000/dbmsapi01/getPos?serviceKey=${import.meta.env.VITE_DAEGU_ENC_KEY}&routeId=${routeId}`);
-        console.log("노선 현 위치 : ",res);
+        // console.log("노선 현 위치 : ",res);
         return res;
     }catch (error) {
         let res = error.response;

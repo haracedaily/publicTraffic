@@ -12,3 +12,16 @@
   box-sizing: border-box;
   list-style: none;
 }
+
+.jh_sideSelectedStop{
+  position: relative;
+  &::before{
+    position: absolute;
+    content:"";
+    bottom:-10%;
+    width:100%;
+    height:3%;
+    background-color:#035E34;
+
+  }
+}
