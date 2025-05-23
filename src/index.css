@@ -4,6 +4,9 @@
   font-weight: 400;
   font-style: normal;
 }
+label.navSideRouteBtn{
+  background-color: #D7E3DD;
+}
 #root{
   width: 100vw;
   height: 100vh;
@@ -42,7 +45,7 @@
     display:flex;
     overflow-y:auto;
     &>nav>div>label.ant-radio-button-wrapper-checked{
-      background:#D7E3DD;
+      background:white;
       border-color:transparent;
       color:black;
       &::before{
