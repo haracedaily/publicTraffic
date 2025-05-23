@@ -20,22 +20,47 @@ async function fetchAndParse(url, type = "json") {
 
 // 1. 주변 정류장 목록 조회
 export async function getNearbyStations(lat, lng) {
-  const url = `https://apis.data.go.kr/1613000/BusSttnInfoInqireService/getCrdntPrxmtSttnList?serviceKey=${SERVICE_KEY}&gpsLati=${lat}&gpsLong=${lng}&_type=json`;
-  const data = await fetchAndParse(url, "json");
+  const encodedKey = encodeURIComponent(import.meta.env.VITE_DAEGU_DEC_KEY);
 
-  let items = data?.response?.body?.items?.item ?? [];
+  const url = `https://apis.data.go.kr/1613000/BusSttnInfoInqireService/getCrdntPrxmtSttnList?serviceKey=${encodedKey}&gpsLati=${lat}&gpsLong=${lng}&_type=json`;
 
-  // 대구 정류장 필터링 및 가공
-  items = items
-    .filter(el => el?.nodeid?.includes("DGB"))
-    .map(el => ({
-      ...el,
-      nodeid: el.nodeid.replaceAll("DGB", ""),
-      gpslati: parseFloat(el.gpslati),
-      gpslong: parseFloat(el.gpslong),
-    }));
+  try {
+    const res = await fetch(url);
+    const text = await res.text();
 
-  return items;
+    // JSON 시도
+    try {
+      const json = JSON.parse(text);
+      const items = json.response?.body?.items?.item;
+
+      if (!items || !Array.isArray(items)) {
+        throw new Error("API 응답 형식이 예상과 다릅니다.");
+      }
+
+      return items.map((item) => ({
+        name: item.sttnNm || "이름없음",
+        arsId: item.arsId || "",
+        nodeId: item.nodeid || "",
+        lat: parseFloat(item.gpslati),
+        lng: parseFloat(item.gpslong),
+      }));
+    } catch (jsonError) {
+      // XML fallback
+      const xml = new DOMParser().parseFromString(text, "text/xml");
+      const items = [...xml.querySelectorAll("item")];
+
+      return items.map((item) => ({
+        name: item.querySelector("sttnNm")?.textContent ?? "이름없음",
+        arsId: item.querySelector("arsId")?.textContent ?? "",
+        nodeId: item.querySelector("nodeid")?.textContent ?? "",
+        lat: parseFloat(item.querySelector("gpslati")?.textContent ?? "0"),
+        lng: parseFloat(item.querySelector("gpslong")?.textContent ?? "0"),
+      }));
+    }
+  } catch (err) {
+    console.error("getNearbyStations fetch 오류:", err);
+    throw new Error(`Unexpected response format from: ${url}`);
+  }
 }
 
 // 2. 특정 정류장(nodeId)에 대한 버스 도착 정보 조회 (국가 API)

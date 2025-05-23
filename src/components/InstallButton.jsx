@@ -5,7 +5,7 @@ import { Button } from "antd";
 let deferredPrompt = null;
 
 const InstallButton = () => {
-  const [installReady, setInstallReady] = useState(false);
+  const [installReady, setInstallReady] = useState(true);
 
   useEffect(() => {
     const handler = (e) => {
@@ -16,7 +16,7 @@ const InstallButton = () => {
 
     window.addEventListener("beforeinstallprompt", handler);
 
-    return () => window.removeEventListener("beforeinstallprompt", handler);
+    //   return () => window.removeEventListener("beforeinstallprompt", handler);
   }, []);
 
   const handleInstallClick = async () => {
@@ -33,22 +33,24 @@ const InstallButton = () => {
   // if (!installReady) return null; 준비 안되어있으니 버튼 가지마라
 
   return (
-      <>
-    <Button
-      type="text"
-      onClick={handleInstallClick}
-      className="install-btn"
-    >
-      <img
-        src="/Install.svg"
-        alt="앱 설치하기"
-        style={{ width: "25px", height: "25px" }}
-      />
-    </Button>
-      </>
+    <>
+      {installReady && (
+        <Button
+          type="text"
+          onClick={handleInstallClick}
+          className="install-btn"
+        >
+          <img
+            src="/Install.svg"
+            alt="앱 설치하기"
+            style={{ width: "25px", height: "25px" }}
+          />
+        </Button>
+      )}
+    </>
   );
 };
 
 export default InstallButton;
 
-//현재 위치 끌고 오는 것과 현재 위치 검색 
+//현재 위치 끌고 오는 것과 현재 위치 검색
