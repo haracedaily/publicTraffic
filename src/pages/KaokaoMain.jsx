@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useState} from 'react';
-import {CustomOverlayMap, Map, MapMarker, MarkerClusterer, useKakaoLoader} from "react-kakao-maps-sdk";
+import {CustomOverlayMap, Map, MapMarker, MarkerClusterer, Polyline, useKakaoLoader} from "react-kakao-maps-sdk";
 import Side from "../component/Side.jsx";
 import styles from "../css/kakao_main.module.css";
 import proj4 from 'proj4';
@@ -24,7 +24,7 @@ function KaokaoMain(props) {
     const [openedRoute,setOpenedRoute] = useState(false);
     const [isVisible, setIsVisible] = useState(true);
     const sideRef = useRef(null);
-
+    const [selectedPathLine,setSelectedPathLine]=useState(null);
     useKakaoLoader({
         appkey: import.meta.env.VITE_KAKAO_API_KEY,
         libraries: ["clusterer", "drawing", "services"],
@@ -36,9 +36,14 @@ function KaokaoMain(props) {
         kakaoMap.getRouteInfo(item.routeId).then(res=>{
             // console.log("노선정류장 : ",res);
         //     if(res?.data?.body?.items?.length>0)
-        //     console.log("확인 : ",res.data.body.items);
+            console.log("확인 : ",res.data.body.items);
         setSelectedRouteList(res.data.body.items);
-
+        setSelectedPathLine(res.data.body.items.map(el=>{
+            return {
+            lat: el.yPos,
+            lng: el.xPos
+            }
+        }));
         });
         kakaoMap.getRouteLocation(item.routeId).then(res=>{
             // console.log("노선위치 : ",res);
@@ -74,6 +79,15 @@ function KaokaoMain(props) {
                      else setIsVisible(true);
                  }}
             >
+                {openedRoute && selectedRoute && selectedRouteList && selectedPathLine && (
+                    <Polyline
+                        path={selectedPathLine}
+                        strokeWeight={5}
+                        strokeColor="#FFAE00"
+                        strokeOpacity={0.7}
+                        strokeStyle="solid"
+                    />
+                )}
                 <MarkerClusterer
                     averageCenter={true} // 클러스터에 포함된 마커들의 평균 위치를 클러스터 마커 위치로 설정
                     minLevel={10} // 클러스터 할 최소 지도 레벨
@@ -141,8 +155,7 @@ function KaokaoMain(props) {
                                                     cursor:"pointer"
                                                     }}
                                                  onClick={()=>{
-                                                     setOpenedRoute(!openedRoute);
-                                                     if(!openedRoute)
+                                                     setOpenedRoute(true);
                                                      searchRoute(item);
                                                     }}
                                             >
