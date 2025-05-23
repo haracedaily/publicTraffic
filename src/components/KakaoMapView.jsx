@@ -15,29 +15,33 @@ export default function KakaoMapView({ center, markers = [], onRelocate }) {
   };
 
   return (
-    <Map
-      center={center}
-      ref={mapRef}
-      style={{ width: "100%", height: "300px", borderRadius: "15px" }}
-      level={4}
-    >
-      {/* 현재 위치 마커 */}
-      <MapView position={center} onClick={handleClick} />
-      {markers.map((marker, idx) => (
-        <MapMarker
-          key={idx}
-          position={{ lat: marker.lat, lng: marker.lng }}
-          title={marker.name}
-        />
-      ))}
-      {/* 정류장 마커 */}
-      {markers.map((marker, idx) => (
-        <MapMarker
-          key={idx}
-          position={{ lat: marker.lat, lng: marker.lng }}
-          title={marker.name}
-        />
-      ))}
-    </Map>
+    <>
+      <div>
+        <Map
+          center={center}
+          ref={mapRef}
+          style={{ width: "100%", height: "300px", borderRadius: "15px" }}
+          level={4}
+        >
+          {/* 현재 위치 마커 */}
+          <MapView position={center} onClick={handleClick} />
+          {markers.map((marker, idx) => (
+            <MapMarker
+              key={idx}
+              position={{ lat: marker.lat, lng: marker.lng }}
+              title={marker.name}
+            />
+          ))}
+          {/* 정류장 마커 */}
+          {markers.map((marker, idx) => (
+            <MapMarker
+              key={idx}
+              position={{ lat: marker.lat, lng: marker.lng }}
+              title={marker.name}
+            />
+          ))}
+        </Map>
+      </div>
+    </>
   );
 }

@@ -125,67 +125,73 @@ function Nearby() {
           gridTemplateColumns: selectedStop ? "1fr 1fr 1fr" : "1fr 1fr",
           gap: "24px",
           width: "100%",
+          height: "100%",
+          alignItems: "center",
         }}
       >
-        <Card style={{ width: "50%", padding: 0, marginBottom: "24px" }}>
-          {location.lat && location.lng && (
-            <KakaoMapView
-              center={{ lat: location.lat, lng: location.lng }}
-              markers={busStops}
-              onRelocate={() => {
-                navigator.geolocation.getCurrentPosition((pos) => {
-                  setLocation({
-                    lat: pos.coords.latitude,
-                    lng: pos.coords.longitude,
+        <div style={{ display: "flex", height: "100%", justifyContent: "end", alignItems: "center" }}>
+          <Card style={{ width: "60%", height: "70%", padding: 0, marginBottom: "24px" }}>
+            {location.lat && location.lng && (
+              <KakaoMapView
+                center={{ lat: location.lat, lng: location.lng }}
+                markers={busStops}
+                onRelocate={() => {
+                  navigator.geolocation.getCurrentPosition((pos) => {
+                    setLocation({
+                      lat: pos.coords.latitude,
+                      lng: pos.coords.longitude,
+                    });
                   });
-                });
-              }}
-            />
-          )}
-        </Card>
+                }}
+              />
+            )}
+          </Card>
+        </div>
 
-        <div style={{ display: "flex", width: "100%", gap: "24px" }}>
+        <div style={{ display: "flex", width: "50%", gap: "24px", justifyContent: "start" }}>
           <div style={{ flex: 1 }}>
             <Title level={3} style={{ textAlign: "center" }}>
               📍 주변 정류장
             </Title>
-            {loadingStops ? (
-              <Spin tip="정류장을 불러오는 중...">
-                <div style={{ height: 300 }} />
-              </Spin>
-            ) : (
-              <List
-                dataSource={busStops}
-                renderItem={(stop, index) => (
-                  <Card
-                    style={{
-                      marginBottom: "12px",
-                      borderRadius: "12px",
-                      border: "1px solid #eee",
-                      cursor: "pointer",
-                    }}
-                    bodyStyle={{ padding: "12px 16px" }}
-                    onClick={() => setSelectedStop(stop)}
-                  >
-                    <div
+            <Card style={{height:"100%"}}>
+              {loadingStops ? (
+                <Spin tip="정류장을 불러오는 중...">
+                  <div style={{ height: 300 }} />
+                </Spin>
+              ) : (
+                <List
+                  dataSource={busStops}
+                  renderItem={(stop, index) => (
+                    <Card
                       style={{
-                        display: "flex",
-                        justifyContent: "space-between",
+                        marginBottom: "12px",
+                        borderRadius: "12px",
+                        border: "1px solid #eee",
+                        cursor: "pointer",
                       }}
+                      bodyStyle={{ padding: "12px 16px" }}
+                      onClick={() => setSelectedStop(stop)}
                     >
-                      <div>
-                        <Text strong>
-                          {index + 1}. {stop.name}
-                        </Text>
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                        }}
+                      >
+                        <div>
+                          <Text strong>
+                            {index + 1}. {stop.name}
+                          </Text>
+                        </div>
+                        <div>
+                          <Text>{(stop.distance / 1000).toFixed(1)} km</Text>
+                        </div>
                       </div>
-                      <div>
-                        <Text>{(stop.distance / 1000).toFixed(1)} km</Text>
-                      </div>
-                    </div>
-                  </Card>
-                )}
-              />
-            )}
+                    </Card>
+                  )}
+                />
+              )}
+            </Card>
           </div>
 
           <div
