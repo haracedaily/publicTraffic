@@ -1,5 +1,5 @@
 import React, {useEffect} from 'react';
-import {Card, Input, List, message, Space} from "antd";
+import {Card, Input, List, message, Space, Spin} from "antd";
 import kakaoMap from "../js/kakaoMap.js";
 import proj4 from 'proj4';
 import styles from "../css/search_total.module.css";
@@ -132,8 +132,16 @@ function SearchTotal(props) {
                                         }}>
                                             버스 번호: {item.vhcNo2}
                                         </div>
+                                        {props?.selectedRoute?.routeId === item.routeId && props.selectedRouteList && (
+                                            <div style={{display:"flex",width:"100%",justifyContent:"end"}}>
+                                            <img className={props.openedRoute?styles.jh_side_open:styles.jh_side_close} width={15} src={"/reverse_triangle.svg"} alt={"경로 닫기"}
+                                                 onClick={()=>props.setOpenedRoute(!props.openedRoute)} style={{cursor:"pointer"}} />
+                                            </div>
+                                        )}
                                     {props.openedRoute && props?.selectedRoute?.routeId === item.routeId && props.selectedRouteList && (
+
                                         <List
+                                            className={styles.jh_sideSelectedStopList}
                                             dataSource={props.selectedRouteList}
                                             renderItem={(item) => {
 
@@ -166,7 +174,9 @@ function SearchTotal(props) {
                                                     </List.Item>
                                                 </Card>
                                             )}}
-                                        />
+                                        >
+                                            <img width={30} src={"/dir.png"} alt={"위로가기버튼"} className={styles.sticky_side_btn} onClick={()=>{document.querySelector(`.${styles.jh_sideSelectedStopList}`).scrollIntoView({behavior:"smooth",block:"start",inline:"nearest"});}}/>
+                                        </List>
                                     )}
                                     </div>
                                 </List.Item>
