@@ -15,7 +15,7 @@ function useGeoLocation() {
             {
                 enableHighAccuracy: true,
                 maximumAge: 5000,
-                timeout: 10000,
+                timeout: 15000,
             }
         );
 
