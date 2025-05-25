@@ -4,10 +4,9 @@ import { fetchArrivalInfo } from "../api/busApi";
 import KakaoMapView from "../components/KakaoMapView";
 import useGeoLocation from "../hooks/GeoLocation";
 import { getDistance } from "../utils/distance";
+import { EnvironmentOutlined } from "@ant-design/icons";
 
 const { Title, Text } = Typography;
-
-const DAEGU_API_KEY = import.meta.env.VITE_DAEGU_ENC_KEY;
 
 function Nearby() {
   const [location, setLocation] = useState({ lat: null, lng: null });
@@ -19,8 +18,9 @@ function Nearby() {
   const locationHook = useGeoLocation();
   const errorShownRef = useRef(false);
 
+  console.log("busStops에 저장된 데이터:", busStops)
   useEffect(() => {
-    navigator.geolocation.getCurrentPosition(
+    navigator.geolocation.watchPosition(
       (pos) => {
         setLocation({
           lat: pos.coords.latitude,
@@ -33,60 +33,61 @@ function Nearby() {
       },
       {
         enableHighAccuracy: true,
-        timeout: 10000,
+        timeout: 15000,
       }
     );
   }, []);
 
   useEffect(() => {
-    if (!location.lat || !location.lng) return;
+    if (typeof location.lat !== "number" || typeof location.lng !== "number" ||
+      isNaN(location.lat) ||
+      isNaN(location.lng)) return;
 
     const fetchNearbyStops = async () => {
       setLoadingStops(true);
       const { lat, lng } = location;
 
-      const url = `https://apis.data.go.kr/1613000/BusSttnInfoInqireService/getCrdntPrxmtSttnList?serviceKey=${encodeURIComponent(
-        DAEGU_API_KEY
-      )}&gpsLati=${lat}&gpsLong=${lng}&_type=json`;
+      const url = `https://apis.data.go.kr/1613000/BusSttnInfoInqireService/getCrdntPrxmtSttnList?serviceKey=l7L9HOYK5mFEJAehYbro5q9qXaJofTBB7nv0fYzNNIqJE%2FYGs2d7Gn6%2FDb6qrv9D1F9v5iEm%2BpXpQ%2FCINV59DA%3D%3D&gpsLati=${lat}&gpsLong=${lng}&radius=500&_type=json`;
 
       try {
         const res = await fetch(url);
-        const text = await res.text();
+        const json = await res.json();
+        console.log("응답 원본", json)
 
-        if (text.includes("SERVICE_KEY_IS_NOT_REGISTERED_ERROR")) {
-          throw new Error("API 키 오류: 서비스 키가 등록되지 않았습니다.");
-        }
+        // if (json.includes("SERVICE_KEY_IS_NOT_REGISTERED_ERROR")) {
+        //   throw new Error("API 키 오류: 서비스 키가 등록되지 않았습니다.");
+        // }
 
-        const xml = new DOMParser().parseFromString(text, "text/xml");
-        const items = [...xml.querySelectorAll("item")];
+        // const xml = new DOMParser().parseFromString(text, "text/xml");
+        const items = json.response.body.items?.item ?? [];
+        console.log("item 수:", items.length);
 
-        const stops = items
-          .map((item) => {
-            const stopLat = parseFloat(
-              item.querySelector("gpslati")?.textContent ?? "0"
-            );
-            const stopLng = parseFloat(
-              item.querySelector("gpslong")?.textContent ?? "0"
-            );
-            const name =
-              item.querySelector("stationNm")?.textContent ?? "이름없음";
-            const arsId = item.querySelector("arsId")?.textContent ?? "";
+        const stops = items.map((item) => {
+          // const stopLat = parseFloat(item.querySelector("gpslati")?.textContent ?? "0");
+          // const stopLng = parseFloat(item.querySelector("gpslong")?.textContent ?? "0");
+          // const name = item.querySelector("nodenm")?.textContent ?? "이름없음";
+          // const arsId = item.querySelector("nodeid")?.textContent ?? "";
+          const stopLat = parseFloat(item.gpslati ?? "0");
+          const stopLng = parseFloat(item.gpslong ?? "0");
+          const name = item.nodenm ?? "이름없음";
+          const arsId = item.nodeid ?? "";
 
-            return {
-              name,
-              arsId,
-              lat: stopLat,
-              lng: stopLng,
-              distance: getDistance(
-                location.lat,
-                location.lng,
-                stopLat,
-                stopLng
-              ),
-            };
-          })
-          .sort((a, b) => a.distance - b.distance);
+          return {
+            name,
+            arsId,
+            lat: stopLat,
+            lng: stopLng,
+            distance: getDistance(
+              location.lat,
+              location.lng,
+              stopLat,
+              stopLng
+            ),
+          };
+        })
+        // .sort((a, b) => a.distance - b.distance);
 
+        console.log("파싱된 stops:", stops);
         setBusStops(stops);
       } catch (err) {
         if (!errorShownRef.current) {
@@ -102,6 +103,7 @@ function Nearby() {
     };
 
     fetchNearbyStops();
+    console.log("API 호출 좌표", location.lat, location.lng);
   }, [location]);
 
   useEffect(() => {
@@ -125,12 +127,12 @@ function Nearby() {
           gridTemplateColumns: selectedStop ? "1fr 1fr 1fr" : "1fr 1fr",
           gap: "24px",
           width: "100%",
-          height: "100%",
+          // height: "100%",
           alignItems: "center",
         }}
       >
-        <div style={{ display: "flex", height: "100%", justifyContent: "end", alignItems: "center" }}>
-          <Card style={{ width: "60%", height: "70%", padding: 0, marginBottom: "24px" }}>
+        <div style={{ display: "flex", justifyContent: "end"}}>
+          <Card style={{ width: "70%", marginBottom: "24px"}}>
             {location.lat && location.lng && (
               <KakaoMapView
                 center={{ lat: location.lat, lng: location.lng }}
@@ -148,21 +150,36 @@ function Nearby() {
           </Card>
         </div>
 
-        <div style={{ display: "flex", width: "50%", gap: "24px", justifyContent: "start" }}>
+        <div style={{ display: "flex", width: "70%", height: "85%", gap: "24px", justifyContent: "start" }}>
           <div style={{ flex: 1 }}>
-            <Title level={3} style={{ textAlign: "center" }}>
-              📍 주변 정류장
-            </Title>
-            <Card style={{height:"100%"}}>
+            <div style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+              <EnvironmentOutlined style={{ fontSize: "30px", color: "#2d6ae0", marginRight: "10px", marginBottom: "10px" }} />
+              {/* <Title style={{ fontSize:"20px",textAlign: "center" }}> */}
+              <h1>주변 정류장</h1>
+              {/* </Title> */}
+            </div>
+            <Text type="secondary" style={{ display: "block", marginBottom: "16px", textAlign: "center" }}>
+              현재 위치 근처의 버스 정류장 목록입니다.
+            </Text>
+            <Card style={{
+              maxHeight: "50%", 
+              overflowY: "auto",
+              paddingRight: "4px",
+              borderRadius: "12px",
+            }}>
               {loadingStops ? (
                 <Spin tip="정류장을 불러오는 중...">
                   <div style={{ height: 300 }} />
                 </Spin>
+              ) : busStops.length === 0 ? (
+                <Text type="secondary">주변에 정류장이 없습니다.</Text>
               ) : (
                 <List
                   dataSource={busStops}
-                  renderItem={(stop, index) => (
+                  loading={loadingStops}
+                  renderItem={(item, index) => (
                     <Card
+                      key={item.arsId}
                       style={{
                         marginBottom: "12px",
                         borderRadius: "12px",
@@ -170,7 +187,7 @@ function Nearby() {
                         cursor: "pointer",
                       }}
                       bodyStyle={{ padding: "12px 16px" }}
-                      onClick={() => setSelectedStop(stop)}
+                      onClick={() => setSelectedStop(item)}
                     >
                       <div
                         style={{
@@ -180,11 +197,14 @@ function Nearby() {
                       >
                         <div>
                           <Text strong>
-                            {index + 1}. {stop.name}
+                            {index + 1}. {item.name}
                           </Text>
+                          <div style={{ marginTop: 4, color: "#888" }}>
+                            정류장 ID: {item.arsId}
+                          </div>
                         </div>
                         <div>
-                          <Text>{(stop.distance / 1000).toFixed(1)} km</Text>
+                          <Text>{(item.distance / 1000).toFixed(1)} km</Text>
                         </div>
                       </div>
                     </Card>
