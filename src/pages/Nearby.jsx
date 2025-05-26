@@ -129,22 +129,27 @@ function Nearby() {
         style={{
           display: "grid",
           gridTemplateColumns: selectedStop ? "1fr 1fr 1fr" : "1fr 1fr",
-          gap: "24px",
+          // gap: "24px",
           width: "100%",
           height: "100vh", // 전체 화면에 맞춤
           alignItems: "stretch",
           padding: "16px",
           boxSizing: "border-box",
+
         }}
       >
         <div
           style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
+            // display: "flex",
+            // justifyContent: "center",
+            // alignItems: "center",
           }}
         >
-          <Card style={{ width: "70%" }}>
+          <Card style={{
+            width: "70%",
+            height: "50%",
+            margin: "20% auto"
+          }}>
             {location.lat && location.lng && (
               <KakaoMapView
                 center={{ lat: location.lat, lng: location.lng }}
@@ -168,13 +173,19 @@ function Nearby() {
             display: "flex",
             width: "70%",
             height: "85%",
-            gap: "24px",
+            margin: "0 auto"
+            // gap: "24px",
             // justifyContent: "start",
             // alignItems: "center",
             // flexDirection: "column",
           }}
         >
-          <div style={{ flex: 1, justifyContent: "center" }}>
+          <div
+            style={{
+              width: "100%",
+              margin: "10% auto"
+            }}
+          >
             <div
               style={{
                 display: "flex",
@@ -232,7 +243,7 @@ function Nearby() {
                           border: "1px solid #eee",
                           cursor: "pointer",
                         }}
-                        bodyStyle={{ padding: "12px 16px" }}
+                        styles={{ body:{ padding: "12px 16px" }}}
                         onClick={() => setSelectedStop(item)}
                       >
                         <div
@@ -261,16 +272,13 @@ function Nearby() {
             </Card>
           </div>
         </div>
-        <div>
-          <div
-          // style={{
-          //   display: "grid",
-          //   gridTemplateColumns: selectedStop ? "1fr 1fr" : "1fr",
-          //   gap: "24px",
-          // }}
-          >
+        <div style={{
+          width: "70%",
+          margin: "10% auto",
+        }}>
+          <div >
             {selectedStop && (
-              <div style={{ flex: 1 }}>
+              <div >
                 <Title level={4} style={{ textAlign: "center" }}>
                   🚌 {selectedStop.name} 도착 정보
                 </Title>
@@ -280,12 +288,10 @@ function Nearby() {
                   <List
                     style={{
                       width: "100%",
-                      maxHeight: "100%",
                       overflowY: "auto",
                       borderRadius: "12px",
                       paddingRight: "4px",
                       placeContent: "center",
-                      placeItems: "center",
                     }}
                     bordered
                     dataSource={arrivalData}
@@ -318,16 +324,15 @@ function Nearby() {
 
                       return (
                         <List.Item
-                        style={{
-                          width: "100%",
-                          marginBottom: "12px",
-                        }}
+                          style={{
+                            width: "100%",
+                          }}
                         >
                           <Card
                             style={{
                               width: "100%",
-                              borderRadius: "12px",
-                              border: "1px solid #eee",
+                              // borderRadius: "12px",
+                              // border: "1px solid #eee",
                             }}
                           >
                             <div

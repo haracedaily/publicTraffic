@@ -20,7 +20,7 @@ export default function KakaoMapView({ center, markers = [], selectedStop, onRel
         <Map
           center={center}
           ref={mapRef}
-          style={{ width: "100%", height: "300px", borderRadius: "15px" }}
+          style={{ width: "100%", height: "38vh", borderRadius: "15px" }}
           level={4}
         >
           {/* 현재 위치 마커 */}
