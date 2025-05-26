@@ -1,10 +1,20 @@
+@font-face {
+  font-family: 'Pretendard-Regular';
+  src: url('https://fastly.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Regular.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+}
+label.navSideRouteBtn{
+  background-color: #D7E3DD;
+}
 #root{
   width: 100vw;
   height: 100vh;
   display:flex;
   flex-direction:column;
+  font-family: 'Pretendard-Regular';
   &>header{
-    padding-left: 20vw;
+    padding: 0 5vw;
     width:100%;
     height:10vh;
     min-height:70px;
@@ -18,7 +28,7 @@
       display:flex;
       gap:5rem;
       height:100%;
-      &>div{
+      &>*{
         height:100%;
         align-content:center;
         cursor:pointer;
@@ -30,12 +40,12 @@
   }
   &>main{
     width:100%;
-    height:75vh;
+    height:80vh;
     min-height:400px;
     display:flex;
     overflow-y:auto;
     &>nav>div>label.ant-radio-button-wrapper-checked{
-      background:#D7E3DD;
+      background:white;
       border-color:transparent;
       color:black;
       &::before{
@@ -45,7 +55,47 @@
   }
   &>footer{
     width:100%;
-    height:15vh;
+    height:10vh;
     background:#333333;
+    &>div{
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      height: 100%;
+    &>*{
+      margin-left: min(5vw,10%);
+      font-size: min(2vw,0.9rem);
+      color:white;
+      display:flex;
+      gap:2rem;
+    }
+
+    &>:first-child{
+      &>:nth-last-child(n+2){
+        position: relative;
+        &::after{
+          content: "|";
+          position: absolute;
+          right: -1rem;
+        }
+      }
+    }
+
+    &>:nth-child(2){
+      &>:first-child{
+        position: relative;
+        &::after{
+          content: "|";
+          position: absolute;
+          right: -1.5rem;
+        }
+      }
+    }
+
+    &>:last-child{
+      margin-top:1rem;
+    }
+    }
+
   }
 }

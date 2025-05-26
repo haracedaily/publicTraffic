@@ -1,7 +1,8 @@
-import React from 'react';
-import {Card, Input, List, message, Space} from "antd";
+import React, {useEffect} from 'react';
+import {Card, Input, List, message, Space, Spin} from "antd";
 import kakaoMap from "../js/kakaoMap.js";
 import proj4 from 'proj4';
+import styles from "../css/search_total.module.css";
 
 // EPSG:5182 (TM-동부원점) 좌표계 정의
 proj4.defs("EPSG:5182", "+proj=tmerc +lat_0=38 +lon_0=129 +k=1 +x_0=200000 +y_0=600000 +ellps=GRS80 +units=m +no_defs");
@@ -10,12 +11,18 @@ proj4.defs("EPSG:5182", "+proj=tmerc +lat_0=38 +lon_0=129 +k=1 +x_0=200000 +y_0=
 proj4.defs("EPSG:4326", "+proj=longlat +datum=WGS84 +no_defs");
 ///[^ㄱ-ㅎ가-힣a-zA-Z0-9]/g
 function SearchTotal(props) {
+<<<<<<< HEAD
     // console.log(props);
+=======
+    useEffect(() => {
+        document.querySelector(".jh_sideSelectedStop")?.scrollIntoView({behavior:"smooth",block:"center",inline:"nearest"});
+    }, [props.selectedRouteList]);
+>>>>>>> main
     const fetchArrivalInfo = (bsId) => {
         kakaoMap.getArrivalInfo(bsId)
             .then(res => {
                 if(res!==404){
-                    console.log(res);
+                    // console.log("도착 예정정보",res.list);
                     props.setArrivalInfo(res);
                 }
             })
@@ -54,6 +61,7 @@ function SearchTotal(props) {
                     renderItem={(item) => (
                         <List.Item
                             onClick={() => {
+                                props.setMarkerClicked(false);
                                 fetchArrivalInfo(item.bsId);
                                 let {lat,lng} = convertNGISToKakao(item.ngisXPos, item.ngisYPos);
                                 item.lat = lat;
@@ -114,11 +122,11 @@ function SearchTotal(props) {
                                             </div>
                                             <div style={{
                                                 color: item.arrState === "전" ? "#52c41a" :
-                                                    item.arrState === "전전" ? "#faad14" : "#1890ff",
+                                                    item.arrState === "전전" ? "#faad14" : item.arrState ==='도착예정' ? "#aaaaaa" :"#1890ff",
                                                 fontWeight: "bold"
                                             }}>
                                                 {item.arrState === "전" ? "곧 도착" :
-                                                    item.arrState === "전전" ? "곧 도착 예정" :
+                                                    item.arrState === "전전" ? "곧 도착 예정" : item.arrState ==='도착예정' ? "차고지 대기" :
                                                         `${item.arrState} 후 도착`}
                                             </div>
                                         </div>
@@ -128,6 +136,52 @@ function SearchTotal(props) {
                                         }}>
                                             버스 번호: {item.vhcNo2}
                                         </div>
+                                        {props?.selectedRoute?.routeId === item.routeId && props.selectedRouteList && (
+                                            <div style={{display:"flex",width:"100%",justifyContent:"end"}}>
+                                            <img className={props.openedRoute?styles.jh_side_open:styles.jh_side_close} width={15} src={"/reverse_triangle.svg"} alt={"경로 닫기"}
+                                                 onClick={()=>props.setOpenedRoute(!props.openedRoute)} style={{cursor:"pointer"}} />
+                                            </div>
+                                        )}
+                                    {props.openedRoute && props?.selectedRoute?.routeId === item.routeId && props.selectedRouteList && (
+
+                                        <List
+                                            className={styles.jh_sideSelectedStopList}
+                                            dataSource={props.selectedRouteList}
+                                            renderItem={(item) => {
+
+                                                // if(item.bsId===props.selectedStop.bsId)document.querySelector(".jh_sideSelectedStop")?.scrollIntoView({behavior:"smooth",block:"center",inline:"nearest"});
+                                                return (
+                                                <Card className={`${item.moveDir==0?styles.origin_dir:styles.reverse_dir} ${item.bsId===props.selectedStop.bsId?"jh_sideSelectedStop":""}`} >
+                                                    <List.Item>
+                                                        <div className={item.bsId===props.selectedStop.bsId?"jh_sideSelectedStop":""} style={{ width: "100%" }}>
+                                                            <div style={{
+                                                                fontWeight: "bold",
+                                                                fontSize: "1.1em",
+                                                                marginBottom: "4px",
+                                                                display:"flex",
+                                                                justifyContent:"space-between",
+                                                            }}>
+                                                                {item.bsNm}
+                                                                {props.selectedRoutePosition?.length>0 && props.selectedRoutePosition.find(el=>el.bsId===item.bsId && el.moveDir===item.moveDir) ? (
+                                                                    <img src={"/yellow_bus.png"} width={40} style={{borderRadius:"50%", zIndex:"999"}} alt={"cross_arrow"}/>
+                                                                ):(<img src={"/dir.png"} width={40} style={{border:"3px solid #ffe31a",borderRadius:"50%", zIndex:"999"}} alt={"cross_arrow"} />)}
+
+                                                            </div>
+                                                            <div style={{
+                                                                color: "#666",
+                                                                fontSize: "0.9em",
+                                                                marginBottom: "4px"
+                                                            }}>
+                                                                정류장 ID: {item.bsId}
+                                                            </div>
+                                                        </div>
+                                                    </List.Item>
+                                                </Card>
+                                            )}}
+                                        >
+                                            <img width={30} src={"/dir.png"} alt={"위로가기버튼"} className={styles.sticky_side_btn} onClick={()=>{document.querySelector(`.${styles.jh_sideSelectedStopList}`).scrollIntoView({behavior:"smooth",block:"start",inline:"nearest"});}}/>
+                                        </List>
+                                    )}
                                     </div>
                                 </List.Item>
                             )}
