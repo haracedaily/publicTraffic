@@ -18,7 +18,7 @@ function Nearby() {
   const locationHook = useGeoLocation();
   const errorShownRef = useRef(false);
 
-  console.log("busStops에 저장된 데이터:", busStops)
+  console.log("busStops에 저장된 데이터:", busStops);
   useEffect(() => {
     navigator.geolocation.watchPosition(
       (pos) => {
@@ -39,9 +39,13 @@ function Nearby() {
   }, []);
 
   useEffect(() => {
-    if (typeof location.lat !== "number" || typeof location.lng !== "number" ||
+    if (
+      typeof location.lat !== "number" ||
+      typeof location.lng !== "number" ||
       isNaN(location.lat) ||
-      isNaN(location.lng)) return;
+      isNaN(location.lng)
+    )
+      return;
 
     const fetchNearbyStops = async () => {
       setLoadingStops(true);
@@ -52,7 +56,7 @@ function Nearby() {
       try {
         const res = await fetch(url);
         const json = await res.json();
-        console.log("응답 원본", json)
+        console.log("응답 원본", json);
 
         // if (json.includes("SERVICE_KEY_IS_NOT_REGISTERED_ERROR")) {
         //   throw new Error("API 키 오류: 서비스 키가 등록되지 않았습니다.");
@@ -77,14 +81,9 @@ function Nearby() {
             arsId,
             lat: stopLat,
             lng: stopLng,
-            distance: getDistance(
-              location.lat,
-              location.lng,
-              stopLat,
-              stopLng
-            ),
+            distance: getDistance(location.lat, location.lng, stopLat, stopLng),
           };
-        })
+        });
         // .sort((a, b) => a.distance - b.distance);
 
         console.log("파싱된 stops:", stops);
@@ -127,12 +126,13 @@ function Nearby() {
           gridTemplateColumns: selectedStop ? "1fr 1fr 1fr" : "1fr 1fr",
           gap: "24px",
           width: "100%",
-          // height: "100%",
+          height: "100%",
+          justifycontent: "space-between",
           alignItems: "center",
         }}
       >
-        <div style={{ display: "flex", justifyContent: "end"}}>
-          <Card style={{ width: "70%", marginBottom: "24px"}}>
+        <div style={{ display: "flex", justifyContent: "end" }}>
+          <Card style={{ width: "70%", marginBottom: "50%" }}>
             {location.lat && location.lng && (
               <KakaoMapView
                 center={{ lat: location.lat, lng: location.lng }}
@@ -150,23 +150,55 @@ function Nearby() {
           </Card>
         </div>
 
-        <div style={{ display: "flex", width: "70%", height: "85%", gap: "24px", justifyContent: "start" }}>
-          <div style={{ flex: 1 }}>
-            <div style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
-              <EnvironmentOutlined style={{ fontSize: "30px", color: "#2d6ae0", marginRight: "10px", marginBottom: "10px" }} />
+        <div
+          style={{
+            display: "flex",
+            width: "70%",
+            height: "85%",
+            gap: "24px",
+            // justifyContent: "start",
+            // alignItems: "center",
+            // flexDirection: "column",
+          }}
+        >
+          <div style={{ flex: 1 , justifyContent: "center" }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <EnvironmentOutlined
+                style={{
+                  fontSize: "30px",
+                  color: "#2d6ae0",
+                  marginRight: "10px",
+                  marginBottom: "10px",
+                }}
+              />
               {/* <Title style={{ fontSize:"20px",textAlign: "center" }}> */}
               <h1>주변 정류장</h1>
               {/* </Title> */}
             </div>
-            <Text type="secondary" style={{ display: "block", marginBottom: "16px", textAlign: "center" }}>
+            <Text
+              type="secondary"
+              style={{
+                display: "block",
+                marginBottom: "16px",
+                textAlign: "center",
+              }}
+            >
               현재 위치 근처의 버스 정류장 목록입니다.
             </Text>
-            <Card style={{
-              maxHeight: "50%", 
-              overflowY: "auto",
-              paddingRight: "4px",
-              borderRadius: "12px",
-            }}>
+            <Card
+              style={{
+                maxHeight: "50%",
+                overflowY: "auto",
+                paddingRight: "4px",
+                borderRadius: "12px",
+              }}
+            >
               {loadingStops ? (
                 <Spin tip="정류장을 불러오는 중...">
                   <div style={{ height: 300 }} />
@@ -213,7 +245,8 @@ function Nearby() {
               )}
             </Card>
           </div>
-
+        </div>
+        <div>
           <div
             style={{
               display: "grid",
