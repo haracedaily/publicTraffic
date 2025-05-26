@@ -2,7 +2,7 @@ import React, { useRef } from "react";
 import { Map, MapMarker, useKakaoLoader } from "react-kakao-maps-sdk";
 import MapView from "./MapView";
 
-export default function KakaoMapView({ center, markers = [], onRelocate }) {
+export default function KakaoMapView({ center, markers = [], selectedStop, onRelocate }) {
   useKakaoLoader({ appkey: import.meta.env.VITE_KAKAO_API_KEY });
   const mapRef = useRef(null);
 
@@ -37,8 +37,24 @@ export default function KakaoMapView({ center, markers = [], onRelocate }) {
             <MapMarker
               key={idx}
               position={{ lat: marker.lat, lng: marker.lng }}
-              title={marker.name}
-            />
+              clickable={true}
+            >
+              {selectedStop?.bsId === marker.bsId && (
+                <div
+                  style={{
+                    margin: "0 auto",
+                    padding: "4px 8px",
+                    background: "#fff",
+                    border: "1px solid #ccc",
+                    borderRadius: "8px",
+                    fontSize: "12px",
+                    fontWeight: "bold",
+                  }}
+                >
+                  {marker.name}
+                </div>
+              )}
+            </MapMarker>
           ))}
         </Map>
       </div>

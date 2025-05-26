@@ -7,15 +7,11 @@ import "antd/dist/reset.css";
 
 function Main(props) {
   return (
-    <>
-      <BrowserRouter>
         <Routes>
           <Route path="/" element={<KaokaoMain />} />
           <Route path="/my" element={<My />} />
           <Route path="/nearby" element={<Nearby />} />
         </Routes>
-      </BrowserRouter>
-    </>
   );
 }
 

@@ -1,3 +1,5 @@
+import axios from "axios";
+
 const SERVICE_KEY = import.meta.env.VITE_DAEGU_ENC_KEY;
 const CITY_CODE = 22; // 대구
 
@@ -73,20 +75,23 @@ export async function getArrivalInfo(nodeId) {
 
 // 3. 대구 버스 정보 시스템 API (arsId 기반 도착 정보)
 export async function fetchArrivalInfo(arsId) {
-  const url = `https://businfo.daegu.go.kr/openapi/service/BusArriveService/getBusArrivalListByStation?arsId=${arsId}&serviceKey=${SERVICE_KEY}`;
-
   try {
-    const xml = await fetchAndParse(url, "xml");
-    const items = [...xml.querySelectorAll("item")];
-
-    return items.map(item => ({
-      routeId: item.querySelector("routeId")?.textContent ?? "",
-      routeName: item.querySelector("routeName")?.textContent ?? "",
-      predictTime1: item.querySelector("predictTime1")?.textContent ?? "-",
-      locationNo1: item.querySelector("locationNo1")?.textContent ?? "-",
-    }));
-  } catch (err) {
-    console.error("버스 도착 정보 요청 실패:", err);
+    const res = await axios.get(`https://businfo.daegu.go.kr:8095/dbms_web_api/realtime/arr/${arsId}`);
+    console.log("버스 도착 정보 응답:", res.data);
+    if (res.status === 200 && res.data?.body?.list?.length > 0) {
+      return res.data.body.list.map(item => ({
+        routeId: item.routeId,
+        routeName: item.routeNo,
+        predictTime1: item.predictTime1 ?? "-",
+        locationNo1: item.locationNo1 ?? "-",
+        arrState: item.arrState,
+        vhcNo2: item.vhcNo2 ?? null,
+      }));
+    } else {
+      return [];
+    }
+  } catch (error) {
+    console.error("버스 도착 정보 요청 실패:", error);
     return [];
   }
 }
