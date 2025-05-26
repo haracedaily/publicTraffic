@@ -5,6 +5,19 @@ import KakaoMapView from "../components/KakaoMapView";
 import useGeoLocation from "../hooks/GeoLocation";
 import { getDistance } from "../utils/distance";
 import { EnvironmentOutlined } from "@ant-design/icons";
+import kakaoMap from "../js/kakaoMap";
+import proj4 from "proj4";
+
+proj4.defs(
+  "EPSG:5182",
+  "+proj=tmerc +lat_0=38 +lon_0=129 +k=1 +x_0=200000 +y_0=600000 +ellps=GRS80 +units=m +no_defs"
+);
+proj4.defs("EPSG:4326", "+proj=longlat +datum=WGS84 +no_defs");
+
+function convertNGISToKakao(x, y) {
+  const [longitude, latitude] = proj4("EPSG:5182", "EPSG:4326", [x, y]);
+  return { lat: latitude, lng: longitude };
+}
 
 const { Title, Text } = Typography;
 
@@ -49,53 +62,43 @@ function Nearby() {
 
     const fetchNearbyStops = async () => {
       setLoadingStops(true);
+
       const { lat, lng } = location;
 
-      const url = `https://apis.data.go.kr/1613000/BusSttnInfoInqireService/getCrdntPrxmtSttnList?serviceKey=l7L9HOYK5mFEJAehYbro5q9qXaJofTBB7nv0fYzNNIqJE%2FYGs2d7Gn6%2FDb6qrv9D1F9v5iEm%2BpXpQ%2FCINV59DA%3D%3D&gpsLati=${lat}&gpsLong=${lng}&radius=500&_type=json`;
-
       try {
+        const url = `https://apis.data.go.kr/1613000/BusSttnInfoInqireService/getCrdntPrxmtSttnList?serviceKey=l7L9HOYK5mFEJAehYbro5q9qXaJofTBB7nv0fYzNNIqJE%2FYGs2d7Gn6%2FDb6qrv9D1F9v5iEm%2BpXpQ%2FCINV59DA%3D%3D&gpsLati=${lat}&gpsLong=${lng}&radius=1000&_type=json`;
         const res = await fetch(url);
         const json = await res.json();
-        console.log("응답 원본", json);
+        let items = json.response.body.items?.item ?? [];
 
-        // if (json.includes("SERVICE_KEY_IS_NOT_REGISTERED_ERROR")) {
-        //   throw new Error("API 키 오류: 서비스 키가 등록되지 않았습니다.");
-        // }
+        const searchResults = await kakaoMap.getSearchTotal("");
 
-        // const xml = new DOMParser().parseFromString(text, "text/xml");
-        const items = json.response.body.items?.item ?? [];
-        console.log("item 수:", items.length);
+        const stops = items
+          .filter((item) => item.nodeid.includes("DGB"))
+          .map((item) => {
+            const matched = searchResults.find((sr) => sr.bsNm === item.nodenm);
+            if (!matched) return null;
 
-        const stops = items.map((item) => {
-          // const stopLat = parseFloat(item.querySelector("gpslati")?.textContent ?? "0");
-          // const stopLng = parseFloat(item.querySelector("gpslong")?.textContent ?? "0");
-          // const name = item.querySelector("nodenm")?.textContent ?? "이름없음";
-          // const arsId = item.querySelector("nodeid")?.textContent ?? "";
-          const stopLat = parseFloat(item.gpslati ?? "0");
-          const stopLng = parseFloat(item.gpslong ?? "0");
-          const name = item.nodenm ?? "이름없음";
-          const arsId = item.nodeid ?? "";
+            const converted = convertNGISToKakao(
+              matched.ngisXPos,
+              matched.ngisYPos
+            );
 
-          return {
-            name,
-            arsId,
-            lat: stopLat,
-            lng: stopLng,
-            distance: getDistance(location.lat, location.lng, stopLat, stopLng),
-          };
-        });
-        // .sort((a, b) => a.distance - b.distance);
+            return {
+              name: item.nodenm,
+              bsId: matched.bsId,
+              arsId: item.nodeid ?? "",
+              lat: converted.lat,
+              lng: converted.lng,
+              distance: getDistance(lat, lng, converted.lat, converted.lng),
+            };
+          })
+          .filter(Boolean); // null 제거
 
-        console.log("파싱된 stops:", stops);
         setBusStops(stops);
       } catch (err) {
-        if (!errorShownRef.current) {
-          message.error(
-            "주변 정류장을 불러오는 데 실패했습니다: " + err.message
-          );
-          errorShownRef.current = true;
-        }
         console.error("정류장 불러오기 실패:", err);
+        message.error("정류장을 불러오는 데 실패했습니다");
       } finally {
         setLoadingStops(false);
       }
@@ -110,7 +113,9 @@ function Nearby() {
 
     const fetchData = async () => {
       setLoadingArrivals(true);
-      const result = await fetchArrivalInfo(selectedStop.arsId);
+      const result = await fetchArrivalInfo(selectedStop.bsId);
+      console.log("🧭 selectedStop:", selectedStop);
+      console.log("도착 정보:", result);
       setArrivalData(result);
       setLoadingArrivals(false);
     };
@@ -126,17 +131,25 @@ function Nearby() {
           gridTemplateColumns: selectedStop ? "1fr 1fr 1fr" : "1fr 1fr",
           gap: "24px",
           width: "100%",
-          height: "100%",
-          justifycontent: "space-between",
-          alignItems: "center",
+          height: "100vh", // 전체 화면에 맞춤
+          alignItems: "stretch",
+          padding: "16px",
+          boxSizing: "border-box",
         }}
       >
-        <div style={{ display: "flex", justifyContent: "end" }}>
-          <Card style={{ width: "70%", marginBottom: "50%" }}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <Card style={{ width: "70%" }}>
             {location.lat && location.lng && (
               <KakaoMapView
                 center={{ lat: location.lat, lng: location.lng }}
                 markers={busStops}
+                selectedStop={selectedStop}
                 onRelocate={() => {
                   navigator.geolocation.getCurrentPosition((pos) => {
                     setLocation({
@@ -161,7 +174,7 @@ function Nearby() {
             // flexDirection: "column",
           }}
         >
-          <div style={{ flex: 1 , justifyContent: "center" }}>
+          <div style={{ flex: 1, justifyContent: "center" }}>
             <div
               style={{
                 display: "flex",
@@ -193,66 +206,68 @@ function Nearby() {
             </Text>
             <Card
               style={{
-                maxHeight: "50%",
+                // maxHeight: "100%",
+                // overflowY: "auto",
+                // paddingRight: "4px",
+                // borderRadius: "12px",
+                maxHeight: "100%",
                 overflowY: "auto",
-                paddingRight: "4px",
                 borderRadius: "12px",
+                paddingRight: "4px",
               }}
             >
-              {loadingStops ? (
-                <Spin tip="정류장을 불러오는 중...">
-                  <div style={{ height: 300 }} />
-                </Spin>
-              ) : busStops.length === 0 ? (
-                <Text type="secondary">주변에 정류장이 없습니다.</Text>
-              ) : (
-                <List
-                  dataSource={busStops}
-                  loading={loadingStops}
-                  renderItem={(item, index) => (
-                    <Card
-                      key={item.arsId}
-                      style={{
-                        marginBottom: "12px",
-                        borderRadius: "12px",
-                        border: "1px solid #eee",
-                        cursor: "pointer",
-                      }}
-                      bodyStyle={{ padding: "12px 16px" }}
-                      onClick={() => setSelectedStop(item)}
-                    >
-                      <div
+              <Spin spinning={loadingStops} tip="정류장을 불러오는 중...">
+                {busStops.length === 0 ? (
+                  <Text type="secondary">주변에 정류장이 없습니다.</Text>
+                ) : (
+                  <List
+                    dataSource={busStops}
+                    loading={loadingStops}
+                    renderItem={(item, index) => (
+                      <Card
+                        key={item.arsId}
                         style={{
-                          display: "flex",
-                          justifyContent: "space-between",
+                          marginBottom: "12px",
+                          borderRadius: "12px",
+                          border: "1px solid #eee",
+                          cursor: "pointer",
                         }}
+                        bodyStyle={{ padding: "12px 16px" }}
+                        onClick={() => setSelectedStop(item)}
                       >
-                        <div>
-                          <Text strong>
-                            {index + 1}. {item.name}
-                          </Text>
-                          <div style={{ marginTop: 4, color: "#888" }}>
-                            정류장 ID: {item.arsId}
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                          }}
+                        >
+                          <div>
+                            <Text strong>
+                              {index + 1}. {item.name}
+                            </Text>
+                            <div style={{ marginTop: 4, color: "#888" }}>
+                              정류장 ID: {item.arsId}
+                            </div>
+                          </div>
+                          <div>
+                            <Text>{(item.distance / 1000).toFixed(1)} km</Text>
                           </div>
                         </div>
-                        <div>
-                          <Text>{(item.distance / 1000).toFixed(1)} km</Text>
-                        </div>
-                      </div>
-                    </Card>
-                  )}
-                />
-              )}
+                      </Card>
+                    )}
+                  />
+                )}
+              </Spin>
             </Card>
           </div>
         </div>
         <div>
           <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: selectedStop ? "1fr 1fr" : "1fr",
-              gap: "24px",
-            }}
+          // style={{
+          //   display: "grid",
+          //   gridTemplateColumns: selectedStop ? "1fr 1fr" : "1fr",
+          //   gap: "24px",
+          // }}
           >
             {selectedStop && (
               <div style={{ flex: 1 }}>
@@ -263,21 +278,88 @@ function Nearby() {
                   <Spin tip="도착 정보를 불러오는 중..." />
                 ) : arrivalData.length > 0 ? (
                   <List
+                    style={{
+                      width: "100%",
+                      maxHeight: "100%",
+                      overflowY: "auto",
+                      borderRadius: "12px",
+                      paddingRight: "4px",
+                      placeContent: "center",
+                      placeItems: "center",
+                    }}
                     bordered
                     dataSource={arrivalData}
-                    renderItem={(bus) => (
-                      <List.Item>
-                        <Card style={{ width: "100%" }}>
-                          <Text>
-                            🚌 버스번호: <strong>{bus.routeName}</strong>
-                          </Text>
-                          <br />
-                          <Text>⏱ 예상 도착: {bus.predictTime1}분</Text>
-                          <br />
-                          <Text>📍 남은 정류장: {bus.locationNo1}개</Text>
-                        </Card>
-                      </List.Item>
-                    )}
+                    renderItem={(bus) => {
+                      const getColorByState = (state) => {
+                        switch (state) {
+                          case "전":
+                            return "#52c41a"; // 곧 도착
+                          case "전전":
+                            return "#faad14"; // 곧 도착 예정
+                          case "도착예정":
+                            return "#aaaaaa"; // 차고지 대기
+                          default:
+                            return "#1890ff"; // 기타
+                        }
+                      };
+
+                      const getStateText = (state) => {
+                        switch (state) {
+                          case "전":
+                            return "곧 도착";
+                          case "전전":
+                            return "곧 도착 예정";
+                          case "도착예정":
+                            return "차고지 대기";
+                          default:
+                            return `${state} 후 도착`;
+                        }
+                      };
+
+                      return (
+                        <List.Item
+                        style={{
+                          width: "100%",
+                          marginBottom: "12px",
+                        }}
+                        >
+                          <Card
+                            style={{
+                              width: "100%",
+                              borderRadius: "12px",
+                              border: "1px solid #eee",
+                            }}
+                          >
+                            <div
+                              style={{
+                                display: "flex",
+                                justifyContent: "space-between",
+                                marginBottom: "4px",
+                              }}
+                            >
+                              <Text strong style={{ fontSize: "1.1em" }}>
+                                🚌 {bus.routeName}
+                              </Text>
+                              <Text
+                                strong
+                                style={{ color: getColorByState(bus.arrState) }}
+                              >
+                                {getStateText(bus.arrState)}
+                              </Text>
+                            </div>
+                            <Text>⏱ 예상 도착: {bus.predictTime1}분</Text>
+                            <br />
+                            <Text>📍 남은 정류장: {bus.locationNo1}개</Text>
+                            {bus.vhcNo2 && (
+                              <>
+                                <br />
+                                <Text>🆔 차량번호: {bus.vhcNo2}</Text>
+                              </>
+                            )}
+                          </Card>
+                        </List.Item>
+                      );
+                    }}
                   />
                 ) : (
                   <Text type="secondary">도착 정보가 없습니다.</Text>
