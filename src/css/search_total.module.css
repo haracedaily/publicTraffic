@@ -1,0 +1,52 @@
+.origin_dir{
+    position:relative;
+    &::after{
+        content:"";
+        position:absolute;
+        top:0;
+        right:min(15%,3em);
+        width:4px;
+        height:100%;
+        background-color:blue;
+    }
+}
+
+.reverse_dir{
+    position:relative;
+    &::after{
+        content:"";
+        position:absolute;
+        top:0;
+        right:min(15%,3em);
+        width:4px;
+        height:100%;
+        background-color:red;
+    }
+}
+
+.sticky_side_btn{
+    position:sticky;
+    bottom: 10%;
+    cursor:pointer;
+    z-index: 1000;
+    rotate: 180deg;
+    border-radius: 50%;
+    border: 3px solid black;
+}
+.jh_sideSelectedStopList {
+    &>div>div{
+    display:flex;
+    flex-direction: column;
+    align-items: end;
+        &>ul{
+            width:100%;
+        }
+    }
+}
+.jh_side_open{
+    justify-items:end;
+}
+.jh_side_close{
+    justify-items:end;
+    rotate: 180deg;
+}
