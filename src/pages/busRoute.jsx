@@ -15,16 +15,61 @@ function BusRoute(props) {
   const [selectedDestination, setSelectedDestination] = useState(null);
   const [routeList, setRouteList] = useState([]);
   const [isRouteSearched, setIsRouteSearched] = useState(false);
+  const [searchHistory, setSearchHistory] = useState(() => {
+    const saved = localStorage.getItem("searchHistory");
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  const key = "unique_noti_key";
 
   const handleSwap = () => {
-    setOrigin(destination);
-    setDestination(origin);
+    // 현재 상태 임시 저장
+    const prevOrigin = origin;
+    const prevDestination = destination;
+    const prevSelectedOrigin = selectedOrigin;
+    const prevSelectedDestination = selectedDestination;
+
+    // 상태 한꺼번에 업데이트
+    setOrigin(prevDestination);
+    setDestination(prevOrigin);
+    setSelectedOrigin(prevSelectedDestination);
+    setSelectedDestination(prevSelectedOrigin);
   };
 
   const handleSearch = () => {
-    if (!selectedOrigin || !selectedDestination) {
-      message.warning("출발지와 도착지를 정류장에서 선택해주세요.");
+    if (!selectedOrigin && !selectedDestination) {
+      message.warning({
+        content: "출발 정류장과 도착 정류장을 선택해주세요.",
+        key,
+        duration: 2,
+      });
       return;
+    }
+    if (!selectedOrigin) {
+      message.warning({
+        content: "출발 정류장을 선택해주세요.",
+        key,
+        duration: 2,
+      });
+      return;
+    }
+    if (!selectedDestination) {
+      message.warning({
+        content: "도착 정류장을 선택해주세요.",
+        key,
+        duration: 2,
+      });
+      return;
+    }
+    const newEntry = { origin, destination };
+    const isDuplicate = searchHistory.some(
+      (entry) => entry.origin === origin && entry.destination === destination
+    );
+
+    if (!isDuplicate) {
+      const updated = [newEntry, ...searchHistory.slice(0, 4)];
+      setSearchHistory(updated);
+      localStorage.setItem("searchHistory", JSON.stringify(updated));
     }
 
     // 출발지 및 도착지 좌표와 ID 추출
@@ -39,7 +84,11 @@ function BusRoute(props) {
       bsId: dstBsID,
     } = selectedDestination;
 
-    message.success("경로를 찾는 중....");
+    message.loading({
+      content: "이동 경로를 확인하는 중입니다. 조금만 기다려 주세요.",
+      key,
+      duration: 2,
+    });
 
     axios
       .get("https://businfo.daegu.go.kr:8095/dbms_web_api/srcdstroute_new", {
@@ -55,23 +104,38 @@ function BusRoute(props) {
       .then((response) => {
         const { header, body } = response.data;
 
-        // console.log("📦 API 응답 전체:", response.data);
-        // console.log("📍 응답 header:", header);
-        // console.log("🧭 경로 body:", body);
+        // console.log("API 응답 전체:", response.data);
+        // console.log("응답 header:", header);
+        // console.log("경로 body:", body);
 
         if (header?.success && Array.isArray(body) && body.length > 0) {
           setRouteList(body);
         } else {
-          message.error("경로를 찾을 수 없습니다.");
+          message.error({
+            content: "요청하신 경로를 찾지 못했습니다.",
+            key,
+            duration: 2,
+          });
           setRouteList([]);
         }
       })
       .catch((error) => {
         console.error("경로 검색 실패:", error);
-        message.error("경로 검색 중 오류가 발생했습니다.");
+        message.error({
+          content: "경로를 검색하는 중 문제가 발생했습니다.",
+          key,
+          duration: 2,
+        });
       });
 
     setIsRouteSearched(true);
+  };
+
+  const handleDeleteHistory = (index) => {
+    const updated = [...searchHistory];
+    updated.splice(index, 1);
+    setSearchHistory(updated);
+    localStorage.setItem("searchHistory", JSON.stringify(updated));
   };
 
   const fetchArrivalInfo = (bsId) => {
@@ -108,7 +172,7 @@ function BusRoute(props) {
     return { lat, lng };
   };
 
-  const searchBusRoute = (value, setValue) => {
+  const searchBusRoute = (value, setValue, target = null, callback = null) => {
     if (!value || value.trim() === "") return;
 
     axios
@@ -128,11 +192,23 @@ function BusRoute(props) {
               convertNGISToKakao(firstStop.ngisXPos, firstStop.ngisYPos)
             );
             fetchArrivalInfo(firstStop.bsId);
+
+            if (target === "origin") {
+              setOrigin(firstStop.bsNm);
+              setSelectedOrigin(firstStop);
+            } else if (target === "destination") {
+              setDestination(firstStop.bsNm);
+              setSelectedDestination(firstStop);
+            }
+
+            if (callback) {
+              callback(firstStop);
+            }
           }
         }
       })
       .catch((error) => {
-        console.log("정류장 검색 실패했습니다:", error);
+        console.log("정류장 검색에 실패했습니다:", error);
       });
   };
 
@@ -147,12 +223,11 @@ function BusRoute(props) {
         <Space direction="vertical" style={{ width: "100%" }}>
           <Input.Search
             id="originInput"
-            placeholder="출발지를 선택하세요."
+            placeholder="출발지를 선택해 주세요."
             value={origin}
             onChange={(e) => {
               setOrigin(e.target.value);
               setSearchTarget("origin");
-              searchBusRoute(val, setOrigin);
             }}
             onSearch={(value) => {
               setSearchTarget("origin");
@@ -160,15 +235,14 @@ function BusRoute(props) {
             }}
             allowClear
           />
-          
+
           <Input.Search
             id="destinationInput"
-            placeholder="도착지를 선택하세요."
+            placeholder="도착지를 선택해 주세요."
             value={destination}
             onChange={(e) => {
               setDestination(e.target.value);
               setSearchTarget("destination");
-              searchBusRoute(val, setDestination);
             }}
             onSearch={(value) => {
               setSearchTarget("destination");
@@ -191,6 +265,64 @@ function BusRoute(props) {
         </Space>
       </div>
 
+      <div style={{ padding: "20px" }}>
+        <Card title="최근 검색 경로" size="small">
+          <List
+            dataSource={searchHistory}
+            renderItem={(item, index) => (
+              <List.Item
+                key={index}
+                actions={[
+                  <Button
+                    type=""
+                    danger
+                    onClick={() => {
+                      e.stopPropagation();
+                      handleDeleteHistory(index);
+                      console.log("최근기록 클릭됨:", item);}
+                      }
+                  >
+                    삭제
+                  </Button>,
+                ]}
+                onClick={() => {
+                  setOrigin(item.origin);
+                  setDestination(item.destination);
+                  setSearchTarget("origin");
+                  searchBusRoute(
+                    item.origin,
+                    setOrigin,
+                    "origin",
+                    (originStop) => {
+                      setSelectedOrigin(originStop);
+
+                      searchBusRoute(
+                        item.destination,
+                        setDestination,
+                        "destination",
+                        (destinationStop) => {
+                          setSelectedDestination(destinationStop);
+                        }
+                      );
+                      message.info({
+                        content: `경로 재선택: ${item.origin} → ${item.destination}`,
+                        key,
+                        duration: 2,
+                      });
+                    }
+                  );
+                }}
+                style={{ cursor: "pointer" }}
+              >
+                <span>
+                  📍 {item.origin} → {item.destination}
+                </span>
+              </List.Item>
+            )}
+          ></List>
+        </Card>
+      </div>
+
       <Card
         style={{ marginBottom: 16, borderRadius: 12, background: "#fafafa" }}
       >
@@ -209,7 +341,7 @@ function BusRoute(props) {
       {!isRouteSearched && searchResults.length > 0 && (
         <div style={{ padding: "20px" }}>
           <List
-            bordered
+            variant="borderless"
             dataSource={searchResults}
             renderItem={(item) => (
               <List.Item
@@ -262,7 +394,7 @@ function BusRoute(props) {
 
       {Array.isArray(routeList) && routeList.length > 0 && (
         <div style={{ padding: "20px" }}>
-          <Card title="추천 경로" bordered={false}>
+          <Card title="추천 경로" variant="outlined">
             <List
               dataSource={filteredRouteList}
               renderItem={(route, idx) => (
