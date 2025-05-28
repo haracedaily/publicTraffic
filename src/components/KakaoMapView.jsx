@@ -1,17 +1,9 @@
 import React, { useRef, useState, useEffect } from "react";
-import { Map, MapMarker, useKakaoLoader } from "react-kakao-maps-sdk";
+import { Map, MapMarker } from "react-kakao-maps-sdk";
 import MapView from "./MapView";
+import { fetchArrivalInfo } from "../api/busApi";
 
-export default function KakaoMapView({
-  center,
-  markers = [],
-  busStops = [],
-  selectedStop,
-  setSelectedStop,
-  setArrivalData,
-  onRelocate,
-}) {
-  useKakaoLoader({ appkey: import.meta.env.VITE_KAKAO_API_KEY });
+export default function KakaoMapView({ center, markers = [], busStops = [], selectedStop, setSelectedStop = () => {}, setArrivalData = () => {}, onRelocate }) {
   const mapRef = useRef(null);
   const containerRef = useRef(null);
   const dragHandleRef = useRef(null);
@@ -42,9 +34,7 @@ export default function KakaoMapView({
   const handleMouseMove = (e) => {
     if (!isDragging) return;
     const newHeight = window.innerHeight - e.clientY;
-    setPanelHeight(
-      Math.max(100, Math.min(newHeight, window.innerHeight * 0.9))
-    );
+    setPanelHeight(Math.max(100, Math.min(newHeight, window.innerHeight * 0.9)));
   };
 
   const handleMouseUp = () => {
@@ -63,12 +53,7 @@ export default function KakaoMapView({
   return (
     <div
       ref={containerRef}
-      style={{
-        width: "100%",
-        height: "100%",
-        position: "relative",
-        overflow: "hidden",
-      }}
+      style={{ width: "100%", height: "100%", position: "relative", overflow: "hidden" }}
     >
       <Map
         center={center}
@@ -140,16 +125,11 @@ export default function KakaoMapView({
                   setArrivalData([]);
                   return;
                 }
-
                 setSelectedStop(item);
                 const result = await fetchArrivalInfo(item.bsId);
                 setArrivalData(result);
               }}
-              style={{
-                padding: "8px 12px",
-                borderBottom: "1px solid #eee",
-                cursor: "pointer",
-              }}
+              style={{ padding: "8px 12px", borderBottom: "1px solid #eee", cursor: "pointer" }}
             >
               <strong>
                 {index + 1}. {item.name}

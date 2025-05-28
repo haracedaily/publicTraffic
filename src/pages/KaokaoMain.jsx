@@ -105,6 +105,7 @@ function KaokaoMain(props) {
             <article className={styles.main}>
             <Map center={mapCenter} level={3}
                  style={{width:'100%',height:'100%'}}
+                 ref={mapRef}
 
                  onZoomChanged={(data)=>{
                      if(data.getLevel()>5)setIsVisible(false);
