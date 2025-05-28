@@ -12,8 +12,8 @@ proj4.defs("EPSG:4326", "+proj=longlat +datum=WGS84 +no_defs");
 ///[^ㄱ-ㅎ가-힣a-zA-Z0-9]/g
 function SearchTotal(props) {
     useEffect(() => {
-        document.querySelector(".jh_sideSelectedStop")?.scrollIntoView({behavior:"smooth",block:"center",inline:"nearest"});
-    }, [props.selectedRouteList]);
+        document.querySelector(".jh_sideSelectedStop")?.scrollIntoView({behavior:"smooth",block:"center",inline:"center"});
+    }, [props.selectedStop]);
     const fetchArrivalInfo = (bsId) => {
         kakaoMap.getArrivalInfo(bsId)
             .then(res => {
@@ -41,6 +41,8 @@ function SearchTotal(props) {
                 props.setSearchResults(res);
                 props.setArrivalInfo(null);
                 props.setSelectedStop(null);
+                props.setMarkerClicked(false);
+                props.setOpenedRoute(false);
             }
         }
 
