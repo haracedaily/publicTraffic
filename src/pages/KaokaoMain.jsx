@@ -31,10 +31,10 @@ function KaokaoMain(props) {
     });
 
     const searchRoute = (item) => {
-        // console.log("검색 조건",item);
+        console.log("검색 조건",item);
         setSelectedRoute(item);
         kakaoMap.getRouteInfo(item.routeId).then(res=>{
-            // console.log("노선정류장 : ",res);
+             console.log("노선정류장 : ",res);
         //     if(res?.data?.body?.items?.length>0)
             console.log("확인 : ",res.data.body.items);
         setSelectedRouteList(res.data.body.items);
@@ -51,6 +51,7 @@ function KaokaoMain(props) {
         setSelectedRoutePosition(res.data.body.items);
         });
     }
+
     return (
         <>
             <Side
@@ -78,8 +79,16 @@ function KaokaoMain(props) {
                      if(data.getLevel()>5)setIsVisible(false);
                      else setIsVisible(true);
                  }}
+                 onClick={(data)=>{
+                     setMarkerClicked(false);
+                 }}
             >
+                <MarkerClusterer
+                    averageCenter={true} // 클러스터에 포함된 마커들의 평균 위치를 클러스터 마커 위치로 설정
+                    minLevel={10} // 클러스터 할 최소 지도 레벨
+                >
                 {openedRoute && selectedRoute && selectedRouteList && selectedPathLine && (
+
                     <Polyline
                         path={selectedPathLine}
                         strokeWeight={5}
@@ -87,13 +96,49 @@ function KaokaoMain(props) {
                         strokeOpacity={0.7}
                         strokeStyle="solid"
                     />
-                )}
-                <MarkerClusterer
-                    averageCenter={true} // 클러스터에 포함된 마커들의 평균 위치를 클러스터 마커 위치로 설정
-                    minLevel={10} // 클러스터 할 최소 지도 레벨
-                >
+                        )}
+                {openedRoute && selectedRouteList && selectedRouteList.map(item => {
+
+                        return item.bsNm!=selectedStop?.bsNm&&(<MapMarker
+                            key={item.bsId + item.seq}
+                            position={{lat: item.yPos, lng: item.xPos}}
+                            image={{
+                                src: "/stop_marker.png",
+                                size: {
+                                    width: 50,
+                                    height: 50
+                                },
+                                options: {
+                                    offset: {
+                                        x: 25, y: 48
+                                    }
+                                }
+                            }}
+                            onClick={()=>{
+                                setMarkerClicked(true);
+                                item.lat=item.yPos;
+                                item.lng=item.xPos;
+                                setSelectedStop(item);
+                                setHoveredStop(item);
+                                kakaoMap.getArrivalInfo(item.bsId)
+                                    .then(res => {
+                                        if(res!==404){
+                                            // console.log("도착 예정정보",res.list);
+                                            setArrivalInfo(res);
+                                        }
+                                    })
+                                    .catch(error => {
+                                        console.error("도착 정보 조회 실패:", error);
+                                    });
+                            }}
+                        />)
+                    }
+
+                    )}
+
                     {selectedStop && isVisible && (
                         <MapMarker
+                            key={selectedStop.lat-selectedStop.lng}
                             position={{lat:selectedStop.lat, lng:selectedStop.lng}}
                             image={{
                                 src:"/stop_marker.png",
@@ -107,9 +152,9 @@ function KaokaoMain(props) {
                                     }
                                 }
                         }}
-
+                            clickable={true}
                             onClick={()=>{
-                                setMarkerClicked(!markerClicked);
+                                setMarkerClicked(true);
                                 setHoveredStop(selectedStop);
                             }}
                         />
@@ -119,6 +164,8 @@ function KaokaoMain(props) {
                             position={{ lat: hoveredStop.lat, lng: hoveredStop.lng }}
                             xAnchor={-0.1}
                             yAnchor={0.3}
+                            zIndex={2}
+                            clickable={true}
                         >
                             <div
                                 style={{
@@ -129,7 +176,7 @@ function KaokaoMain(props) {
                                     boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
                                     whiteSpace: "nowrap",
                                     overflow: "hidden",
-                                    width: "220px",
+                                    width: "220px"
                                 }}
                             >
                                 <div style={{display:"flex",flexDirection:"column",justifyContent:"center",alignItems:"flex-start",borderBottom:"2px solid black" }} >
