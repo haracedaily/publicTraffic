@@ -17,6 +17,8 @@ function App() {
   const isMobile = useMediaQuery({maxWidth: 900});
   const navigator = useNavigate();
 
+  useKakaoLoader({ appkey: import.meta.env.VITE_KAKAO_API_KEY });
+
   useEffect(() => {
     if (location)
     getNearbyStations(location.lat, location.lng).then(setStations);
