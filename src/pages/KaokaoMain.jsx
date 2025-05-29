@@ -25,18 +25,24 @@ function KaokaoMain(props) {
     const [isVisible, setIsVisible] = useState(true);
     const sideRef = useRef(null);
     const [selectedPathLine,setSelectedPathLine]=useState(null);
+    const [linkGeoJson,setLinkGeoJson] = useState(null);
+    const [variableLink,setVairableLink] = useState(null);
+
     useKakaoLoader({
         appkey: import.meta.env.VITE_KAKAO_API_KEY,
         libraries: ["clusterer", "drawing", "services"],
     });
+    useEffect(() => {
+        fetch("/link_20250224.json").then(res => res.json()).then(res => {setLinkGeoJson(res);});
+    },[]);
 
     const searchRoute = (item) => {
-        console.log("검색 조건",item);
+        //console.log("검색 조건",item);
         setSelectedRoute(item);
         kakaoMap.getRouteInfo(item.routeId).then(res=>{
-             console.log("노선정류장 : ",res);
-        //     if(res?.data?.body?.items?.length>0)
-            console.log("확인 : ",res.data.body.items);
+            /* console.log("노선정류장 : ",res);
+
+            console.log("확인 : ",res.data.body.items);*/
         setSelectedRouteList(res.data.body.items);
         setSelectedPathLine(res.data.body.items.map(el=>{
             return {
@@ -47,11 +53,46 @@ function KaokaoMain(props) {
         });
         kakaoMap.getRouteLocation(item.routeId).then(res=>{
             // console.log("노선위치 : ",res);
-        // console.log("위치 확인 : ",res.data.body.items);
+         // console.log("위치 확인 : ",res.data.body.items);
         setSelectedRoutePosition(res.data.body.items);
         });
+        kakaoMap.getRouteLink(item.routeId)
+            .then(res=>{
+                // console.log("링크확인 : ",res.data.body.items);
+                drawLine(res.data.body.items);
+            })
+            .catch(error=>{console.log(error)})
     }
 
+const drawLine = (data) => {
+        if(!data) return
+        const validLinks = linkGeoJson.features.filter(link => {
+            return Object.values(data).some(p=>
+                p.linkId===link.properties.link_id
+            );
+        });
+        // console.log("유효 링크값",validLinks);
+        validLinks.map(el=>{
+            if(Object.values(data).some(p=> {
+                if(p.linkId === el.properties.link_id){
+                    el.dir=p.moveDir;
+                    return true;
+                }
+            }));
+        });
+        let variableList = [];
+        validLinks.forEach(link=>{
+            const path = link.geometry.coordinates.map(([lng,lat])=> {
+                let [x,y]=proj4("EPSG:5182", "EPSG:4326", [lng, lat]);
+                return {lat:y, lng:x,dir:link.dir};
+            });
+            variableList.push(path);
+
+        })
+    // console.log("유효 리턴 링크값",variableList);
+        setVairableLink(variableList);
+
+};
     return (
         <>
             <Side
@@ -75,11 +116,11 @@ function KaokaoMain(props) {
             <Map center={mapCenter} level={3}
                  style={{width:'100%',height:'100%'}}
 
-                 onZoomChanged={(data)=>{
+                 /*onZoomChanged={(data)=>{
                      if(data.getLevel()>5)setIsVisible(false);
                      else setIsVisible(true);
-                 }}
-                 onClick={(data)=>{
+                 }}*/
+                 onClick={()=>{
                      setMarkerClicked(false);
                  }}
             >
@@ -87,16 +128,19 @@ function KaokaoMain(props) {
                     averageCenter={true} // 클러스터에 포함된 마커들의 평균 위치를 클러스터 마커 위치로 설정
                     minLevel={10} // 클러스터 할 최소 지도 레벨
                 >
-                {openedRoute && selectedRoute && selectedRouteList && selectedPathLine && (
-
-                    <Polyline
-                        path={selectedPathLine}
-                        strokeWeight={5}
-                        strokeColor="#FFAE00"
-                        strokeOpacity={0.7}
-                        strokeStyle="solid"
-                    />
-                        )}
+                    {openedRoute && selectedRoute && selectedRouteList && selectedPathLine && variableLink && variableLink.map(item=>{
+                        if(item)
+                        return (
+                            <Polyline
+                                key={item[0].lat+"_"+item[1].lng}
+                                path={item}
+                                strokeWeight={5}
+                                strokeOpacity={1}
+                                strokeColor={item[0].dir==1?"#FF0000":"#0000FF"}
+                                strokeStyle="solid"
+                            />
+                        )
+                    })}
                 {openedRoute && selectedRouteList && selectedRouteList.map(item => {
 
                         return item.bsNm!=selectedStop?.bsNm&&(<MapMarker
