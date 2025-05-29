@@ -252,6 +252,7 @@ const drawLine = (data) => {
                                 {arrivalInfo?.list?.length>0?arrivalInfo.list.map(item=>(
 
                                         <div
+                                            className={item.routeNo===selectedRoute?.routeNo&&styles.selectedBus}
                                             style={{
                                             borderBottom: "1px solid #eee",
                                             display: "flex",
