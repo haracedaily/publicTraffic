@@ -31,14 +31,14 @@
     overflow: hidden;
 }
 
-.mobile-arrival-panel {
+/* .mobile-arrival-panel {
   position: fixed;
   bottom: 0;
   width: 100%;
   background: white;
   z-index: 100;
   box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
-}
+} */
 
 @media (max-width: 1024px) {
 

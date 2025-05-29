@@ -32,16 +32,18 @@ function Nearby() {
   const locationHook = useGeoLocation();
   const errorShownRef = useRef(false);
 
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 1024);
+  const [arrivalMap, setArrivalMap] = useState({});
 
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth <= 1024);
-    };
+  // const [isMobile, setIsMobile] = useState(window.innerWidth <= 1024);
 
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
+  // useEffect(() => {
+  //   const handleResize = () => {
+  //     setIsMobile(window.innerWidth <= 1024);
+  //   };
+
+  //   window.addEventListener("resize", handleResize);
+  //   return () => window.removeEventListener("resize", handleResize);
+  // }, []);
 
   useEffect(() => {
     navigator.geolocation.watchPosition(
@@ -123,93 +125,93 @@ function Nearby() {
     fetchData();
   }, [selectedStop]);
 
-  if (isMobile) {
-    return (
-      <>
-        <KakaoMapView
-          center={location}
-          markers={busStops}
-          busStops={busStops}
-          selectedStop={selectedStop}
-          setSelectedStop={setSelectedStop}
-          setArrivalData={setArrivalData}
-          onRelocate={() => {
-            navigator.geolocation.getCurrentPosition((pos) => {
-              setLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-            });
-          }}
-        />
+  // if (isMobile) {
+  //   return (
+  //     <>
+  //       <KakaoMapView
+  //         center={location}
+  //         markers={busStops}
+  //         busStops={busStops}
+  //         selectedStop={selectedStop}
+  //         setSelectedStop={setSelectedStop}
+  //         setArrivalData={setArrivalData}
+  //         onRelocate={() => {
+  //           navigator.geolocation.getCurrentPosition((pos) => {
+  //             setLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+  //           });
+  //         }}
+  //       />
 
-        <div style={{ height: "100%", overflowY: "auto", padding: 12 }}>
-          {loadingStops ? (
-            <Spin tip="정류장을 불러오는 중..." />
-          ) : (
-            <List
-              dataSource={busStops}
-              renderItem={(item, index) => {
-                const isSelected = selectedStop?.arsId === item.arsId;
-                return (
-                  <Card
-                    key={item.arsId}
-                    onClick={async () => {
-                      if (isSelected) {
-                        setSelectedStop(null);
-                        setArrivalData([]);
-                        return;
-                      }
-                      setSelectedStop(item);
-                      setLoadingArrivals(true);
-                      const result = await fetchArrivalInfo(item.bsId);
-                      setArrivalData(result);
-                      setLoadingArrivals(false);
-                    }}
-                    style={{
-                      marginBottom: 12,
-                      borderRadius: 12,
-                      border: isSelected ? "2px solid #2d6ae0" : "1px solid #ddd",
-                      background: isSelected ? "#f5faff" : "#fff",
-                      transition: "0.3s all"
-                    }}
-                    bodyStyle={{ padding: "12px 16px" }}
-                  >
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                      <Text style={{ fontWeight: 600, fontSize: "1rem", color: "#333" }}>{index + 1}. {item.name}</Text>
-                      <Text style={{ fontSize: "0.85rem", color: "#666" }}>{(item.distance / 1000).toFixed(1)} km</Text>
-                    </div>
-                    <div style={{ color: "#999", fontSize: "0.75rem", marginTop: 4 }}>ID: {item.arsId}</div>
+  //       <div style={{ height: "100%", overflowY: "auto", padding: 12 }}>
+  //         {loadingStops ? (
+  //           <Spin tip="정류장을 불러오는 중..." />
+  //         ) : (
+  //           <List
+  //             dataSource={busStops}
+  //             renderItem={(item, index) => {
+  //               const isSelected = selectedStop?.arsId === item.arsId;
+  //               return (
+  //                 <Card
+  //                   key={item.arsId}
+  //                   onClick={async () => {
+  //                     if (isSelected) {
+  //                       setSelectedStop(null);
+  //                       setArrivalData([]);
+  //                       return;
+  //                     }
+  //                     setSelectedStop(item);
+  //                     setLoadingArrivals(true);
+  //                     const result = await fetchArrivalInfo(item.bsId);
+  //                     setArrivalData(result);
+  //                     setLoadingArrivals(false);
+  //                   }}
+  //                   style={{
+  //                     marginBottom: 12,
+  //                     borderRadius: 12,
+  //                     border: isSelected ? "2px solid #2d6ae0" : "1px solid #ddd",
+  //                     background: isSelected ? "#f5faff" : "#fff",
+  //                     transition: "0.3s all"
+  //                   }}
+  //                   bodyStyle={{ padding: "12px 16px" }}
+  //                 >
+  //                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+  //                     <Text style={{ fontWeight: 600, fontSize: "1rem", color: "#333" }}>{index + 1}. {item.name}</Text>
+  //                     <Text style={{ fontSize: "0.85rem", color: "#666" }}>{(item.distance / 1000).toFixed(1)} km</Text>
+  //                   </div>
+  //                   <div style={{ color: "#999", fontSize: "0.75rem", marginTop: 4 }}>ID: {item.arsId}</div>
 
-                    {isSelected && (
-                      <div style={{
-                        marginTop: 12,
-                        paddingTop: 12,
-                        borderTop: "1px dashed #ccc"
-                      }}>
-                        {loadingArrivals ? (
-                          <Spin tip="도착 정보를 불러오는 중..." />
-                        ) : arrivalData.length > 0 ? (
-                          arrivalData.map((bus, idx) => (
-                            <div key={idx} style={{ marginBottom: 10 }}>
-                              <Text strong>🚌 {bus.routeName}</Text><br />
-                              <Text>⏱ {bus.predictTime1 !== "-" ? `${bus.predictTime1}분` : "정보 없음"}</Text><br />
-                              {bus.locationNo1 !== "-" && (
-                                <Text>📍 남은 정류장: {bus.locationNo1}개</Text>
-                              )}
-                            </div>
-                          ))
-                        ) : (
-                          <Text type="secondary">도착 정보가 없습니다.</Text>
-                        )}
-                      </div>
-                    )}
-                  </Card>
-                );
-              }}
-            />
-          )}
-        </div>
-      </>
-    );
-  }
+  //                   {isSelected && (
+  //                     <div style={{
+  //                       marginTop: 12,
+  //                       paddingTop: 12,
+  //                       borderTop: "1px dashed #ccc"
+  //                     }}>
+  //                       {loadingArrivals ? (
+  //                         <Spin tip="도착 정보를 불러오는 중..." />
+  //                       ) : arrivalData.length > 0 ? (
+  //                         arrivalData.map((bus, idx) => (
+  //                           <div key={idx} style={{ marginBottom: 10 }}>
+  //                             <Text strong>🚌 {bus.routeName}</Text><br />
+  //                             <Text>⏱ {bus.predictTime1 !== "-" ? `${bus.predictTime1}분` : "정보 없음"}</Text><br />
+  //                             {bus.locationNo1 !== "-" && (
+  //                               <Text>📍 남은 정류장: {bus.locationNo1}개</Text>
+  //                             )}
+  //                           </div>
+  //                         ))
+  //                       ) : (
+  //                         <Text type="secondary">도착 정보가 없습니다.</Text>
+  //                       )}
+  //                     </div>
+  //                   )}
+  //                 </Card>
+  //               );
+  //             }}
+  //           />
+  //         )}
+  //       </div>
+  //     </>
+  //   );
+  // }
 
   return (
     <div
@@ -226,7 +228,9 @@ function Nearby() {
           markers={busStops}
           selectedStop={selectedStop}
           setSelectedStop={setSelectedStop}
-          setArrivalData={setArrivalData}
+          setArrivalMap={setArrivalMap}
+          loadingArrivals={loadingArrivals}
+          setLoadingArrivals={setLoadingArrivals}
           onRelocate={() => {
             navigator.geolocation.getCurrentPosition((pos) => {
               setLocation({
@@ -260,17 +264,32 @@ function Nearby() {
                 key={item.arsId}
                 style={{ marginBottom: 8, cursor: "pointer", minHeight: 70 }}
                 styles={{ body: { padding: "8px 12px" } }}
+                // onClick={async () => {
+                //   if (selectedStop?.bsId === item.bsId) {
+                //     setSelectedStop(null);
+                //     setArrivalData([]);
+                //     return;
+                //   }
+                //   setSelectedStop(item);
+                //   setLoadingArrivals(true);
+                //   const result = await fetchArrivalInfo(item.bsId);
+                //   setArrivalData(result);
+                //   setLoadingArrivals(false);
+                // }}
                 onClick={async () => {
                   if (selectedStop?.bsId === item.bsId) {
                     setSelectedStop(null);
-                    setArrivalData([]);
                     return;
                   }
+
                   setSelectedStop(item);
-                  setLoadingArrivals(true);
-                  const result = await fetchArrivalInfo(item.bsId);
-                  setArrivalData(result);
-                  setLoadingArrivals(false);
+
+                  if (!arrivalMap[item.bsId]) {
+                    setLoadingArrivals(true);
+                    const result = await fetchArrivalInfo(item.bsId);
+                    setArrivalMap((prev) => ({ ...prev, [item.bsId]: result }));
+                    setLoadingArrivals(false);
+                  }
                 }}
               >
                 <Text strong>
@@ -315,7 +334,6 @@ function Nearby() {
                         return "#1890ff";
                     }
                   };
-                  console.log(bus);
                   const getStateText = (state) => {
                     switch (state) {
                       case "전":
@@ -353,9 +371,6 @@ function Nearby() {
                             {getStateText(bus.arrState)}
                           </Text>
                         </div>
-                        {/* <Text>⏱ 예상 도착: {bus.predictTime1}분</Text>
-                        <br />
-                        <Text>📍 남은 정류장: {bus.locationNo1}개</Text> */}
                         {bus.vhcNo2 && (
                           <>
                             <br />
