@@ -103,7 +103,7 @@ function KaokaoMain(props) {
                 sideRef={sideRef}
             />
             <article className={styles.main}>
-            <Map center={mapCenter} level={3}
+            <Map center={mapCenter} level={mapLevel}
                  style={{width:'100%',height:'100%'}}
                  ref={mapRef}
 
