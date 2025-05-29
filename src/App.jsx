@@ -23,7 +23,7 @@ function App() {
                     <div onClick={()=>{navigator("/my")}}>나의버스</div>
                     <div onClick={()=>{navigator("/nearby")}}>주변정류장</div>
                     <div>이용안내</div>
-                    {/* <Button>로그인</Button> */}
+                    <Button>로그인</Button>
                     <InstallButton/>
                 </nav>}
             </header>

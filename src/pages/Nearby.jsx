@@ -66,54 +66,63 @@ function Nearby() {
   }, []);
 
   useEffect(() => {
-    if (!location.lat || !location.lng) return;
+  if (!location?.lat || !location?.lng) return;
 
-    const fetchNearbyStops = async () => {
-      setLoadingStops(true);
+  const fetchNearbyStops = async () => {
+    setLoadingStops(true);
+    try {
+      const url = `https://apis.data.go.kr/1613000/BusSttnInfoInqireService/getCrdntPrxmtSttnList?serviceKey=l7L9HOYK5mFEJAehYbro5q9qXaJofTBB7nv0fYzNNIqJE%2FYGs2d7Gn6%2FDb6qrv9D1F9v5iEm%2BpXpQ%2FCINV59DA%3D%3D&gpsLati=${location.lat}&gpsLong=${location.lng}&radius=1000&_type=json`;
+      const res = await fetch(url);
+      const json = await res.json();
+      let items = json.response?.body?.items?.item ?? [];
+
+      // nodeid 유효성 체크하고 필터
+      items = items.filter((item) => item?.nodeid?.includes("DGB"));
+
+      let searchResults = [];
       try {
-        const url = `https://apis.data.go.kr/1613000/BusSttnInfoInqireService/getCrdntPrxmtSttnList?serviceKey=l7L9HOYK5mFEJAehYbro5q9qXaJofTBB7nv0fYzNNIqJE%2FYGs2d7Gn6%2FDb6qrv9D1F9v5iEm%2BpXpQ%2FCINV59DA%3D%3D&gpsLati=${location.lat}&gpsLong=${location.lng}&radius=1000&_type=json`;
-        const res = await fetch(url);
-        const json = await res.json();
-        let items = json.response.body.items?.item ?? [];
-
-        const searchResults = await kakaoMap.getSearchTotal("");
-
-        const stops = items
-          .filter((item) => item.nodeid.includes("DGB"))
-          .map((item) => {
-            const matched = searchResults.find((sr) => sr.bsNm === item.nodenm);
-            if (!matched) return null;
-            const converted = convertNGISToKakao(
-              matched.ngisXPos,
-              matched.ngisYPos
-            );
-            return {
-              name: item.nodenm,
-              bsId: matched.bsId,
-              arsId: item.nodeid ?? "",
-              lat: converted.lat,
-              lng: converted.lng,
-              distance: getDistance(
-                location.lat,
-                location.lng,
-                converted.lat,
-                converted.lng
-              ),
-            };
-          })
-          .filter(Boolean);
-
-        setBusStops(stops);
-      } catch (err) {
-        console.error("정류장 불러오기 실패:", err);
-        message.error("정류장을 불러오는 데 실패했습니다");
-      } finally {
-        setLoadingStops(false);
+        searchResults = await kakaoMap.getSearchTotal("");
+      } catch (searchErr) {
+        console.error("카카오맵 검색 실패:", searchErr);
       }
-    };
 
-    fetchNearbyStops();
-  }, [location]);
+      const stops = items
+        .map((item) => {
+          const matched = searchResults.find(
+            (sr) => sr.bsNm === item.nodenm
+          );
+          if (!matched) return null;
+          const converted = convertNGISToKakao(
+            matched.ngisXPos,
+            matched.ngisYPos
+          );
+          return {
+            name: item.nodenm,
+            bsId: matched.bsId,
+            arsId: item.nodeid,
+            lat: converted.lat,
+            lng: converted.lng,
+            distance: getDistance(
+              location.lat,
+              location.lng,
+              converted.lat,
+              converted.lng
+            ),
+          };
+        })
+        .filter(Boolean);
+
+      setBusStops(stops);
+    } catch (err) {
+      console.error("정류장 불러오기 실패:", err);
+      message.error("정류장을 불러오는 데 실패했습니다");
+    } finally {
+      setLoadingStops(false); // 반드시 여기서 해제
+    }
+  };
+
+  fetchNearbyStops();
+}, [location?.lat, location?.lng]);
 
   useEffect(() => {
     if (!selectedStop) return;
