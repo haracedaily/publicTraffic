@@ -65,12 +65,25 @@ async function getRouteLocation(routeId){
     }
 }
 
+async function getRouteLink(routeId){
+    try{
+        let res = await axios.get(`https://apis.data.go.kr/6270000/dbmsapi01/getLink?serviceKey=${import.meta.env.VITE_DAEGU_ENC_KEY}&routeId=${routeId}`);
+        // console.log("route별 링크 : ",res);
+        return res;
+    }catch (error) {
+        let res = error.response;
+        res.message="에러사항 발생";
+        return res;
+    }
+}
+
 export const kakaoMap = {
     defaultMove,
     getSearchTotal,
     getArrivalInfo,
     getRouteInfo,
-    getRouteLocation
+    getRouteLocation,
+    getRouteLink,
 }
 
 export default kakaoMap;
