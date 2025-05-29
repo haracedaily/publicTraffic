@@ -4,6 +4,7 @@ import Side from "../component/Side.jsx";
 import styles from "../css/kakao_main.module.css";
 import proj4 from 'proj4';
 import kakaoMap from "../js/kakaoMap.js";
+import MapView from "../components/MapView.jsx";
 
 // EPSG:5182 (TM-동부원점) 좌표계 정의
 proj4.defs("EPSG:5182", "+proj=tmerc +lat_0=38 +lon_0=129 +k=1 +x_0=200000 +y_0=600000 +ellps=GRS80 +units=m +no_defs");
@@ -28,12 +29,33 @@ function KaokaoMain(props) {
     const [linkGeoJson,setLinkGeoJson] = useState(null);
     const [variableLink,setVairableLink] = useState(null);
 
+    const [mapLevel, setMapLevel] = useState(4);
+    const [myPosition, setMyPosition] = useState(null);
+    const mapRef = useRef(null);
+
     useKakaoLoader({
         appkey: import.meta.env.VITE_KAKAO_API_KEY,
         libraries: ["clusterer", "drawing", "services"],
     });
     useEffect(() => {
         fetch("/link_20250224.json").then(res => res.json()).then(res => {setLinkGeoJson(res);});
+        navigator.geolocation.getCurrentPosition(
+            (pos) => {
+                const { latitude, longitude } = pos.coords;
+                setMyPosition({ lat: latitude, lng: longitude });
+                // console.log("위도:", pos.coords.latitude);
+                // console.log("경도:", pos.coords.longitude);
+                setMapCenter({ lat: latitude, lng: longitude });
+                setMapLevel(4);
+            },
+            (err) => {
+                console.error("위치 오류:", err);
+                setMyPosition(null);
+                setMapCenter({ lat: 35.8714, lng: 128.6014 });
+                setMapLevel(7);
+            },
+            { enableHighAccuracy: true, maximumAge: 0 }
+        );
     },[]);
 
     const searchRoute = (item) => {
@@ -113,9 +135,9 @@ const drawLine = (data) => {
                 sideRef={sideRef}
             />
             <article className={styles.main}>
-            <Map center={mapCenter} level={3}
+            <Map center={mapCenter} level={mapLevel}
                  style={{width:'100%',height:'100%'}}
-
+                 ref={mapRef}
                  /*onZoomChanged={(data)=>{
                      if(data.getLevel()>5)setIsVisible(false);
                      else setIsVisible(true);
@@ -268,6 +290,21 @@ const drawLine = (data) => {
                         </CustomOverlayMap>
                     )}
                 </MarkerClusterer>
+                {myPosition && (
+                    <MapView
+                        position={myPosition}
+                        onClick={() => {
+                            console.log("내 위치 클릭");
+                            if (mapRef.current && window.kakao?.maps) {
+                                const kakaoLatLng = new window.kakao.maps.LatLng(
+                                    myPosition.lat,
+                                    myPosition.lng
+                                );
+                                mapRef.current.setCenter(kakaoLatLng);
+                            }
+                        }}
+                    />
+                )}
             </Map>
             </article>
         </>
