@@ -12,8 +12,8 @@ proj4.defs("EPSG:4326", "+proj=longlat +datum=WGS84 +no_defs");
 ///[^ㄱ-ㅎ가-힣a-zA-Z0-9]/g
 function SearchTotal(props) {
     useEffect(() => {
-        document.querySelector(".jh_sideSelectedStop")?.scrollIntoView({behavior:"smooth",block:"center",inline:"nearest"});
-    }, [props.selectedRouteList]);
+        document.querySelector(".jh_sideSelectedStop")?.scrollIntoView({behavior:"smooth",block:"center",inline:"center"});
+    }, [props.selectedStop,props.selectedRouteList]);
     const fetchArrivalInfo = (bsId) => {
         kakaoMap.getArrivalInfo(bsId)
             .then(res => {
@@ -41,13 +41,15 @@ function SearchTotal(props) {
                 props.setSearchResults(res);
                 props.setArrivalInfo(null);
                 props.setSelectedStop(null);
+                props.setMarkerClicked(false);
+                props.setOpenedRoute(false);
             }
         }
 
     }
     return (
         <div>
-            <Space.Compact style={{ width: '100%', padding: '20px' }}>
+            <Space.Compact id={"jh_searchTop"} style={{ width: '100%', padding: '20px' }}>
                 <Input.Search placeholder="버스번호 및 정류소" onSearch={searchTotal} allowClear />
             </Space.Compact>
             <div>
@@ -175,7 +177,7 @@ function SearchTotal(props) {
                                                 </Card>
                                             )}}
                                         >
-                                            <img width={30} src={"/dir.png"} alt={"위로가기버튼"} className={styles.sticky_side_btn} onClick={()=>{document.querySelector(`.${styles.jh_sideSelectedStopList}`).scrollIntoView({behavior:"smooth",block:"start",inline:"nearest"});}}/>
+                                            <img width={30} src={"/dir.png"} alt={"위로가기버튼"} className={styles.sticky_side_btn} onClick={()=>{document.querySelector(`#jh_searchTop`).scrollIntoView({behavior:"smooth",block:"start",inline:"nearest"});}}/>
                                         </List>
                                     )}
                                     </div>

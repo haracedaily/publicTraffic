@@ -7,10 +7,12 @@ import BusRoute from "./pages/busRoute.jsx";
 import {useMediaQuery} from "react-responsive";
 import {Map, useKakaoLoader} from "react-kakao-maps-sdk";
 import {BrowserRouter, useNavigate} from "react-router-dom";
+import InstallButton from './components/InstallButton.jsx';
 
 function App() {
 
     const isMobile = useMediaQuery({maxWidth: 900});
+    const isCommonMobile = useMediaQuery({maxWidth: 425});
     const navigator = useNavigate();
 
     return (
@@ -18,17 +20,18 @@ function App() {
             <header>
                 {isMobile ? <img width={150} src={"/logo_word.svg"} alt={"logo"} onClick={()=>{navigator("/")}} style={{cursor:"pointer"}} /> :
                     <img width={200} src={"/header_logo.svg"} alt={'logo'} onClick={()=>{navigator("/")}} style={{cursor:"pointer"}} />}
-                {isMobile ? <Button>로그인</Button> : <nav>
+                {isMobile ? <InstallButton/> : <nav>
                     <div onClick={()=>{navigator("/my")}}>나의버스</div>
-                    <div>주변정류장</div>
+                    <div onClick={()=>{navigator("/nearby")}}>주변정류장</div>
                     <div>이용안내</div>
-                    <Button>로그인</Button>
+                    {/* <Button>로그인</Button> */}
+                    <InstallButton/>
                 </nav>}
             </header>
-            <main>
-                <Main/>
+            <main className={isCommonMobile?"common_mobile_main":""}>
+                <Main isCommonMobile={isCommonMobile}/>
             </main>
-            <footer>
+            <footer className={isCommonMobile?"none":""}>
                 <div>
 
                 <div>
