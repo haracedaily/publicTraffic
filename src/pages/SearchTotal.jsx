@@ -49,7 +49,7 @@ function SearchTotal(props) {
     }
     return (
         <div>
-            <Space.Compact style={{ width: '100%', padding: '20px' }}>
+            <Space.Compact id={"jh_searchTop"} style={{ width: '100%', padding: '20px' }}>
                 <Input.Search placeholder="버스번호 및 정류소" onSearch={searchTotal} allowClear />
             </Space.Compact>
             <div>
@@ -177,7 +177,7 @@ function SearchTotal(props) {
                                                 </Card>
                                             )}}
                                         >
-                                            <img width={30} src={"/dir.png"} alt={"위로가기버튼"} className={styles.sticky_side_btn} onClick={()=>{document.querySelector(`.${styles.jh_sideSelectedStopList}`).scrollIntoView({behavior:"smooth",block:"start",inline:"nearest"});}}/>
+                                            <img width={30} src={"/dir.png"} alt={"위로가기버튼"} className={styles.sticky_side_btn} onClick={()=>{document.querySelector(`#jh_searchTop`).scrollIntoView({behavior:"smooth",block:"start",inline:"nearest"});}}/>
                                         </List>
                                     )}
                                     </div>
