@@ -3,6 +3,7 @@ import {Card, Input, List, message, Space, Spin} from "antd";
 import kakaoMap from "../js/kakaoMap.js";
 import proj4 from 'proj4';
 import styles from "../css/search_total.module.css";
+import KaokaoMain from "./KaokaoMain.jsx";
 
 // EPSG:5182 (TM-동부원점) 좌표계 정의
 proj4.defs("EPSG:5182", "+proj=tmerc +lat_0=38 +lon_0=129 +k=1 +x_0=200000 +y_0=600000 +ellps=GRS80 +units=m +no_defs");
@@ -13,7 +14,7 @@ proj4.defs("EPSG:4326", "+proj=longlat +datum=WGS84 +no_defs");
 function SearchTotal(props) {
     useEffect(() => {
         document.querySelector(".jh_sideSelectedStop")?.scrollIntoView({behavior:"smooth",block:"center",inline:"center"});
-    }, [props.selectedStop]);
+    }, [props.selectedStop,props.selectedRouteList]);
     const fetchArrivalInfo = (bsId) => {
         kakaoMap.getArrivalInfo(bsId)
             .then(res => {
@@ -49,9 +50,10 @@ function SearchTotal(props) {
     }
     return (
         <div>
-            <Space.Compact style={{ width: '100%', padding: '20px' }}>
+            <Space.Compact id={"jh_searchTop"} style={{ width: '100%', padding: '20px' }}>
                 <Input.Search placeholder="버스번호 및 정류소" onSearch={searchTotal} allowClear />
             </Space.Compact>
+
             <div>
                 <List
                     bordered
@@ -177,7 +179,7 @@ function SearchTotal(props) {
                                                 </Card>
                                             )}}
                                         >
-                                            <img width={30} src={"/dir.png"} alt={"위로가기버튼"} className={styles.sticky_side_btn} onClick={()=>{document.querySelector(`.${styles.jh_sideSelectedStopList}`).scrollIntoView({behavior:"smooth",block:"start",inline:"nearest"});}}/>
+                                            <img width={30} src={"/dir.png"} alt={"위로가기버튼"} className={styles.sticky_side_btn} onClick={()=>{document.querySelector(`#jh_searchTop`).scrollIntoView({behavior:"smooth",block:"start",inline:"nearest"});}}/>
                                         </List>
                                     )}
                                     </div>

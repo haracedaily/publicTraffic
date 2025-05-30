@@ -12,7 +12,7 @@ proj4.defs("EPSG:5182", "+proj=tmerc +lat_0=38 +lon_0=129 +k=1 +x_0=200000 +y_0=
 // EPSG:4326 (WGS84) 좌표계 정의
 proj4.defs("EPSG:4326", "+proj=longlat +datum=WGS84 +no_defs");
 
-function KaokaoMain(props) {
+function KaokaoMain({isCommonMobile}) {
     const [searchResults, setSearchResults] = useState([]);
     const [arrivalInfo, setArrivalInfo] = useState(null);
     const [mapCenter, setMapCenter] = useState({ lat: 35.8693, lng: 128.6062 });
@@ -133,7 +133,9 @@ const drawLine = (data) => {
                 selectedRouteList={selectedRouteList}
                 selectedRoutePosition={selectedRoutePosition}
                 sideRef={sideRef}
+                isCommonMobile={isCommonMobile}
             />
+            {isCommonMobile ||
             <article className={styles.main}>
             <Map center={mapCenter} level={mapLevel}
                  style={{width:'100%',height:'100%'}}
@@ -252,6 +254,7 @@ const drawLine = (data) => {
                                 {arrivalInfo?.list?.length>0?arrivalInfo.list.map(item=>(
 
                                         <div
+                                            className={item.routeNo===selectedRoute?.routeNo&&styles.selectedBus}
                                             style={{
                                             borderBottom: "1px solid #eee",
                                             display: "flex",
@@ -307,6 +310,7 @@ const drawLine = (data) => {
                 )}
             </Map>
             </article>
+            }
         </>
     );
 }
