@@ -13,7 +13,7 @@ proj4.defs("EPSG:4326", "+proj=longlat +datum=WGS84 +no_defs");
 function SearchTotal(props) {
     useEffect(() => {
         document.querySelector(".jh_sideSelectedStop")?.scrollIntoView({behavior:"smooth",block:"center",inline:"center"});
-    }, [props.selectedStop]);
+    }, [props.selectedStop,props.selectedRouteList]);
     const fetchArrivalInfo = (bsId) => {
         kakaoMap.getArrivalInfo(bsId)
             .then(res => {
