@@ -1,0 +1,161 @@
+.container {
+    padding: 1rem;
+    box-sizing: border-box;
+    max-width: 1200px;
+    margin: 0 auto;
+    min-height: 600px;
+}
+
+.contentWrapper {
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+    margin-top: 1rem;
+    /*justify-content: center;*/
+    /*flex-wrap: wrap;*/
+    /*max-height: calc(100vh - 150px);*/
+    /*overflow-y: auto;*/
+    padding: 1rem;
+}
+
+.favoritesWrapper {
+    /*flex: 1;*/
+    /*min-width: 300px;*/
+    /*max-width: 500px;*/
+    /*width: 27rem;*/
+    width: 50%;
+}
+
+.favoritesTitle {
+    margin-bottom: 1rem;
+    /*margin-left: 1rem;*/
+}
+
+.noFavorites {
+    text-align: center;
+    padding: 1rem;
+}
+
+.favoritesList {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.listItem {
+    cursor: pointer;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.listItemContent {
+    width: 100%;
+    min-height: 80px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.stopName,
+.stopId,
+.routeList {
+    /*white-space: nowrap;*/
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 2px 0;
+}
+
+.favoriteIcon {
+    cursor: pointer;
+}
+
+.cardWrapper {
+    /*flex: 1;*/
+    /*min-width: 300px;*/
+    /*max-width: 500px;*/
+    width: 50%;
+    overflow-y: auto;
+    /*background-color: green;*/
+    /*padding-right: 0 !important;*/
+}
+
+.cardTitle {
+    display: flex;
+    align-items: center;
+    /*justify-content: space-between;*/
+    /*max-width: 400px;*/
+    /*background-color: blue;*/
+}
+.cardTitleText {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    /*max-width: 200px;*/
+    width: 400px;
+}
+
+.refreshTimer {
+    margin-left: 1rem;
+    color: #1890ff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    /*max-width: 100px;*/
+    align-items: end;
+    width: 100px;
+
+}
+
+.refreshButton {
+    /*margin-left: 1rem;*/
+
+}
+
+.arrivalList {
+
+    max-height: 400px;
+    overflow-y: auto;
+
+}
+
+.arrivalItem {
+    border-bottom: 1px solid #f0f0f0;
+    /*background-color: red;*/
+
+}
+
+
+
+.arrivalContent {
+    width: 100%;
+    min-height: 60px;
+    /*max-height: 40px;*/
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    /*background-color: orange;*/
+}
+
+.routeInfo {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+    /*background-color: yellow;*/
+}
+
+.routeNo,
+.arrivalState,
+.vehicleNo {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 2px 0;
+}
+
+.loadingMessage {
+    text-align: center;
+    padding: 1rem;
+}
+
+.ant-card .ant-card-body {
+    padding: 0 !important;
+}
