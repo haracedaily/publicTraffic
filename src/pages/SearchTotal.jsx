@@ -4,6 +4,7 @@ import kakaoMap from "../js/kakaoMap.js";
 import proj4 from 'proj4';
 import styles from "../css/search_total.module.css";
 import KaokaoMain from "./KaokaoMain.jsx";
+import MobileKakaoMap from "../component/MobileKakaoMap.jsx";
 
 // EPSG:5182 (TM-동부원점) 좌표계 정의
 proj4.defs("EPSG:5182", "+proj=tmerc +lat_0=38 +lon_0=129 +k=1 +x_0=200000 +y_0=600000 +ellps=GRS80 +units=m +no_defs");
@@ -49,12 +50,19 @@ function SearchTotal(props) {
 
     }
     return (
-        <div>
+        <div style={{height:"100%",overflow:"hidden"}}>
             <Space.Compact id={"jh_searchTop"} style={{ width: '100%', padding: '20px' }}>
                 <Input.Search placeholder="버스번호 및 정류소" onSearch={searchTotal} allowClear />
             </Space.Compact>
-
-            <div>
+            {props.isCommonMobile&&
+            <div style={{width:"100%",height:"50vh"}}>
+                <MobileKakaoMap {...props} />
+            </div>
+            }
+            <div className={props.isCommonMobile?"jh_search_result_mobile":""} style={{}}>
+                {props.isCommonMobile&&<div style={{display:"flex",justifyContent:"center",marginBottom:"1rem",alignItems:"center",height:"20px"}}>
+                    <div style={{width:"10%",height:"5px",borderRadius:"3px",backgroundColor:"#dddddd"}}></div>
+                </div>}
                 <List
                     bordered
                     dataSource={props.searchResults}
@@ -97,7 +105,7 @@ function SearchTotal(props) {
                     )}
                 />
             </div>
-            {props.selectedStop && (
+            {props.isCommonMobile ? false : props.selectedStop && (
                 <Card
                     title={`${props.selectedStop.bsNm} 실시간 도착 정보`}
                     style={{ marginTop: "1rem" }}
