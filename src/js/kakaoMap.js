@@ -20,8 +20,10 @@ async function getArrivalInfo(bsId) {
         if (res.status === 200) {
             if (res?.data?.body?.list?.length > 0) {
                 let data = [...res.data.body.list].filter(item=>item.arrState==="도착예정");
+                if(data?.length>0){
                 res.data.body.list.splice(res.data.body.list.findIndex(item=>item.arrState==="도착예정"),1);
                 res.data.body.list.push(...data);
+                }
                 return res.data.body;
             } else {
                 res.message = "조회된 데이터가 없습니다.";
