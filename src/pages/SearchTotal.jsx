@@ -3,6 +3,7 @@ import {Card, Input, List, message, Space, Spin} from "antd";
 import kakaoMap from "../js/kakaoMap.js";
 import proj4 from 'proj4';
 import styles from "../css/search_total.module.css";
+import KaokaoMain from "./KaokaoMain.jsx";
 
 // EPSG:5182 (TM-동부원점) 좌표계 정의
 proj4.defs("EPSG:5182", "+proj=tmerc +lat_0=38 +lon_0=129 +k=1 +x_0=200000 +y_0=600000 +ellps=GRS80 +units=m +no_defs");
@@ -52,6 +53,7 @@ function SearchTotal(props) {
             <Space.Compact id={"jh_searchTop"} style={{ width: '100%', padding: '20px' }}>
                 <Input.Search placeholder="버스번호 및 정류소" onSearch={searchTotal} allowClear />
             </Space.Compact>
+
             <div>
                 <List
                     bordered
