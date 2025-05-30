@@ -12,6 +12,7 @@ import InstallButton from './components/InstallButton.jsx';
 function App() {
 
     const isMobile = useMediaQuery({maxWidth: 900});
+    const isCommonMobile = useMediaQuery({maxWidth: 425});
     const navigator = useNavigate();
 
     return (
@@ -27,10 +28,10 @@ function App() {
                     <InstallButton/>
                 </nav>}
             </header>
-            <main>
-                <Main/>
+            <main className={isCommonMobile?"common_mobile_main":""}>
+                <Main isCommonMobile={isCommonMobile}/>
             </main>
-            <footer>
+            <footer className={isCommonMobile?"none":""}>
                 <div>
 
                 <div>
