@@ -93,7 +93,7 @@ export default function KakaoMapView({
       }}
     >
       <Map
-        center={center}
+        center={center?.lat && center?.lng ? center : { lat: 35.8714, lng: 128.6014 }} // fallback 위치 추가
         ref={mapRef}
         style={{ width: "100%", height: "100%" }}
         level={4}
