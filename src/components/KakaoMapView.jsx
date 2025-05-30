@@ -44,7 +44,9 @@ export default function KakaoMapView({
 
   const handleDrag = (clientY) => {
     const newHeight = window.innerHeight - clientY;
-    setPanelHeight(Math.max(100, Math.min(newHeight, window.innerHeight * 0.9)));
+    setPanelHeight(
+      Math.max(100, Math.min(newHeight, window.innerHeight * 0.9))
+    );
   };
 
   const handleMouseDown = (e) => {
@@ -99,7 +101,8 @@ export default function KakaoMapView({
         <MapView
           position={center}
           onClick={handleClick}
-          style={{ zIndex: "90" }}
+          style={{ zIndex: "90",
+           }}
         />
         {markers.map((marker, idx) => (
           <MapMarker
@@ -107,6 +110,11 @@ export default function KakaoMapView({
             position={{ lat: marker.lat, lng: marker.lng }}
             title={marker.name}
             clickable={true}
+            image={{
+              src: "/stop_marker.png",
+              size: { width: 40, height: 45 },
+              // options: { offset: { x: 25, y: 50 } },
+            }}
           >
             {selectedStop?.bsId === marker.bsId && (
               <div
@@ -203,10 +211,15 @@ export default function KakaoMapView({
                     ) : arrivalMap[item.bsId]?.length > 0 ? (
                       arrivalMap[item.bsId].map((bus, idx) => (
                         <div key={idx} style={{ marginBottom: 10 }}>
-                          <Text strong>🚌 {bus.routeName}</Text><br />
+                          <Text strong>🚌 {bus.routeName}</Text>
+                          <br />
                           <Text>
-                            ⏱ {bus.predictTime1 !== "-" ? `${bus.predictTime1}분` : "정보 없음"}
-                          </Text><br />
+                            ⏱{" "}
+                            {bus.predictTime1 !== "-"
+                              ? `${bus.predictTime1}분`
+                              : "정보 없음"}
+                          </Text>
+                          <br />
                           {bus.locationNo1 !== "-" && (
                             <Text>📍 남은 정류장: {bus.locationNo1}개</Text>
                           )}
