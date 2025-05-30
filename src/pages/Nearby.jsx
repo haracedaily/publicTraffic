@@ -178,6 +178,7 @@ function Nearby() {
           style={{ flex: 1, overflowY: "auto" }}
           styles={{ body: { padding: 8 } }}
         >
+          <div>
           <Spin spinning={loadingStops} tip="정류장을 불러오는 중...">
             {busStops.map((item, index) => (
               <Card
@@ -214,6 +215,7 @@ function Nearby() {
               </Card>
             ))}
           </Spin>
+          </div>
         </Card>
       </div>
 
