@@ -162,41 +162,42 @@ function Nearby() {
         />
       </Card>
 
-      <div className="stops-column card-fixed">
-        <div style={{ textAlign: "center", marginBottom: 12 }}>
-          <EnvironmentOutlined
-            style={{ fontSize: 24, color: "#2d6ae0", marginRight: 8 }}
-          />
-          <Title level={4} style={{ display: "inline-block", margin: 0 }}>
-            주변 정류장
-          </Title>
-          <Text type="secondary" style={{ display: "block", marginTop: 4 }}>
-            현재 위치 근처의 버스 정류장 목록입니다.
-          </Text>
-        </div>
-        <div style={{ position: "relative", flex: 1, overflow: "hidden" }}>
-          <Card
-            style={{ height: "100%", overflowY: "auto" }}
-            styles={{ body: { padding: 8 } }}
-          >
-            {loadingStops && (
-              <div
-                style={{
-                  position: "absolute",
-                  top: "45%",
-                  left: "50%",
-                  transform: "translate(-50%, -50%)",
-                  zIndex: 10,
-                  textAlign: "center",
-                }}
-              >
-                <Spin />
-                <div style={{ marginTop: 8, color: "#666" }}>
-                  정류장을 불러오는 중...
+      {window.innerWidth > 1024 && (
+        <div className="stops-column card-fixed">
+          <div style={{ textAlign: "center", marginBottom: 12 }}>
+            <EnvironmentOutlined
+              style={{ fontSize: 24, color: "#2d6ae0", marginRight: 8 }}
+            />
+            <Title level={4} style={{ display: "inline-block", margin: 0 }}>
+              주변 정류장
+            </Title>
+            <Text type="secondary" style={{ display: "block", marginTop: 4 }}>
+              현재 위치 근처의 버스 정류장 목록입니다.
+            </Text>
+          </div>
+          <div style={{ position: "relative", flex: 1, overflow: "hidden" }}>
+            <Card
+              style={{ height: "100%", overflowY: "auto" }}
+              styles={{ body: { padding: 8 } }}
+            >
+              {loadingStops && (
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "45%",
+                    left: "50%",
+                    transform: "translate(-50%, -50%)",
+                    zIndex: 10,
+                    textAlign: "center",
+                  }}
+                >
+                  <Spin />
+                  <div style={{ marginTop: 8, color: "#666" }}>
+                    정류장을 불러오는 중...
+                  </div>
                 </div>
-              </div>
-            )}
-            {/* <div>
+              )}
+              {/* <div>
               <Spin
                 spinning={loadingStops}
                 tip="정류장을 불러오는 중..."
@@ -209,58 +210,59 @@ function Nearby() {
                 }}
               />
             </div> */}
-            <div style={{ opacity: loadingStops ? 0.2 : 1 }}>
-              {busStops.map((item, index) => (
-                <Card
-                  key={item.arsId}
-                  style={{
-                    margin: "4px 0",
-                    marginBottom: 8,
-                    cursor: "pointer",
-                    minHeight: 70,
-                  }}
-                  styles={{ body: { padding: "8px 12px" } }}
-                  onClick={async () => {
-                    if (selectedStop?.bsId === item.bsId) {
-                      setSelectedStop(null);
-                      return;
-                    }
-
-                    setSelectedStop(item);
-
-                    if (!arrivalMap[item.bsId]) {
-                      setLoadingArrivals(true);
-                      const result = await fetchArrivalInfo(item.bsId);
-                      setArrivalMap((prev) => ({
-                        ...prev,
-                        [item.bsId]: result,
-                      }));
-                      setLoadingArrivals(false);
-                    }
-                  }}
-                >
-                  <div
+              <div style={{ opacity: loadingStops ? 0.2 : 1 }}>
+                {busStops.map((item, index) => (
+                  <Card
+                    key={item.arsId}
                     style={{
-                      display: "flex",
-                      justifyContent: "space-between",
+                      margin: "4px 0",
+                      marginBottom: 8,
+                      cursor: "pointer",
+                      minHeight: 70,
+                    }}
+                    styles={{ body: { padding: "8px 12px" } }}
+                    onClick={async () => {
+                      if (selectedStop?.arsId === item.arsId) {
+                        setSelectedStop(null);
+                        return;
+                      }
+
+                      setSelectedStop(item);
+
+                      if (!arrivalMap[item.arsId]) {
+                        setLoadingArrivals(true);
+                        const result = await fetchArrivalInfo(item.arsId);
+                        setArrivalMap((prev) => ({
+                          ...prev,
+                          [item.arsId]: result,
+                        }));
+                        setLoadingArrivals(false);
+                      }
                     }}
                   >
-                    <Text strong>
-                      {index + 1}. {item.name}
-                    </Text>
-                    <div>
-                      <Text>{(item.distance / 1000).toFixed(1)} km</Text>
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                      }}
+                    >
+                      <Text strong>
+                        {index + 1}. {item.name}
+                      </Text>
+                      <div>
+                        <Text>{(item.distance / 1000).toFixed(1)} km</Text>
+                      </div>
                     </div>
-                  </div>
-                  <div style={{ color: "#888", fontSize: "0.8rem" }}>
-                    정류장 ID: {item.arsId}
-                  </div>
-                </Card>
-              ))}
-            </div>
-          </Card>
+                    <div style={{ color: "#888", fontSize: "0.8rem" }}>
+                      정류장 ID: {item.arsId}
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </Card>
+          </div>
         </div>
-      </div>
+      )}
 
       {selectedStop && (
         <div className="arrival-column card-fixed">
