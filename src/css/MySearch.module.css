@@ -1,54 +1,58 @@
 .container {
     padding: 1rem;
     box-sizing: border-box;
-    /*max-width: 57.5rem;*/
     width: 100%;
-    /*margin: 0 auto;*/
 }
 
 .title {
     margin-bottom: 1rem;
-    /*margin-left: 1rem;*/
 }
 
 .searchWrapper {
     display: flex;
     gap: 8px;
     margin-bottom: 1rem;
-    /*background-color: orange;*/
-    width: 42rem;
-
+    width: 39.5rem;
+    /*max-width: 600px;*/
+    /*background-color: pink;*/
+    justify-content: space-between;
 }
 
 .searchInput {
-    flex: 1;
-    max-width: 600px;
+    /*flex: 1;*/
+    /*max-width: 100%;*/
+    align-items: center;
+    /*background-color: purple;*/
+    height: 40px;
+    width: 80%;
 }
 
 .resetButton {
     align-self: center;
+    /*background-color: gray;*/
 }
 
 .resultsWrapper {
-    min-height: 300px;
+    /*min-height: 200px;*/
     max-height: 400px;
     overflow-y: auto;
-    /*background-color: gray;*/
-    width: 42rem;
+    /*width: 100%;*/
+    /*max-width: 600px;*/
+    width: 39.5rem;
+    /*background-color: #1890ff;*/
 }
 
 .loading {
     text-align: center;
     padding: 1rem;
-    min-height: 300px;
+    min-height: 200px;
     display: flex;
     align-items: center;
     justify-content: center;
-
 }
 
 .noResults {
-    min-height: 300px;
+    min-height: 200px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -69,24 +73,35 @@
     width: 100%;
     min-height: 80px;
     display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+}
+
+.textContent {
+    flex: 1;
+    display: flex;
     flex-direction: column;
     justify-content: space-between;
+}
+
+.actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .stopName,
 .stopId,
 .routeList {
-    /*white-space: nowrap;*/
     overflow: hidden;
     text-overflow: ellipsis;
     padding: 2px 0;
-    /*background-color: yellow;*/
 }
 
 .favoriteIcon {
     cursor: pointer;
-    /*background-color: purple;*/
-
 }
 
 .buttonWrapper {
@@ -96,12 +111,166 @@
     background-color: pink;
 }
 
-/*.toggleButton {*/
-/*    width: 150px;*/
-/*}*/
+/* AutoComplete 드롭다운 스타일 */
+.ant-select-dropdown {
+    z-index: 1000;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.ant-select-item-option-content {
+    padding: 8px;
+}
+
+.ant-select-item-option-content div {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
 
 .mapButton {
     margin-left: 8px;
     border: none;
     box-shadow: none;
+}
+
+/* 반응형 스타일 */
+@media (max-width: 1165px) {
+    /* 태블릿 */
+    .container {
+        padding: 0.5rem;
+    }
+
+    .searchWrapper {
+        max-width: 100%;
+    }
+    .searchInput {
+        align-items: center;
+    }
+
+    .resultsWrapper {
+        max-width: 100%;
+        max-height: 300px;
+    }
+
+    .list {
+        max-height: 250px;
+    }
+
+    .listItemContent {
+        min-height: 70px;
+    }
+}
+
+@media (max-width: 768px) {
+    /* 모바일 */
+    .container {
+        padding: 0.5rem;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .title {
+        font-size: 1.2rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .searchWrapper {
+        flex-direction: row;
+        gap: 4px;
+        max-width: 100%;
+        padding: 0 0.25rem;
+    }
+
+    .searchInput {
+        font-size: 0.9rem;
+        align-items: center;
+    }
+
+    .resetButton {
+        padding: 4px;
+    }
+
+    .resultsWrapper {
+        min-height: 150px;
+        max-height: 200px;
+        max-width: 100%;
+        padding: 0 0.25rem;
+        overflow-y: hidden;
+    }
+
+    .loading,
+    .noResults {
+        min-height: 150px;
+    }
+
+    .list {
+        max-height: 200px;
+    }
+
+    .listItemContent {
+        min-height: 60px;
+        flex-direction: row;
+        gap: 4px;
+    }
+
+    .stopName,
+    .stopId,
+    .routeList {
+        font-size: 0.85rem;
+    }
+
+    .ant-select-dropdown {
+        max-height: 200px;
+    }
+
+    .actions {
+        gap: 4px;
+    }
+}
+
+@media (max-width: 425px) {
+    /* 작은 모바일 */
+    .container {
+        margin-top: 1rem;
+        padding: 0.25rem;
+    }
+
+    .searchWrapper {
+        gap: 2px;
+        padding: 0 0.1rem;
+    }
+
+    .searchInput {
+        line-height: 40px;
+        font-size: 0.85rem;
+        align-items: center;
+    }
+
+    .resetButton {
+        padding: 2px;
+    }
+
+    .resultsWrapper {
+        max-height: 150px;
+        padding: 0 0.1rem;
+    }
+
+    .list {
+        max-height: 150px;
+    }
+
+    .stopName,
+    .stopId,
+    .routeList {
+        font-size: 0.8rem;
+    }
+
+    .ant-select-dropdown {
+        max-height: 150px;
+    }
+
+    .actions {
+        gap: 2px;
+    }
 }
