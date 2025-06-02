@@ -365,12 +365,12 @@ function Nearby() {
                             {getStateText(bus.arrState)}
                           </Text>
                         </div>
-                        {bus.vhcNo2 && (
+                        {/* {bus.vhcNo2 && (
                           <>
                             <br />
                             <Text>🆔 차량번호: {bus.vhcNo2}</Text>
                           </>
-                        )}
+                        )} */}
                       </Card>
                     </List.Item>
                   );
