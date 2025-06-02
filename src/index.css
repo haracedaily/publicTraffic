@@ -4,6 +4,11 @@
   font-weight: 400;
   font-style: normal;
 }
+@font-face {
+  font-family: 'Noto Sans KR';
+  src: url('https://fonts.googleapis.com/earlyaccess/notosanskr.css');
+  font-style: normal;
+}
 label.navSideRouteBtn{
   background-color: #D7E3DD;
 }
@@ -107,4 +112,10 @@ label.navSideRouteBtn{
 
 .none{
   display:none;
+}
+
+
+.jh_app_footer{
+  font-family: 'Noto Sans KR';
+  font-weight: 0;
 }
