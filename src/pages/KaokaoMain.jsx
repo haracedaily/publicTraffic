@@ -25,7 +25,6 @@ function KaokaoMain({isCommonMobile}) {
     const [openedRoute,setOpenedRoute] = useState(false);
     const [isVisible, setIsVisible] = useState(true);
     const sideRef = useRef(null);
-    const [selectedPathLine,setSelectedPathLine]=useState(null);
     const [linkGeoJson,setLinkGeoJson] = useState(null);
     const [variableLink,setVairableLink] = useState(null);
 
@@ -66,12 +65,7 @@ function KaokaoMain({isCommonMobile}) {
 
             console.log("확인 : ",res.data.body.items);*/
         setSelectedRouteList(res.data.body.items);
-        setSelectedPathLine(res.data.body.items.map(el=>{
-            return {
-            lat: el.yPos,
-            lng: el.xPos
-            }
-        }));
+
         });
         kakaoMap.getRouteLocation(item.routeId).then(res=>{
             // console.log("노선위치 : ",res);
@@ -113,7 +107,6 @@ const drawLine = (data) => {
         })
     // console.log("유효 리턴 링크값",variableList);
         setVairableLink(variableList);
-
 };
     return (
         <>
@@ -134,7 +127,22 @@ const drawLine = (data) => {
                 selectedRoutePosition={selectedRoutePosition}
                 sideRef={sideRef}
                 isCommonMobile={isCommonMobile}
+
+                mapCenter={mapCenter}
+                markerClicked={markerClicked}
+                hoveredStop={hoveredStop}
+                setHoveredStop={setHoveredStop}
+                setSelectedRouteList={setSelectedRouteList}
+                setSelectedRoutePosition={setSelectedRoutePosition}
+                linkGeoJson={linkGeoJson}
+                variableLink={variableLink}
+                setVairableLink={setVairableLink}
+                myPosition={myPosition}
+                setMyPosition={setMyPosition}
+                mapLevel={mapLevel}
+                setMapLevel={setMapLevel}
             />
+
             {isCommonMobile ||
             <article className={styles.main}>
             <Map center={mapCenter} level={mapLevel}
@@ -152,7 +160,7 @@ const drawLine = (data) => {
                     averageCenter={true} // 클러스터에 포함된 마커들의 평균 위치를 클러스터 마커 위치로 설정
                     minLevel={10} // 클러스터 할 최소 지도 레벨
                 >
-                    {openedRoute && selectedRoute && selectedRouteList && selectedPathLine && variableLink && variableLink.map(item=>{
+                    {openedRoute && selectedRoute && selectedRouteList && variableLink && variableLink.map(item=>{
                         if(item)
                         return (
                             <Polyline
