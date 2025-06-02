@@ -7,7 +7,10 @@ import { Spin, Typography } from "antd";
 const { Text } = Typography;
 
 export default function KakaoMapView({
-  center,
+  // center,
+  mapCenter, //지도 중심
+  myLocation, //내 위치
+  onCenterChanged,
   markers = [],
   busStops = [],
   selectedStop,
@@ -35,9 +38,18 @@ export default function KakaoMapView({
   }, []);
 
   const handleClick = () => {
-    if (mapRef.current && window.kakao?.maps) {
-      const kakaoLatLng = new window.kakao.maps.LatLng(center.lat, center.lng);
+    if (
+      mapRef.current &&
+      window.kakao?.maps &&
+      myLocation?.lat &&
+      myLocation?.lng
+    ) {
+      const kakaoLatLng = new window.kakao.maps.LatLng(
+        myLocation.lat,
+        myLocation.lng
+      );
       mapRef.current.setCenter(kakaoLatLng);
+      onCenterChanged(myLocation);
     }
     onRelocate?.();
   };
@@ -82,6 +94,18 @@ export default function KakaoMapView({
     };
   }, [isDragging]);
 
+  useEffect(() => {
+    if (selectedStop?.bsId && arrivalMap[selectedStop.bsId]) {
+      setArrivalData(arrivalMap[selectedStop.bsId]);
+    }
+  }, [selectedStop?.bsId, arrivalMap]);
+
+  useEffect(() => {
+    if (busStops.length > 0) {
+      setSelectedStop(null); // 초기화
+    }
+  }, [busStops]);
+
   return (
     <div
       ref={containerRef}
@@ -94,14 +118,21 @@ export default function KakaoMapView({
     >
       <Map
         center={
-          center?.lat && center?.lng ? center : { lat: 35.8714, lng: 128.6014 }
+          mapCenter?.lat && mapCenter?.lng
+            ? mapCenter
+            : { lat: 35.8714, lng: 128.6014 }
         } // fallback 위치 추가
+        // center={mapCenter}
         ref={mapRef}
         style={{ width: "100%", height: "100%" }}
         level={4}
+        onDragEnd={(map) => {
+          const latlng = map.getCenter();
+          onCenterChanged({ lat: latlng.getLat(), lng: latlng.getLng() });
+        }}
       >
         <MapView
-          position={center}
+          position={myLocation}
           onClick={handleClick}
           style={{
             zIndex: "90",
@@ -136,6 +167,16 @@ export default function KakaoMapView({
             )}
           </MapMarker>
         ))}
+        {myLocation?.lat && (
+          <MapMarker
+            position={myLocation}
+            image={{
+              src: "/location.png",
+              size: { width: 50, height: 50 },
+            }}
+            zIndex={100}
+          />
+        )}
       </Map>
 
       {isMobile && (
@@ -184,7 +225,7 @@ export default function KakaoMapView({
                   setLoadingArrivals(true);
                   const arrivals = await fetchArrivalInfo(item.arsId);
                   console.log("도착 정보 응답 길이:", arrivals.length);
-                  setArrivalData(arrivals); 
+                  setArrivalData(arrivals);
                   setArrivalMap((prev) => ({
                     ...prev,
                     [item.arsId]: arrivals,

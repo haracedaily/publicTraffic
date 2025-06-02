@@ -24,7 +24,8 @@ function convertNGISToKakao(x, y) {
 const { Title, Text } = Typography;
 
 function Nearby() {
-  const [location, setLocation] = useState({ lat: null, lng: null });
+  const [location, setLocation] = useState({ lat: null, lng: null }); // 내 위치
+  const [mapCenter, setMapCenter] = useState(null); // 지도 중심 위치
   const [busStops, setBusStops] = useState([]);
   const [selectedStop, setSelectedStop] = useState(null);
   const [arrivalData, setArrivalData] = useState([]);
@@ -35,16 +36,20 @@ function Nearby() {
 
   const [arrivalMap, setArrivalMap] = useState({});
 
-  // const [isMobile, setIsMobile] = useState(window.innerWidth <= 1024);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 1024);
 
-  // useEffect(() => {
-  //   const handleResize = () => {
-  //     setIsMobile(window.innerWidth <= 1024);
-  //   };
+  const handleMapCenterChanged = (newCenter) => {
+    setMapCenter(newCenter); // 지도 중심 바뀔 때마다 위치 갱신
+  };
 
-  //   window.addEventListener("resize", handleResize);
-  //   return () => window.removeEventListener("resize", handleResize);
-  // }, []);
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 1024);
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   useEffect(() => {
     navigator.geolocation.watchPosition(
@@ -66,12 +71,21 @@ function Nearby() {
   }, []);
 
   useEffect(() => {
-    if (!location?.lat || !location?.lng) return;
+    navigator.geolocation.getCurrentPosition((pos) => {
+      const lat = pos.coords.latitude;
+      const lng = pos.coords.longitude;
+      setLocation({ lat, lng });  // 내 위치만 설정
+      setMapCenter({ lat, lng }); // 지도도 처음엔 내 위치로 시작
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!mapCenter?.lat || !mapCenter?.lng) return;
 
     const fetchNearbyStops = async () => {
       setLoadingStops(true);
       try {
-        const url = `https://apis.data.go.kr/1613000/BusSttnInfoInqireService/getCrdntPrxmtSttnList?serviceKey=l7L9HOYK5mFEJAehYbro5q9qXaJofTBB7nv0fYzNNIqJE%2FYGs2d7Gn6%2FDb6qrv9D1F9v5iEm%2BpXpQ%2FCINV59DA%3D%3D&gpsLati=${location.lat}&gpsLong=${location.lng}&radius=1000&_type=json`;
+        const url = `https://apis.data.go.kr/1613000/BusSttnInfoInqireService/getCrdntPrxmtSttnList?serviceKey=l7L9HOYK5mFEJAehYbro5q9qXaJofTBB7nv0fYzNNIqJE%2FYGs2d7Gn6%2FDb6qrv9D1F9v5iEm%2BpXpQ%2FCINV59DA%3D%3D&gpsLati=${mapCenter.lat}&gpsLong=${mapCenter.lng}&radius=1000&_type=json`;
         const res = await fetch(url);
         const json = await res.json();
         let items = json.response?.body?.items?.item ?? [];
@@ -120,18 +134,33 @@ function Nearby() {
     };
 
     fetchNearbyStops();
-  }, [location?.lat, location?.lng]);
+  }, [mapCenter?.lat, mapCenter?.lng]);
 
   useEffect(() => {
-    if (!selectedStop) return;
-    const fetchData = async () => {
-      setLoadingArrivals(true);
-      const result = await fetchArrivalInfo(selectedStop.bsId);
-      setArrivalData(result);
-      setLoadingArrivals(false);
-    };
-    fetchData();
+    if (!selectedStop?.bsId) return;
+
+    if (!arrivalMap[selectedStop.bsId]) {
+      const fetchData = async () => {
+        setLoadingArrivals(true);
+        const result = await fetchArrivalInfo(selectedStop.bsId);
+        setArrivalMap((prev) => ({
+          ...prev,
+          [selectedStop.bsId]: result,
+        }));
+        setArrivalData(result);
+        setLoadingArrivals(false);
+      };
+      fetchData();
+    } else {
+      setArrivalData(arrivalMap[selectedStop.bsId]);
+    }
   }, [selectedStop]);
+
+  useEffect(() => {
+    if (selectedStop?.bsId && arrivalMap[selectedStop.bsId]) {
+      setArrivalData(arrivalMap[selectedStop.bsId]);
+    }
+  }, [isMobile, selectedStop, arrivalMap]);
 
   return (
     <div
@@ -144,13 +173,16 @@ function Nearby() {
         styles={{ body: { height: "100%" } }}
       >
         <KakaoMapView
-          center={{ lat: location.lat, lng: location.lng }}
+          // center={{ lat: location.lat, lng: location.lng }}
+          mapCenter={mapCenter}
+          myLocation={location}
           markers={busStops}
           selectedStop={selectedStop}
           setSelectedStop={setSelectedStop}
           setArrivalMap={setArrivalMap}
           loadingArrivals={loadingArrivals}
           setLoadingArrivals={setLoadingArrivals}
+          onCenterChanged={handleMapCenterChanged}
           onRelocate={() => {
             navigator.geolocation.getCurrentPosition((pos) => {
               setLocation({
@@ -162,7 +194,7 @@ function Nearby() {
         />
       </Card>
 
-      {window.innerWidth > 1024 && (
+      {!isMobile && (
         <div className="stops-column card-fixed">
           <div style={{ textAlign: "center", marginBottom: 12 }}>
             <EnvironmentOutlined
@@ -222,19 +254,19 @@ function Nearby() {
                     }}
                     styles={{ body: { padding: "8px 12px" } }}
                     onClick={async () => {
-                      if (selectedStop?.arsId === item.arsId) {
+                      if (selectedStop?.bsId === item.bsId) {
                         setSelectedStop(null);
                         return;
                       }
 
                       setSelectedStop(item);
 
-                      if (!arrivalMap[item.arsId]) {
+                      if (!arrivalMap[item.bsId]) {
                         setLoadingArrivals(true);
-                        const result = await fetchArrivalInfo(item.arsId);
+                        const result = await fetchArrivalInfo(item.bsId);
                         setArrivalMap((prev) => ({
                           ...prev,
-                          [item.arsId]: result,
+                          [item.bsId]: result,
                         }));
                         setLoadingArrivals(false);
                       }
