@@ -93,7 +93,9 @@ export default function KakaoMapView({
       }}
     >
       <Map
-        center={center}
+        center={
+          center?.lat && center?.lng ? center : { lat: 35.8714, lng: 128.6014 }
+        } // fallback 위치 추가
         ref={mapRef}
         style={{ width: "100%", height: "100%" }}
         level={4}
@@ -101,8 +103,9 @@ export default function KakaoMapView({
         <MapView
           position={center}
           onClick={handleClick}
-          style={{ zIndex: "90",
-           }}
+          style={{
+            zIndex: "90",
+          }}
         />
         {markers.map((marker, idx) => (
           <MapMarker
@@ -137,6 +140,7 @@ export default function KakaoMapView({
 
       {isMobile && (
         <div
+          ref={containerRef}
           style={{
             position: "absolute",
             bottom: 0,
@@ -166,7 +170,7 @@ export default function KakaoMapView({
             }}
           />
 
-          {busStops.map((item, index) => {
+          {markers.map((item, index) => {
             const isSelected = selectedStop?.arsId === item.arsId;
             return (
               <div
@@ -178,9 +182,13 @@ export default function KakaoMapView({
                   }
                   setSelectedStop(item);
                   setLoadingArrivals(true);
-                  const result = await fetchArrivalInfo(item.bsId);
-                  setArrivalData(result);
-                  setArrivalMap((prev) => ({ ...prev, [item.bsId]: result }));
+                  const arrivals = await fetchArrivalInfo(item.arsId);
+                  console.log("도착 정보 응답 길이:", arrivals.length);
+                  setArrivalData(arrivals); 
+                  setArrivalMap((prev) => ({
+                    ...prev,
+                    [item.arsId]: arrivals,
+                  }));
                   setLoadingArrivals(false);
                 }}
                 style={{
@@ -208,8 +216,8 @@ export default function KakaoMapView({
                   >
                     {loadingArrivals ? (
                       <Spin tip="도착 정보를 불러오는 중..." />
-                    ) : arrivalMap[item.bsId]?.length > 0 ? (
-                      arrivalMap[item.bsId].map((bus, idx) => (
+                    ) : arrivalMap[item.arsId]?.length > 0 ? (
+                      arrivalMap[item.arsId].map((bus, idx) => (
                         <div key={idx} style={{ marginBottom: 10 }}>
                           <Text strong>🚌 {bus.routeName}</Text>
                           <br />

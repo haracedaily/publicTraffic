@@ -44,6 +44,9 @@ label.navSideRouteBtn{
     min-height:400px;
     display:flex;
     overflow-y:auto;
+    &.common_mobile_main{
+      height:90vh;
+    }
     &>nav>div>label.ant-radio-button-wrapper-checked{
       background:white;
       border-color:transparent;
@@ -100,9 +103,7 @@ label.navSideRouteBtn{
   }
 }
 
-main.common_mobile_main{
-  height:90vh;
-}
+
 
 .none{
   display:none;

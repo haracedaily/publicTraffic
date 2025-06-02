@@ -12,7 +12,7 @@ proj4.defs("EPSG:5182", "+proj=tmerc +lat_0=38 +lon_0=129 +k=1 +x_0=200000 +y_0=
 // EPSG:4326 (WGS84) 좌표계 정의
 proj4.defs("EPSG:4326", "+proj=longlat +datum=WGS84 +no_defs");
 
-function KaokaoMain(props) {
+function KaokaoMain({isCommonMobile}) {
     const [searchResults, setSearchResults] = useState([]);
     const [arrivalInfo, setArrivalInfo] = useState(null);
     const [mapCenter, setMapCenter] = useState({ lat: 35.8693, lng: 128.6062 });
@@ -25,7 +25,6 @@ function KaokaoMain(props) {
     const [openedRoute,setOpenedRoute] = useState(false);
     const [isVisible, setIsVisible] = useState(true);
     const sideRef = useRef(null);
-    const [selectedPathLine,setSelectedPathLine]=useState(null);
     const [linkGeoJson,setLinkGeoJson] = useState(null);
     const [variableLink,setVairableLink] = useState(null);
 
@@ -66,12 +65,7 @@ function KaokaoMain(props) {
 
             console.log("확인 : ",res.data.body.items);*/
         setSelectedRouteList(res.data.body.items);
-        setSelectedPathLine(res.data.body.items.map(el=>{
-            return {
-            lat: el.yPos,
-            lng: el.xPos
-            }
-        }));
+
         });
         kakaoMap.getRouteLocation(item.routeId).then(res=>{
             // console.log("노선위치 : ",res);
@@ -113,7 +107,6 @@ const drawLine = (data) => {
         })
     // console.log("유효 리턴 링크값",variableList);
         setVairableLink(variableList);
-
 };
     return (
         <>
@@ -133,7 +126,24 @@ const drawLine = (data) => {
                 selectedRouteList={selectedRouteList}
                 selectedRoutePosition={selectedRoutePosition}
                 sideRef={sideRef}
+                isCommonMobile={isCommonMobile}
+
+                mapCenter={mapCenter}
+                markerClicked={markerClicked}
+                hoveredStop={hoveredStop}
+                setHoveredStop={setHoveredStop}
+                setSelectedRouteList={setSelectedRouteList}
+                setSelectedRoutePosition={setSelectedRoutePosition}
+                linkGeoJson={linkGeoJson}
+                variableLink={variableLink}
+                setVairableLink={setVairableLink}
+                myPosition={myPosition}
+                setMyPosition={setMyPosition}
+                mapLevel={mapLevel}
+                setMapLevel={setMapLevel}
             />
+
+            {isCommonMobile ||
             <article className={styles.main}>
             <Map center={mapCenter} level={mapLevel}
                  style={{width:'100%',height:'100%'}}
@@ -150,7 +160,7 @@ const drawLine = (data) => {
                     averageCenter={true} // 클러스터에 포함된 마커들의 평균 위치를 클러스터 마커 위치로 설정
                     minLevel={10} // 클러스터 할 최소 지도 레벨
                 >
-                    {openedRoute && selectedRoute && selectedRouteList && selectedPathLine && variableLink && variableLink.map(item=>{
+                    {openedRoute && selectedRoute && selectedRouteList && variableLink && variableLink.map(item=>{
                         if(item)
                         return (
                             <Polyline
@@ -308,6 +318,7 @@ const drawLine = (data) => {
                 )}
             </Map>
             </article>
+            }
         </>
     );
 }
