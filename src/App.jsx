@@ -31,7 +31,7 @@ function App() {
             <main className={isCommonMobile?"common_mobile_main":""}>
                 <Main isCommonMobile={isCommonMobile}/>
             </main>
-            <footer className={isCommonMobile?"none":""}>
+            <footer className={`${isCommonMobile?"none":""} jh_app_footer`}>
                 <div>
 
                 <div>
