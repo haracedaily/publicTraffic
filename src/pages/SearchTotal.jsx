@@ -96,6 +96,8 @@ function SearchTotal(props) {
                         <List.Item
                             onClick={() => {
                                 props.setMarkerClicked(false);
+                                props.setSelectedRoute(null);
+                                props.setSelectedRouteList(null);
                                 fetchArrivalInfo(item.bsId);
                                 let {lat,lng} = convertNGISToKakao(item.ngisXPos, item.ngisYPos);
                                 item.lat = lat;
@@ -170,12 +172,12 @@ function SearchTotal(props) {
                                                         `${item.arrState} 후 도착`}
                                             </div>
                                         </div>
-                                        <div style={{
+                                        {/*<div style={{
                                             color: "#666",
                                             fontSize: "0.9em"
                                         }}>
                                             버스 번호: {item.vhcNo2}
-                                        </div>
+                                        </div>*/}
                                         {props?.selectedRoute?.routeId === item.routeId && props.selectedRouteList && (
                                             <div style={{display:"flex",width:"100%",justifyContent:"end"}}>
                                             <img className={props.openedRoute?styles.jh_side_open:styles.jh_side_close} width={15} src={"/reverse_triangle.svg"} alt={"경로 닫기"}
