@@ -1,5 +1,5 @@
-import React, {useEffect} from 'react';
-import {Card, Input, List, message, Space, Spin} from "antd";
+import React, {useEffect, useRef, useState} from 'react';
+import {Button, Card, Input, List, message, Space, Spin} from "antd";
 import kakaoMap from "../js/kakaoMap.js";
 import proj4 from 'proj4';
 import styles from "../css/search_total.module.css";
@@ -13,7 +13,10 @@ proj4.defs("EPSG:5182", "+proj=tmerc +lat_0=38 +lon_0=129 +k=1 +x_0=200000 +y_0=
 proj4.defs("EPSG:4326", "+proj=longlat +datum=WGS84 +no_defs");
 ///[^ㄱ-ㅎ가-힣a-zA-Z0-9]/g
 function SearchTotal(props) {
+    let searchHeight = useRef(0);
+    const [calcHeight,setCalcHeight] = useState("0px");
     useEffect(() => {
+        if(!props.isCommonMobile)
         document.querySelector(".jh_sideSelectedStop")?.scrollIntoView({behavior:"smooth",block:"center",inline:"center"});
     }, [props.selectedStop,props.selectedRouteList]);
     const fetchArrivalInfo = (bsId) => {
@@ -34,6 +37,9 @@ function SearchTotal(props) {
         let lng = longitude;
         return { lat, lng };
     };
+    const moveSelectedStop = () => {
+        document.querySelector(".jh_sideSelectedStop")?.scrollIntoView({behavior:"smooth",block:"center",inline:"center"});
+    }
     const searchTotal = async (value) =>{
         if(value){
             let res = await kakaoMap.getSearchTotal(value);
@@ -49,8 +55,25 @@ function SearchTotal(props) {
         }
 
     }
+    const draggableSide = (e) => {
+        if(calcHeight!=="0px")searchHeight.current = parseInt(calcHeight.replace("px",""))+e.screenY;
+        else
+        searchHeight.current=e.screenY;
+        window.addEventListener("mousemove", searchHeightHandler)
+        window.addEventListener("mouseup", searchHeightEnd);
+        e.preventDefault();
+        e.stopPropagation();
+    }
+    const searchHeightHandler = (e) => {
+        // console.log("마우스 이벤트",e,searchHeight.current);
+        setCalcHeight((searchHeight.current-e.screenY)+"px");
+    }
+    const searchHeightEnd = () =>{
+        window.removeEventListener("mousemove", searchHeightHandler);
+        window.removeEventListener("mouseup", searchHeightEnd);
+    }
     return (
-        <div style={{height:"100%",overflow:"hidden"}}>
+        <div style={{height:"100%", position:"relative"}}>
             <Space.Compact id={"jh_searchTop"} style={{ width: '100%', padding: '20px' }}>
                 <Input.Search placeholder="버스번호 및 정류소" onSearch={searchTotal} allowClear />
             </Space.Compact>
@@ -59,10 +82,13 @@ function SearchTotal(props) {
                 <MobileKakaoMap {...props} />
             </div>
             }
-            <div className={props.isCommonMobile?"jh_search_result_mobile":""} style={{}}>
-                {props.isCommonMobile&&<div style={{display:"flex",justifyContent:"center",marginBottom:"1rem",alignItems:"center",height:"20px"}}>
+            <div className={props.isCommonMobile?"jh_search_result_mobile":""} style={{height:`${props.isCommonMobile?"calc(100% - 50vh - 72px + "+calcHeight+")":"auto"}`}} data-height={calcHeight} onMouseDown={draggableSide}>
+                {props.isCommonMobile&&<div style={{display:"flex",justifyContent:"center",marginBottom:"1rem",alignItems:"center",height:"20px",position:"sticky",top:0,zIndex:30000,backgroundColor:"white"}}>
                     <div style={{width:"10%",height:"5px",borderRadius:"3px",backgroundColor:"#dddddd"}}></div>
-                </div>}
+                </div>
+                }
+                <div>
+
                 <List
                     bordered
                     dataSource={props.searchResults}
@@ -70,6 +96,8 @@ function SearchTotal(props) {
                         <List.Item
                             onClick={() => {
                                 props.setMarkerClicked(false);
+                                props.setSelectedRoute(null);
+                                props.setSelectedRouteList(null);
                                 fetchArrivalInfo(item.bsId);
                                 let {lat,lng} = convertNGISToKakao(item.ngisXPos, item.ngisYPos);
                                 item.lat = lat;
@@ -105,7 +133,13 @@ function SearchTotal(props) {
                     )}
                 />
             </div>
-            {props.isCommonMobile ? false : props.selectedStop && (
+            {props.isCommonMobile && props.selectedStop && (
+                <div style={{marginTop:"1rem"}}>
+                    <Button onClick={moveSelectedStop}>선택정류소</Button>
+                </div>
+
+            )}
+            {props.selectedStop && (
                 <Card
                     title={`${props.selectedStop.bsNm} 실시간 도착 정보`}
                     style={{ marginTop: "1rem" }}
@@ -138,12 +172,12 @@ function SearchTotal(props) {
                                                         `${item.arrState} 후 도착`}
                                             </div>
                                         </div>
-                                        <div style={{
+                                        {/*<div style={{
                                             color: "#666",
                                             fontSize: "0.9em"
                                         }}>
                                             버스 번호: {item.vhcNo2}
-                                        </div>
+                                        </div>*/}
                                         {props?.selectedRoute?.routeId === item.routeId && props.selectedRouteList && (
                                             <div style={{display:"flex",width:"100%",justifyContent:"end"}}>
                                             <img className={props.openedRoute?styles.jh_side_open:styles.jh_side_close} width={15} src={"/reverse_triangle.svg"} alt={"경로 닫기"}
@@ -187,7 +221,13 @@ function SearchTotal(props) {
                                                 </Card>
                                             )}}
                                         >
-                                            <img width={30} src={"/dir.png"} alt={"위로가기버튼"} className={styles.sticky_side_btn} onClick={()=>{document.querySelector(`#jh_searchTop`).scrollIntoView({behavior:"smooth",block:"start",inline:"nearest"});}}/>
+                                            <img width={30} src={"/dir.png"} alt={"위로가기버튼"} className={styles.sticky_side_btn} onClick={()=>{
+                                                if(props.isCommonMobile)
+                                                    document.querySelector(".jh_search_result_mobile").scrollTo({behavior:"smooth",top:0});
+                                                else
+                                                document.querySelector(`#jh_searchTop`).scrollIntoView({behavior:"smooth",block:"start",inline:"nearest"});
+
+                                            }}/>
                                         </List>
                                     )}
                                     </div>
@@ -199,6 +239,7 @@ function SearchTotal(props) {
                     )}
                 </Card>
             )}
+        </div>
         </div>
     );
 }
