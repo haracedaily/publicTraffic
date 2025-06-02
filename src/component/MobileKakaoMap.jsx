@@ -2,7 +2,6 @@ import React from 'react';
 import {CustomOverlayMap, Map, MapMarker, MarkerClusterer, Polyline} from "react-kakao-maps-sdk";
 import kakaoMap from "../js/kakaoMap.js";
 import styles from "../css/kakao_main.module.css";
-import MapView from "../components/MapView.jsx";
 import proj4 from "proj4";
 
 function MobileKakaoMap(props) {
@@ -57,8 +56,9 @@ function MobileKakaoMap(props) {
         // console.log("유효 리턴 링크값",variableList);
         props.setVairableLink(variableList);
     };
+
     return (
-        <Map center={props.mapCenter} level={props.mapLevel}
+        <Map id={"jh_mobile_kakao_map"} center={props.mapCenter} level={props.mapLevel}
              style={{width:'100%',height:'100%'}}
              ref={props.mapRef}
             /*onZoomChanged={(data)=>{
@@ -175,7 +175,7 @@ function MobileKakaoMap(props) {
                             {props.arrivalInfo?.list?.length>0?props.arrivalInfo.list.map(item=>(
 
                                 <div
-                                    className={item.routeNo===props.selectedRoute?.routeNo&&styles.selectedBus}
+                                    className={item.routeNo===props.selectedRoute?.routeNo?styles.selectedBus:""}
                                     style={{
                                         borderBottom: "1px solid #eee",
                                         display: "flex",
@@ -214,21 +214,6 @@ function MobileKakaoMap(props) {
                     </CustomOverlayMap>
                 )}
             </MarkerClusterer>
-            {/*{props.myPosition && (
-                <MapView
-                    position={props.myPosition}
-                    onClick={() => {
-                        console.log("내 위치 클릭");
-                        if (props.mapRef.current && window.kakao?.maps) {
-                            const kakaoLatLng = new window.kakao.maps.LatLng(
-                                props.myPosition.lat,
-                                props.myPosition.lng
-                            );
-                            props.mapRef.current.setCenter(kakaoLatLng);
-                        }
-                    }}
-                />
-            )}*/}
         </Map>
     );
 }
