@@ -31,6 +31,11 @@
     overflow: hidden;
 }
 
+.ant-list-item {
+  border-bottom: none !important;
+  padding: 4px 0 !important;
+}
+
 /* .mobile-arrival-panel {
   position: fixed;
   bottom: 0;
