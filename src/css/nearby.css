@@ -32,8 +32,13 @@
 }
 
 .ant-list-item {
-  border-bottom: none !important;
-  padding: 4px 0 !important;
+  /* border-bottom: none !important; */
+  /* padding: 4px 0 !important; */
+  display: flex;
+  justify-content: space-between;
+  margin: 2px 5px;
+  font-size: 20px;
+  /* border-bottom: 1px solid black; */
 }
 
 /* .mobile-arrival-panel {
