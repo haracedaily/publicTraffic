@@ -7,7 +7,10 @@ import { Spin, Typography } from "antd";
 const { Text } = Typography;
 
 export default function KakaoMapView({
-  center,
+  // center,
+  mapCenter, //지도 중심
+  myLocation, //내 위치
+  onCenterChanged,
   markers = [],
   busStops = [],
   selectedStop,
@@ -18,6 +21,7 @@ export default function KakaoMapView({
   onRelocate,
   loadingArrivals,
   setLoadingArrivals,
+  arrivalData,
 }) {
   const mapRef = useRef(null);
   const containerRef = useRef(null);
@@ -35,9 +39,18 @@ export default function KakaoMapView({
   }, []);
 
   const handleClick = () => {
-    if (mapRef.current && window.kakao?.maps) {
-      const kakaoLatLng = new window.kakao.maps.LatLng(center.lat, center.lng);
+    if (
+      mapRef.current &&
+      window.kakao?.maps &&
+      myLocation?.lat &&
+      myLocation?.lng
+    ) {
+      const kakaoLatLng = new window.kakao.maps.LatLng(
+        myLocation.lat,
+        myLocation.lng
+      );
       mapRef.current.setCenter(kakaoLatLng);
+      onCenterChanged(myLocation);
     }
     onRelocate?.();
   };
@@ -82,6 +95,18 @@ export default function KakaoMapView({
     };
   }, [isDragging]);
 
+  useEffect(() => {
+    if (selectedStop?.bsId && arrivalMap[selectedStop.bsId]) {
+      setArrivalData(arrivalMap[selectedStop.bsId]);
+    }
+  }, [selectedStop?.bsId, arrivalMap]);
+
+  useEffect(() => {
+    if (busStops.length > 0) {
+      setSelectedStop(null); // 초기화
+    }
+  }, [busStops]);
+
   return (
     <div
       ref={containerRef}
@@ -94,17 +119,28 @@ export default function KakaoMapView({
     >
       <Map
         center={
-          center?.lat && center?.lng ? center : { lat: 35.8714, lng: 128.6014 }
+          mapCenter?.lat && mapCenter?.lng
+            ? mapCenter
+            : { lat: 35.8714, lng: 128.6014 }
         } // fallback 위치 추가
+        // center={mapCenter}
         ref={mapRef}
         style={{ width: "100%", height: "100%" }}
         level={4}
+        onDragEnd={(map) => {
+          const latlng = map.getCenter();
+          onCenterChanged({ lat: latlng.getLat(), lng: latlng.getLng() });
+        }}
       >
         <MapView
-          position={center}
+          position={myLocation}
           onClick={handleClick}
           style={{
             zIndex: "90",
+            position: "absolute",
+            bottom: isMobile ? panelHeight + 16 : 16, // ← 핵심!
+            right: 16,
+            transition: "bottom 0.3s ease",
           }}
         />
         {markers.map((marker, idx) => (
@@ -136,6 +172,16 @@ export default function KakaoMapView({
             )}
           </MapMarker>
         ))}
+        {myLocation?.lat && (
+          <MapMarker
+            position={myLocation}
+            image={{
+              src: "/location.png",
+              size: { width: 50, height: 50 },
+            }}
+            zIndex={100}
+          />
+        )}
       </Map>
 
       {isMobile && (
@@ -143,15 +189,16 @@ export default function KakaoMapView({
           ref={containerRef}
           style={{
             position: "absolute",
+            marginTop: "50px",
             bottom: 0,
             left: 0,
             width: "100%",
             height: `${panelHeight}px`,
-            background: "white",
+            background: "rgba(255,255,255,0.95)",
             borderTopLeftRadius: 12,
             borderTopRightRadius: 12,
             zIndex: 5,
-            boxShadow: "0 -2px 8px rgba(0,0,0,0.15)",
+            boxShadow: "0 -2px 8px rgba(0,0,0,0.1)",
             overflowY: "auto",
             transition: "height 0.2s ease",
           }}
@@ -161,78 +208,146 @@ export default function KakaoMapView({
             onMouseDown={handleMouseDown}
             onTouchStart={handleMouseDown}
             style={{
-              width: "100%",
-              height: "16px",
+              // width: "100%",
+              height: "24px",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
               cursor: "row-resize",
-              background: "#ccc",
+              // background: "#ccc",
               borderTopLeftRadius: 12,
               borderTopRightRadius: 12,
             }}
-          />
+          >
+            <div
+              style={{
+                width: "36px",
+                height: "5px",
+                background: "#ccc",
+                borderRadius: "3px",
+                marginTop: "4px",
+              }}
+            />
+          </div>
 
           {markers.map((item, index) => {
-            const isSelected = selectedStop?.arsId === item.arsId;
+            const isSelected = selectedStop?.arsId === item.arsId
             return (
               <div
                 key={item.arsId}
                 onClick={async () => {
-                  if (isSelected) {
+                  const isNowSelected = selectedStop?.arsId === item.arsId;
+                  if (isNowSelected) {
                     setSelectedStop(null);
                     return;
                   }
                   setSelectedStop(item);
                   setLoadingArrivals(true);
+
                   const arrivals = await fetchArrivalInfo(item.arsId);
-                  console.log("도착 정보 응답 길이:", arrivals.length);
-                  setArrivalData(arrivals); 
+                  const list = arrivals?.body?.list ?? [];
+
+                  console.log("도착 정보:", list);
+                  setArrivalData(list);
                   setArrivalMap((prev) => ({
                     ...prev,
-                    [item.arsId]: arrivals,
+                    [item.arsId]: list,
                   }));
                   setLoadingArrivals(false);
                 }}
                 style={{
-                  padding: "8px 12px",
+                  padding: "12px 16px",
                   borderBottom: "1px solid #eee",
                   cursor: "pointer",
-                  background: isSelected ? "#f5faff" : "white",
+                  background: isSelected ? "#f0f9ff" : "white",
                 }}
               >
-                <strong>
+                <strong style={{ fontSize: "1rem", fontWeight: "bold" }}>
                   {index + 1}. {item.name}
                 </strong>
-                <div style={{ fontSize: "0.8rem", color: "#888" }}>
+                <div
+                  style={{ fontSize: "0.75rem", color: "#999", marginTop: 4 }}
+                >
                   ID: {item.arsId}
                 </div>
-                <div>{(item.distance / 1000).toFixed(1)} km</div>
+                <div>거리: {(item.distance / 1000).toFixed(1)} km</div>
 
                 {isSelected && (
                   <div
                     style={{
-                      marginTop: 8,
+                      marginTop: 10,
                       paddingTop: 8,
                       borderTop: "1px dashed #ccc",
                     }}
                   >
                     {loadingArrivals ? (
-                      <Spin tip="도착 정보를 불러오는 중..." />
-                    ) : arrivalMap[item.arsId]?.length > 0 ? (
-                      arrivalMap[item.arsId].map((bus, idx) => (
-                        <div key={idx} style={{ marginBottom: 10 }}>
-                          <Text strong>🚌 {bus.routeName}</Text>
-                          <br />
-                          <Text>
-                            ⏱{" "}
-                            {bus.predictTime1 !== "-"
-                              ? `${bus.predictTime1}분`
-                              : "정보 없음"}
-                          </Text>
-                          <br />
-                          {bus.locationNo1 !== "-" && (
-                            <Text>📍 남은 정류장: {bus.locationNo1}개</Text>
-                          )}
-                        </div>
-                      ))
+                      <Spin tip="도착 정보를 불러오는 중..." fullscreen />
+                    ) : Array.isArray(arrivalData) && arrivalData.length > 0 ? (
+                      <List
+                        dataSource={arrivalData}
+                        renderItem={(bus) => {
+                          const getColorByState = (state) => {
+                            switch (state) {
+                              case "전":
+                                return "#52c41a";
+                              case "전전":
+                                return "#faad14";
+                              case "도착예정":
+                                return "#aaaaaa";
+                              default:
+                                return "#1890ff";
+                            }
+                          };
+                          const getStateText = (state) => {
+                            switch (state) {
+                              case "전":
+                                return "곧 도착";
+                              case "전전":
+                                return "곧 도착 예정";
+                              case "도착예정":
+                                return "차고지 대기";
+                              default:
+                                return `${state} 후 도착`;
+                            }
+                          };
+                          return (
+                            <List.Item>
+                              <Card
+                                style={{
+                                  width: "100%",
+                                  minHeight: 100,
+                                  fontSize: "0.9rem",
+                                }}
+                                styles={{ body: { padding: "12px" } }}
+                              >
+                                <div
+                                  style={{
+                                    display: "flex",
+                                    justifyContent: "space-between",
+                                    marginBottom: 4,
+                                  }}
+                                >
+                                  <Text strong>🚌 {bus.routeNo}</Text>
+                                  <Text
+                                    strong
+                                    style={{
+                                      color: getColorByState(bus.arrState),
+                                    }}
+                                  >
+                                    {getStateText(bus.arrState)}
+                                  </Text>
+                                </div>
+                                {/* {bus.vhcNo2 && (
+                                  <>
+                                    <br />
+                                    <Text>🆔 차량번호: {bus.vhcNo2}</Text>
+                                  </>
+                                )} */}
+                              </Card>
+                            </List.Item>
+                          );
+                        }}
+                      />
                     ) : (
                       <Text type="secondary">도착 정보가 없습니다.</Text>
                     )}

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { MapMarker, CustomOverlayMap } from "react-kakao-maps-sdk";
 
-function MapView({ position, onClick }) {
+function MapView({ position, onClick, style = {} }) {
   const [heading, setHeading] = useState(0);
   const [deviceType, setDeviceType] = useState("desktop"); // "android" | "ios" | "desktop"
 
@@ -81,15 +81,15 @@ function MapView({ position, onClick }) {
   // 고정 마커 (데스크탑 전용)
   return (
     <>
-    <MapMarker
-      position={position}
-      image={{
-        src: "/location.png",
-        size: { width: 50, height: 50 },
-        options: { offset: { x: 25, y: 50 } },
-      }}
-    >
-      {/* <div
+      <MapMarker
+        position={position}
+        image={{
+          src: "/location.png",
+          size: { width: 50, height: 50 },
+          options: { offset: { x: 25, y: 50 } },
+        }}
+      >
+        {/* <div
         style={{
           color: "#000",
           background: "#fff",
@@ -99,8 +99,8 @@ function MapView({ position, onClick }) {
       >
         여기 계신가요?
       </div> */}
-    </MapMarker>
-     {/* 현재 위치 복귀 버튼 */}
+      </MapMarker>
+      {/* 현재 위치 복귀 버튼 */}
       <div
         onClick={onClick}
         style={{
@@ -111,6 +111,11 @@ function MapView({ position, onClick }) {
           height: "55px",
           cursor: "pointer",
           zIndex: 1000,
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          cursor: "pointer",
+          ...style, // KakaoMapView에서 내려온 bottom, right 등 포함됨
         }}
       >
         <img
