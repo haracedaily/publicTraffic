@@ -58,7 +58,8 @@ function SearchTotal(props) {
     const draggableSide = (e) => {
         if(calcHeight!=="0px")searchHeight.current = parseInt(calcHeight.replace("px",""))+e.screenY;
         else
-        searchHeight.current=e.screenY;
+            searchHeight.current = e.screenY;
+
         window.addEventListener("mousemove", searchHeightHandler)
         window.addEventListener("mouseup", searchHeightEnd);
         e.preventDefault();
@@ -66,7 +67,10 @@ function SearchTotal(props) {
     }
     const searchHeightHandler = (e) => {
         // console.log("마우스 이벤트",e,searchHeight.current);
-        setCalcHeight((searchHeight.current-e.screenY)+"px");
+        console.log(e.view.outerHeight);
+        let calc = searchHeight.current-e.screenY;
+        if(calc<0)calc=0;
+        setCalcHeight(calc+"px");
     }
     const searchHeightEnd = () =>{
         window.removeEventListener("mousemove", searchHeightHandler);
@@ -90,6 +94,7 @@ function SearchTotal(props) {
                 <div>
 
                 <List
+                    style={{padding:"0.5rem"}}
                     bordered
                     dataSource={props.searchResults}
                     renderItem={(item) => (
@@ -154,13 +159,14 @@ function SearchTotal(props) {
                                             display: "flex",
                                             justifyContent: "space-between",
                                             alignItems: "center",
-                                            marginBottom: "4px"
+                                            marginBottom: "4px",
+                                            borderBottom: "1px solid #dddddd",
                                         }}>
                                             <div style={{
                                                 fontWeight: "bold",
                                                 fontSize: "1.1em"
                                             }}>
-                                                {item.routeNo} {item.routeNote && `(${item.routeNote})`}
+                                                🚌 {item.routeNo} {item.routeNote && `(${item.routeNote})`}
                                             </div>
                                             <div style={{
                                                 color: item.arrState === "전" ? "#52c41a" :
@@ -170,7 +176,14 @@ function SearchTotal(props) {
                                                 {item.arrState === "전" ? "곧 도착" :
                                                     item.arrState === "전전" ? "곧 도착 예정" : item.arrState ==='도착예정' ? "차고지 대기" :
                                                         `${item.arrState} 후 도착`}
+                                                {props?.selectedRoute?.routeId === item.routeId && props.selectedRouteList && (
+                                                    <div style={{display:"flex",width:"100%",justifyContent:"end"}}>
+                                                        <img className={props.openedRoute?styles.jh_side_open:styles.jh_side_close} width={15} src={"/reverse_triangle.svg"} alt={"경로 닫기"}
+                                                             onClick={()=>props.setOpenedRoute(!props.openedRoute)} style={{cursor:"pointer"}} />
+                                                    </div>
+                                                )}
                                             </div>
+
                                         </div>
                                         {/*<div style={{
                                             color: "#666",
@@ -178,12 +191,7 @@ function SearchTotal(props) {
                                         }}>
                                             버스 번호: {item.vhcNo2}
                                         </div>*/}
-                                        {props?.selectedRoute?.routeId === item.routeId && props.selectedRouteList && (
-                                            <div style={{display:"flex",width:"100%",justifyContent:"end"}}>
-                                            <img className={props.openedRoute?styles.jh_side_open:styles.jh_side_close} width={15} src={"/reverse_triangle.svg"} alt={"경로 닫기"}
-                                                 onClick={()=>props.setOpenedRoute(!props.openedRoute)} style={{cursor:"pointer"}} />
-                                            </div>
-                                        )}
+
                                     {props.openedRoute && props?.selectedRoute?.routeId === item.routeId && props.selectedRouteList && (
 
                                         <List
