@@ -44,6 +44,7 @@
 .favoritesList {
     max-height: 400px;
     overflow-y: auto;
+    /*padding: 12px 24px;*/
 }
 
 .listItem {
@@ -74,12 +75,24 @@
     gap: 8px;
 }
 
-.stopName,
-.stopId,
+.stopName{
+    font-weight: bold;
+    font-size: 1.1em;
+    /*margin-bottom: 4px;*/
+
+}
+.stopId{
+    color: rgb(102, 102, 102);
+    font-size: 0.9em;
+    /*margin-bottom: 4px*/
+}
+
 .routeList {
     overflow: hidden;
     text-overflow: ellipsis;
     padding: 2px 0;
+    color: rgb(24, 144, 255);
+    font-size: 0.9em;
 }
 
 .favoriteIcon {
@@ -133,11 +146,11 @@
 
 .arrivalItem {
     border-bottom: 1px solid #f0f0f0;
-    /*background-color: darkblue;*/
-
-
 }
 
+.lastItem {
+    border-bottom: none;
+}
 
 .arrivalContent {
     /*width: 100;*/
@@ -153,9 +166,16 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    /*padding: 8.5px 0;*/
+    /*border-bottom: 1px solid #f0f0f0;*/
     /*margin-bottom: 4px;*/
     /*background-color: chocolate;*/
-
+}
+.routeInfolast {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8.5px 0;
 }
 
 .routeNo{
@@ -200,9 +220,12 @@
         padding: 0.5rem;
     }
 
-    .favoritesWrapper,
+    .favoritesWrapper{
+        width: 100%;
+    }
     .cardWrapper {
         width: 100%;
+        margin-bottom: 4rem;
     }
 
     .favoritesList,

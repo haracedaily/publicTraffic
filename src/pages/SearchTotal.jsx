@@ -76,6 +76,24 @@ function SearchTotal(props) {
         window.removeEventListener("mousemove", searchHeightHandler);
         window.removeEventListener("mouseup", searchHeightEnd);
     }
+    const draggableTouch = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if(calcHeight!=="0px")searchHeight.current = parseInt(calcHeight.replace("px",""))+e.touches[0].screenY;
+        else
+            searchHeight.current = e.touches[0].screenY;
+        window.addEventListener("touchmove", searchHeightHandlerTouch)
+        window.addEventListener("touchend", searchHeightEndTouch);
+    }
+    const searchHeightHandlerTouch = (e) => {
+        let calc = searchHeight.current-e.touches[0].screenY;
+        if(calc<0)calc=0;
+        setCalcHeight(calc+"px");
+    }
+    const searchHeightEndTouch = () =>{
+        window.removeEventListener("touchmove", searchHeightHandlerTouch);
+        window.removeEventListener("touchend", searchHeightEndTouch);
+    }
     return (
         <div style={{height:"100%", position:"relative"}}>
             <Space.Compact id={"jh_searchTop"} style={{ width: '100%', padding: '20px' }}>
@@ -86,7 +104,7 @@ function SearchTotal(props) {
                 <MobileKakaoMap {...props} />
             </div>
             }
-            <div className={props.isCommonMobile?"jh_search_result_mobile":""} style={{height:`${props.isCommonMobile?"calc(100% - 50vh - 72px + "+calcHeight+")":"auto"}`}} data-height={calcHeight} onMouseDown={draggableSide}>
+            <div className={props.isCommonMobile?"jh_search_result_mobile":""} style={{height:`${props.isCommonMobile?"calc(100% - 50vh - 72px + "+calcHeight+")":"auto"}`}} data-height={calcHeight} onMouseDown={draggableSide} onTouchStart={draggableTouch}>
                 {props.isCommonMobile&&<div style={{display:"flex",justifyContent:"center",marginBottom:"1rem",alignItems:"center",height:"20px",position:"sticky",top:0,zIndex:30000,backgroundColor:"white"}}>
                     <div style={{width:"10%",height:"5px",borderRadius:"3px",backgroundColor:"#dddddd"}}></div>
                 </div>
@@ -94,11 +112,13 @@ function SearchTotal(props) {
                 <div>
 
                 <List
-                    style={{padding:"0.5rem"}}
+                    style={{padding:"0.5rem",margin:"0.8rem"}}
                     bordered
+                    className={styles.side_list_border}
                     dataSource={props.searchResults}
                     renderItem={(item) => (
                         <List.Item
+                            className={styles.side_li_border}
                             onClick={() => {
                                 props.setMarkerClicked(false);
                                 props.setSelectedRoute(null);
@@ -138,8 +158,8 @@ function SearchTotal(props) {
                     )}
                 />
             </div>
-            {props.isCommonMobile && props.selectedStop && (
-                <div style={{marginTop:"1rem", display:"flex",justifyContent:"flex-end"}}>
+            {props.isCommonMobile && props.selectedRoute && (
+                <div style={{margin:"1rem", display:"flex",justifyContent:"flex-end"}}>
                     <Button onClick={moveSelectedStop}>선택정류소</Button>
                 </div>
 
@@ -147,7 +167,7 @@ function SearchTotal(props) {
             {props.selectedStop && (
                 <Card
                     title={`${props.selectedStop.bsNm} 실시간 도착 정보`}
-                    style={{ marginTop: "1rem" }}
+                    style={{ margin: "0.8rem" }}
                 >
                     {props.arrivalInfo ? (
                         <List
