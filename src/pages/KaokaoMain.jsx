@@ -99,7 +99,7 @@ const drawLine = (data) => {
         });
         validLinks.sort((a,b)=>a.seq-b.seq);
         validLinks.sort((a,b)=>a.dir-b.dir);
-        console.log(validLinks);
+        // console.log(validLinks);
         let variableList = [];
         validLinks.forEach((link,i)=>{
             const path = link.geometry.coordinates.map(([lng,lat])=> {
