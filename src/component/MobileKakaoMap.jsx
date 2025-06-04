@@ -35,21 +35,32 @@ function MobileKakaoMap(props) {
                 p.linkId===link.properties.link_id
             );
         });
-        // console.log("유효 링크값",validLinks);
+
         validLinks.map(el=>{
             if(Object.values(data).some(p=> {
                 if(p.linkId === el.properties.link_id){
-                    el.dir=p.moveDir;
+                    el.dir=parseInt(p.moveDir);
+                    el.seq=parseInt(p.linkSeq);
                     return true;
                 }
             }));
         });
+        validLinks.sort((a,b)=>a.seq-b.seq);
+        validLinks.sort((a,b)=>a.dir-b.dir);
+        // console.log(validLinks);
         let variableList = [];
-        validLinks.forEach(link=>{
+        validLinks.forEach((link,i)=>{
             const path = link.geometry.coordinates.map(([lng,lat])=> {
                 let [x,y]=proj4("EPSG:5182", "EPSG:4326", [lng, lat]);
                 return {lat:y, lng:x,dir:link.dir};
             });
+            if(i>0) {
+                if (path[0]?.dir !== undefined && !!path[0]){
+                    if (path[0]?.dir === variableList[i - 1][variableList[i - 1]?.length-1]?.dir) {
+                        path.unshift(variableList[i - 1][variableList[i - 1]?.length-1]);
+                    }
+                }
+            }
             variableList.push(path);
 
         })
