@@ -164,7 +164,7 @@ export default function KakaoMapView({
             )}
           </MapMarker>
         ))}
-        {myLocation?.lat && (
+        {/* {myLocation?.lat && (
           <MapMarker
             position={myLocation}
             image={{
@@ -173,7 +173,7 @@ export default function KakaoMapView({
             }}
             zIndex={100}
           />
-        )}
+        )} */}
       </Map>
     </div>
   );

@@ -8,6 +8,7 @@ import {useMediaQuery} from "react-responsive";
 import {Map, useKakaoLoader} from "react-kakao-maps-sdk";
 import {BrowserRouter, useNavigate} from "react-router-dom";
 import InstallButton from './components/InstallButton.jsx';
+import IosPwaGuide from './components/IosPwaGuide.jsx';
 
 function App() {
 
@@ -17,6 +18,7 @@ function App() {
 
     return (
         <>
+            <IosPwaGuide/>
             <header>
                 {isMobile ? <img width={150} src={"/logo_word.svg"} alt={"logo"} onClick={()=>{navigator("/")}} style={{cursor:"pointer"}} /> :
                     <img width={200} src={"/header_logo.svg"} alt={'logo'} onClick={()=>{navigator("/")}} style={{cursor:"pointer"}} />}
