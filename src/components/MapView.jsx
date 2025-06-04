@@ -109,7 +109,6 @@ function MapView({ position, onClick, style = {} }) {
           right: "20px",
           width: "55px",
           height: "55px",
-          cursor: "pointer",
           zIndex: 1000,
           display: "flex",
           justifyContent: "center",

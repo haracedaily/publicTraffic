@@ -50,3 +50,9 @@
     justify-items:end;
     rotate: 180deg;
 }
+.side_li_border{
+    border-bottom: 1px solid #f0f0f0 !important;
+}
+.side_list_border>div>div>ul>li:last-child{
+    border-bottom: none !important;
+}
