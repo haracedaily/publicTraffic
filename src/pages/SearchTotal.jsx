@@ -139,7 +139,7 @@ function SearchTotal(props) {
                 />
             </div>
             {props.isCommonMobile && props.selectedStop && (
-                <div style={{marginTop:"1rem"}}>
+                <div style={{marginTop:"1rem", display:"flex",justifyContent:"flex-end"}}>
                     <Button onClick={moveSelectedStop}>선택정류소</Button>
                 </div>
 
