@@ -18,7 +18,7 @@ function Side(props) {
                 <Radio.Button value="search" style={{borderRadius:0,height:"auto"}} className={"navSideTotalSearchBtn navSideRouteBtn"}>
                     <div style={{display:"flex",flexDirection:"column",justifyContent:"center",alignItems:"center"}}>
                         <img src={"/search_i.svg"} width={30} alt={"search_i"}/>
-                        <h2 >통합검색</h2>
+                        <h2 >정류소검색</h2>
                     </div>
                 </Radio.Button>
                 <Radio.Button value="route" style={{borderRadius:0, height:"auto"}} className={"navSideRouteBtn"}>
