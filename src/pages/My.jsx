@@ -190,11 +190,16 @@ const My = () => {
                                                     </div>
                                                     <div
                                                         className={styles.arrivalState}
+                                                        style={{
+                                                            color: item.arrState === "전" ? "#52c41a" :
+                                                                item.arrState === "전전" ? "#faad14" : item.arrState ==='도착예정' ? "#aaaaaa" :"#1890ff",
+                                                            fontWeight: "bold"
+                                                        }}
                                                         title={
                                                             item.arrState === "전"
-                                                                ? "곧 도착"
+                                                                ? "전"
                                                                 : item.arrState === "전전"
-                                                                    ? "곧 도착 예정"
+                                                                    ? "전전"
                                                                     : item.arrState === "도착예정"
                                                                         ? "차고지 대기"
                                                                         : item.arrState
@@ -203,9 +208,9 @@ const My = () => {
                                                         }
                                                     >
                                                         {item.arrState === "전"
-                                                            ? "곧 도착"
+                                                            ? "전"
                                                             : item.arrState === "전전"
-                                                                ? "곧 도착 예정"
+                                                                ? "전전"
                                                                 : item.arrState === "도착예정"
                                                                     ? "차고지 대기"
                                                                     : item.arrState

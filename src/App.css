@@ -36,7 +36,8 @@
   overflow:hidden;
   overflow-y:auto;
   max-height:calc(100% - 5vh - 72px);
-  min-height:calc(100% - 50vh - 72px);
+  /*min-height:calc(100% - 50vh - 72px);*/
+  min-height:20px;
   width:100%;
   border-top-left-radius:1rem;
   border-top-right-radius:1rem;
