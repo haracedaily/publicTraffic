@@ -28,7 +28,7 @@ function Side(props) {
                     </div>
                 </Radio.Button>
             </Radio.Group>
-            {navTab === 'search' ? <SearchTotal {...props} />:<BusRoute />}
+            {navTab === 'search' ? <SearchTotal {...props} />:<BusRoute {...props} />}
         </nav>
     );
 }
