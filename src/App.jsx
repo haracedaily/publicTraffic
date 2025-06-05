@@ -1,13 +1,10 @@
 import './App.css'
-import {Button, Input, Space, Radio} from "antd";
 import {useEffect, useState} from "react";
 import Main from "./layout/Main.jsx";
-import SearchTotal from "./pages/SearchTotal.jsx";
-import BusRoute from "./pages/busRoute.jsx";
 import {useMediaQuery} from "react-responsive";
-import {Map, useKakaoLoader} from "react-kakao-maps-sdk";
-import {BrowserRouter, useNavigate} from "react-router-dom";
+import {useNavigate} from "react-router-dom";
 import InstallButton from './components/InstallButton.jsx';
+import IosPwaGuide from "./components/IosPwaGuide.jsx";
 
 function App() {
 
@@ -20,6 +17,7 @@ function App() {
     },[isMobile])
     return (
         <>
+            <IosPwaGuide/>
             <div className={`common_mobile_header_nav ${navTab?"common_mobile_header_nav_open":"common_mobile_header_nav_close"}`}>
                 <div onClick={()=>{navigator("/")}} style={{cursor: "pointer"}}>HOME</div>
                 <div onClick={()=>{navigator("/my")}} style={{cursor: "pointer"}}>나의버스</div>
