@@ -9,7 +9,7 @@ import IosPwaGuide from "./components/IosPwaGuide.jsx";
 function App() {
 
     const isMobile = useMediaQuery({maxWidth: 900});
-    const isCommonMobile = useMediaQuery({maxWidth: 425});
+    const isCommonMobile = useMediaQuery({maxWidth: 580});
     const navigator = useNavigate();
     const [navTab, setNavTab] = useState(false);
     useEffect(() => {
