@@ -7,7 +7,8 @@ import { getDistance } from "../utils/distance";
 import { EnvironmentOutlined } from "@ant-design/icons";
 import kakaoMap from "../js/kakaoMap";
 import proj4 from "proj4";
-import "../css/nearby.css";
+// import "../css/nearby.css";
+// import "../css/nearby.module.css";
 import styles from "../css/nearby.module.css";
 
 proj4.defs(
@@ -204,9 +205,8 @@ function Nearby() {
     }
   }, [isMobile, selectedStop, arrivalMap]);
 
-  const maxButtonBottom = typeof window !== "undefined"
-    ? window.innerHeight * 0.7
-    : 300;
+  const maxButtonBottom =
+    typeof window !== "undefined" ? window.innerHeight * 0.7 : 300;
 
   const mapViewStyle = {
     zIndex: "90",
@@ -218,12 +218,12 @@ function Nearby() {
 
   return (
     <div
-      className={`nearby-container ${
-        selectedStop ? "three-columns" : "two-columns"
+      className={`${styles["nearby-container"]} ${
+        selectedStop ? styles["three-columns"] : styles["two-columns"]
       }`}
     >
       <Card
-        className={"map-column card-fixed"}
+        className={`${styles["map-column"]} ${styles["card-fixed"]}`}
         styles={{ body: { height: "100%" } }}
       >
         <KakaoMapView
@@ -251,7 +251,7 @@ function Nearby() {
       </Card>
 
       {!isMobile && (
-        <div className="stops-column card-fixed">
+        <div>
           <div style={{ textAlign: "center", marginBottom: 12 }}>
             <EnvironmentOutlined
               style={{ fontSize: 24, color: "#2d6ae0", marginRight: 8 }}
@@ -265,7 +265,8 @@ function Nearby() {
           </div>
           <div style={{ position: "relative", flex: 1, overflow: "hidden" }}>
             <Card
-              style={{ height: "100%", overflowY: "auto" }}
+              className={`${styles["stops-column"]} ${styles["card-fixed"]}`}
+              style={{ overflowY: "auto", maxHeight: "100vh" }}
               styles={{ body: { padding: 8 } }}
             >
               {loadingStops && (
@@ -340,7 +341,7 @@ function Nearby() {
       )}
 
       {selectedStop && (
-        <div className="arrival-column card-fixed">
+        <div>
           <div style={{ textAlign: "center", marginBottom: 12 }}>
             <Title level={4} style={{ display: "inline-block", margin: 0 }}>
               🚌 {selectedStop.name} 도착 정보
@@ -350,7 +351,8 @@ function Nearby() {
             </Text>
           </div>
           <Card
-            style={{ flex: 1, overflowY: "auto" }}
+            className={`${styles["arrival-column"]} ${styles["card-fixed"]}`}
+            style={{ overflowY: "auto", maxHeight: "100vh" }}
             styles={{ body: { padding: "6px 8px" } }}
           >
             {loadingArrivals ? (
@@ -384,7 +386,9 @@ function Nearby() {
                     }
                   };
                   return (
-                    <List.Item>
+                    <List.Item
+                    // className={`${styles["ant-list-item"]}`}
+                    >
                       {/* <Card
                         style={{
                           width: "100%",
@@ -558,23 +562,23 @@ function Nearby() {
                                 }}
                                 styles={{ body: { padding: "12px" } }}
                               > */}
-                                {/* <div
+                              {/* <div
                                   style={{
                                     display: "flex",
                                     justifyContent: "space-between",
                                     marginBottom: 4,
                                   }}
                                 > */}
-                                  <Text strong>🚌 {bus.routeName}</Text>
-                                  <Text
-                                    strong
-                                    style={{
-                                      color: getColorByState(bus.arrState),
-                                    }}
-                                  >
-                                    {getStateText(bus.arrState)}
-                                  </Text>
-                                {/* </div> */}
+                              <Text strong>🚌 {bus.routeName}</Text>
+                              <Text
+                                strong
+                                style={{
+                                  color: getColorByState(bus.arrState),
+                                }}
+                              >
+                                {getStateText(bus.arrState)}
+                              </Text>
+                              {/* </div> */}
                               {/* </Card> */}
                             </List.Item>
                           );
