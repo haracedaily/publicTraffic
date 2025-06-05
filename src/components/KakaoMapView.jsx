@@ -23,89 +23,22 @@ export default function KakaoMapView({
   mapViewStyle
 }) {
   const mapRef = useRef(null);
-  const containerRef = useRef(null);
-  const dragHandleRef = useRef(null);
-  const [panelHeight, setPanelHeight] = useState(250);
-  const [isDragging, setIsDragging] = useState(false);
-
-  const handleClick = () => {
-    if (
-      mapRef.current &&
-      window.kakao?.maps &&
-      myLocation?.lat &&
-      myLocation?.lng
-    ) {
-      const kakaoLatLng = new window.kakao.maps.LatLng(
-        myLocation.lat,
-        myLocation.lng
-      );
-      mapRef.current.setCenter(kakaoLatLng);
-      onCenterChanged(myLocation);
-    }
-    onRelocate?.();
-  };
-
-  const handleDrag = (clientY) => {
-    const newHeight = window.innerHeight - clientY;
-    setPanelHeight(
-      Math.max(100, Math.min(newHeight, window.innerHeight * 0.9))
-    );
-  };
-
-  const handleMouseDown = (e) => {
-    e.preventDefault();
-    setIsDragging(true);
-  };
 
   useEffect(() => {
-    const handleMouseMove = (e) => {
-      if (isDragging) {
-        handleDrag(e.clientY);
-      }
-    };
-    const handleTouchMove = (e) => {
-      if (isDragging && e.touches.length === 1) {
-        handleDrag(e.touches[0].clientY);
-      }
-    };
-    const stopDrag = () => {
-      setIsDragging(false);
-    };
-
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("mouseup", stopDrag);
-    window.addEventListener("touchmove", handleTouchMove);
-    window.addEventListener("touchend", stopDrag);
-
-    return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mouseup", stopDrag);
-      window.removeEventListener("touchmove", handleTouchMove);
-      window.removeEventListener("touchend", stopDrag);
-    };
-  }, [isDragging]);
-
-  useEffect(() => {
-    if (selectedStop?.bsId && arrivalMap[selectedStop.bsId]) {
-      setArrivalData(arrivalMap[selectedStop.bsId]);
-    }
+    if (!selectedStop?.bsId || !arrivalMap[selectedStop.bsId]) return;
+    setArrivalData(arrivalMap[selectedStop.bsId]);
   }, [selectedStop?.bsId, arrivalMap]);
 
+  // 📌 busStops 바뀌었을 때 selectedStop 유지 (있는 경우만)
   useEffect(() => {
-    if (isMobile && selectedStop?.arsId && arrivalMap[selectedStop.arsId]) {
-      setArrivalData(arrivalMap[selectedStop.arsId]);
-    }
-  }, [isMobile]);
-
-  useEffect(() => {
-    if (busStops.length > 0) {
-      setSelectedStop(null); // 초기화
-    }
+    if (!selectedStop) return;
+    const found = busStops.find((b) => b.bsId === selectedStop.bsId);
+    if (!found) setSelectedStop(null);
   }, [busStops]);
 
   return (
     <div
-      ref={containerRef}
+      // ref={containerRef}
       style={{
         width: "100%",
         height: "100%",
@@ -130,10 +63,23 @@ export default function KakaoMapView({
       >
         <MapView
           position={myLocation}
-          onClick={handleClick}
-          style={{
-            ...mapViewStyle
+          onClick={() => {
+            if (
+              mapRef.current &&
+              window.kakao?.maps &&
+              myLocation?.lat &&
+              myLocation?.lng
+            ) {
+              const kakaoLatLng = new window.kakao.maps.LatLng(
+                myLocation.lat,
+                myLocation.lng
+              );
+              mapRef.current.setCenter(kakaoLatLng);
+              onCenterChanged(myLocation);
+            }
+            onRelocate?.();
           }}
+          style={mapViewStyle}
         />
         {markers.map((marker, idx) => (
           <MapMarker
