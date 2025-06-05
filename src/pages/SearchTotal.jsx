@@ -67,7 +67,7 @@ function SearchTotal(props) {
     }
     const searchHeightHandler = (e) => {
         // console.log("마우스 이벤트",e,searchHeight.current);
-        console.log(e.view.outerHeight);
+        // console.log(e.view.outerHeight);
         let calc = searchHeight.current-e.screenY;
         if(calc<0)calc=0;
         setCalcHeight(calc+"px");
@@ -97,7 +97,7 @@ function SearchTotal(props) {
     return (
         <div style={{height:"100%", position:"relative"}}>
             <Space.Compact id={"jh_searchTop"} style={{ width: '100%', padding: '20px' }}>
-                <Input.Search placeholder="버스번호 및 정류소" onSearch={searchTotal} allowClear />
+                <Input.Search placeholder="정류장명을 입력해주세요" onSearch={searchTotal} allowClear />
             </Space.Compact>
             {props.isCommonMobile&&
             <div style={{width:"100%",height:"50vh"}}>
