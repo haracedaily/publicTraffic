@@ -5,6 +5,7 @@ import {useMediaQuery} from "react-responsive";
 import {useNavigate} from "react-router-dom";
 import InstallButton from './components/InstallButton.jsx';
 import IosPwaGuide from "./components/IosPwaGuide.jsx";
+import {Button} from "antd";
 
 function App() {
 
@@ -39,8 +40,8 @@ function App() {
                     <div onClick={()=>{navigator("/my")}}>나의버스</div>
                     <div onClick={()=>{navigator("/nearby")}}>주변정류장</div>
                     <div>이용안내</div>
-                    {/* <Button>로그인</Button> */}
-                    <InstallButton/>
+                     <Button><InstallButton/></Button>
+
                 </nav>}
             </header>
             <main className={isCommonMobile?"common_mobile_main":""}>
