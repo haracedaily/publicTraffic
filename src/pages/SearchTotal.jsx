@@ -180,7 +180,6 @@ function SearchTotal(props) {
                                             justifyContent: "space-between",
                                             alignItems: "center",
                                             marginBottom: "4px",
-                                            borderBottom: "1px solid #dddddd",
                                         }}>
                                             <div style={{
                                                 fontWeight: "bold",
