@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Radio} from "antd";
 import SearchTotal from "../pages/SearchTotal.jsx";
 import BusRoute from "../pages/busRoute.jsx";
@@ -7,6 +7,10 @@ function Side(props) {
     const [navTab, setNavTab] = useState('search');
     const handleTabClick = (e) => {
         setNavTab(e.target.value);
+        props.setOpenFind(false);
+        props.setSelectedStop(null);
+        props.setMarkerClicked(false);
+        props.setOpenedRoute(false);
     }
     return (
         <nav ref={props.sideRef} className={props.isCommonMobile?styles.is_mobile_side:styles.side_nav}>
