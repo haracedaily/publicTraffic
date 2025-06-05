@@ -18,38 +18,20 @@ function MapView({ position, onClick, style = {} }) {
   }, []);
 
   useEffect(() => {
-    if (
-      (deviceType === "android" || deviceType === "ios") &&
-      window.DeviceOrientationEvent
-    ) {
-      const handleOrientation = (event) => {
-        if (event.alpha !== null) {
-          setHeading(event.alpha); // 0~360도: 북쪽 기준 회전 각도
-        }
-      };
-
-      // iOS는 권한 요청 필요
-      if (
-        deviceType === "ios" &&
-        typeof DeviceOrientationEvent.requestPermission === "function"
-      ) {
-        DeviceOrientationEvent.requestPermission()
-          .then((response) => {
-            if (response === "granted") {
-              window.addEventListener(
-                "deviceorientation",
-                handleOrientation,
-                true
-              );
-            }
-          })
-          .catch(console.error);
-      } else {
-        window.addEventListener("deviceorientation", handleOrientation, true);
-      }
+    if (deviceType === "android" || deviceType === "ios") {
+      const watchId = navigator.geolocation.watchPosition(
+        (pos) => {
+          const headingValue = pos.coords.heading;
+          if (headingValue !== null) {
+            setHeading(headingValue);
+          }
+        },
+        (err) => console.error(err),
+        { enableHighAccuracy: true, maximumAge: 0, timeout: 5000 }
+      );
 
       return () => {
-        window.removeEventListener("deviceorientation", handleOrientation);
+        navigator.geolocation.clearWatch(watchId);
       };
     }
   }, [deviceType]);

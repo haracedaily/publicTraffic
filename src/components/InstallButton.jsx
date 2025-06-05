@@ -6,9 +6,11 @@ const InstallButton = () => {
   const [installReady, setInstallReady] = useState(true);
   const [deferredPrompt, setDeferredPrompt] = useState(null);
 
+  
   useEffect(() => {
     const handler = (e) => {
       e.preventDefault();
+      console.log("✅ beforeinstallprompt 이벤트 발생");
       setDeferredPrompt(e);
       setInstallReady(true);
     };
