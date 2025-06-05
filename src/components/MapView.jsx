@@ -1,13 +1,13 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { MapMarker, CustomOverlayMap } from "react-kakao-maps-sdk";
 
 function MapView({ position, onClick, style = {} }) {
   const [heading, setHeading] = useState(0);
-  const [deviceType, setDeviceType] = useState("desktop"); // "android" | "ios" | "desktop"
+  const [deviceType, setDeviceType] = useState("desktop");
+  const prevHeadingRef = useRef(null);
 
   useEffect(() => {
     const userAgent = navigator.userAgent.toLowerCase();
-
     if (/android/i.test(userAgent)) {
       setDeviceType("android");
     } else if (/iphone|ipad|ipod/i.test(userAgent)) {
@@ -22,17 +22,15 @@ function MapView({ position, onClick, style = {} }) {
       const watchId = navigator.geolocation.watchPosition(
         (pos) => {
           const headingValue = pos.coords.heading;
-          if (headingValue !== null) {
+          if (headingValue !== null && headingValue !== prevHeadingRef.current) {
             setHeading(headingValue);
+            prevHeadingRef.current = headingValue;
           }
         },
         (err) => console.error(err),
-        { enableHighAccuracy: true, maximumAge: 0, timeout: 5000 }
+        { enableHighAccuracy: true, maximumAge: 10000, timeout: 5000 }
       );
-
-      return () => {
-        navigator.geolocation.clearWatch(watchId);
-      };
+      return () => navigator.geolocation.clearWatch(watchId);
     }
   }, [deviceType]);
 
@@ -70,7 +68,7 @@ function MapView({ position, onClick, style = {} }) {
           size: { width: 50, height: 50 },
           options: { offset: { x: 25, y: 50 } },
         }}
-      >
+      />
         {/* <div
         style={{
           color: "#000",
@@ -81,7 +79,7 @@ function MapView({ position, onClick, style = {} }) {
       >
         여기 계신가요?
       </div> */}
-      </MapMarker>
+      {/* </MapMarker> */}
       {/* 현재 위치 복귀 버튼 */}
       <div
         onClick={onClick}

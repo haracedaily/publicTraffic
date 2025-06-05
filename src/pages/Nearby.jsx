@@ -83,6 +83,10 @@ function Nearby() {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 1024);
 
   const handleMapCenterChanged = (newCenter) => {
+    if (
+      Math.abs(newCenter.lat - (mapCenter?.lat || 0)) < 0.001 &&
+      Math.abs(newCenter.lng - (mapCenter?.lng || 0)) < 0.001
+    ) return;
     setMapCenter(newCenter);
   };
 
@@ -96,24 +100,51 @@ function Nearby() {
   }, []);
 
   useEffect(() => {
-    navigator.geolocation.watchPosition(
-      (pos) => {
-        setLocation({
-          lat: pos.coords.latitude,
-          lng: pos.coords.longitude,
-        });
-      },
-      (err) => {
-        message.error("위치를 가져오지 못했습니다.");
-        setLoadingStops(false);
-      },
-      {
-        enableHighAccuracy: false,
-        timeout: 7000,
-        maximumAge:10000
-      }
-    );
-  }, []);
+    if (isMobile) {
+      // ✅ 모바일이면 실시간 위치 추적
+      const watchId = navigator.geolocation.watchPosition(
+        (pos) => {
+          setLocation({
+            lat: pos.coords.latitude,
+            lng: pos.coords.longitude,
+          });
+          setMapCenter({
+            lat: pos.coords.latitude,
+            lng: pos.coords.longitude,
+          });
+        },
+        (err) => {
+          message.error("위치를 가져오지 못했습니다.");
+          setLoadingStops(false);
+        },
+        {
+          enableHighAccuracy: false,
+          timeout: 7000,
+          maximumAge: 10000,
+        }
+      );
+      return () => navigator.geolocation.clearWatch(watchId);
+    } else {
+      // ✅ 데스크탑이면 한 번만 위치 요청
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
+          setLocation({ lat, lng });
+          setMapCenter({ lat, lng });
+        },
+        (err) => {
+          message.error("위치를 가져오지 못했습니다.");
+          setLoadingStops(false);
+        },
+        {
+          enableHighAccuracy: false,
+          timeout: 7000,
+          maximumAge: 10000,
+        }
+      );
+    }
+  }, [isMobile]);
 
   // useEffect(() => {
   //   navigator.geolocation.getCurrentPosition((pos) => {
@@ -126,30 +157,38 @@ function Nearby() {
 
   const prevCenterRef = useRef(null);
 
-  useEffect(() => {
-  if (!mapCenter?.lat || !mapCenter?.lng) return;
+  // useEffect(() => {
+  //   if (!mapCenter?.lat || !mapCenter?.lng) return;
 
-  const isSameLocation = () => {
-    if (!prevCenterRef.current) return false;
-    const { lat, lng } = prevCenterRef.current;
-    return (
-      Math.abs(lat - mapCenter.lat) < 0.0005 &&
-      Math.abs(lng - mapCenter.lng) < 0.0005
-    );
-  };
+  //   const isSameLocation = () => {
+  //     if (!prevCenterRef.current) return false;
+  //     const { lat, lng } = prevCenterRef.current;
+  //     return (
+  //       Math.abs(lat - mapCenter.lat) < 0.0005 &&
+  //       Math.abs(lng - mapCenter.lng) < 0.0005
+  //     );
+  //   };
 
-  if (isSameLocation()) return;
-  prevCenterRef.current = mapCenter;
+  //   if (isSameLocation()) return;
+  //   prevCenterRef.current = mapCenter;
 
-  const fetchNearbyStops = async () => {
-    setLoadingStops(true);
+  const fetchNearbyStops = async (center) => {
+    console.log("📡 fetchNearbyStops 호출됨", center);
+    if (!center?.lat || !center?.lng) return;
+    console.warn("center가 없음. 실행 안 됨");
+    setLoadingStops(false);
     try {
-      const url = `https://apis.data.go.kr/1613000/BusSttnInfoInqireService/getCrdntPrxmtSttnList?serviceKey=l7L9HOYK5mFEJAehYbro5q9qXaJofTBB7nv0fYzNNIqJE%2FYGs2d7Gn6%2FDb6qrv9D1F9v5iEm%2BpXpQ%2FCINV59DA%3D%3D&gpsLati=${mapCenter.lat}&gpsLong=${mapCenter.lng}&radius=1000&_type=json`;
+      const url = `https://apis.data.go.kr/1613000/BusSttnInfoInqireService/getCrdntPrxmtSttnList?serviceKey=l7L9HOYK5mFEJAehYbro5q9qXaJofTBB7nv0fYzNNIqJE%2FYGs2d7Gn6%2FDb6qrv9D1F9v5iEm%2BpXpQ%2FCINV59DA%3D%3D&gpsLati=${center.lat}&gpsLong=${center.lng}&radius=1000&_type=json`;
       const res = await fetch(url);
       const json = await res.json();
       let items = json.response?.body?.items?.item ?? [];
-
       items = items.filter((item) => item?.nodeid?.includes("DGB"));
+
+      if (!items.length) {
+        setBusStops([]);
+        setLoadingStops(false);
+        return;
+      }
 
       let searchResults = [];
       try {
@@ -187,12 +226,38 @@ function Nearby() {
       console.error("정류장 불러오기 실패:", err);
       message.error("정류장을 불러오는 데 실패했습니다");
     } finally {
+      console.log("🔁 로딩 중단됨");
       setLoadingStops(false);
     }
   };
 
-  fetchNearbyStops();
-}, [mapCenter]);
+  const debounce = (fn, delay) => {
+    let timer;
+    return (...args) => {
+      clearTimeout(timer);
+      timer = setTimeout(() => {void fn(...args)}, delay);
+    };
+  };
+
+  const debouncedFetchStops = useRef(debounce(fetchNearbyStops, 500));
+
+  useEffect(() => {
+    console.log("🧭 mapCenter 변경됨", mapCenter);
+
+    if (!mapCenter?.lat || !mapCenter?.lng) return;
+    const { lat, lng } = mapCenter;
+    if (
+      prevCenterRef.current &&
+      Math.abs(lat - prevCenterRef.current.lat) < 0.001 &&
+      Math.abs(lng - prevCenterRef.current.lng) < 0.001
+    ) {
+      console.log("📍 위치 변화 미미 — fetch 안 함");
+      return;
+    }
+    // if (isSameLocation()) return;
+    prevCenterRef.current = mapCenter;
+    debouncedFetchStops.current(mapCenter);
+  }, [mapCenter]);
 
 
   useEffect(() => {
@@ -215,11 +280,22 @@ function Nearby() {
     }
   }, [selectedStop]);
 
+  // useEffect(() => {
+  //   if (selectedStop?.bsId && arrivalMap[selectedStop.bsId]) {
+  //     setArrivalData(arrivalMap[selectedStop.bsId]);
+  //   }
+  // }, [isMobile, selectedStop, arrivalMap]);
   useEffect(() => {
-    if (selectedStop?.bsId && arrivalMap[selectedStop.bsId]) {
-      setArrivalData(arrivalMap[selectedStop.bsId]);
-    }
-  }, [isMobile, selectedStop, arrivalMap]);
+    if (!selectedStop?.bsId || arrivalMap[selectedStop.bsId]) return;
+    const fetchData = async () => {
+      setLoadingArrivals(true);
+      const result = await fetchArrivalInfo(selectedStop.bsId);
+      setArrivalMap((prev) => ({ ...prev, [selectedStop.bsId]: result }));
+      setArrivalData(result);
+      setLoadingArrivals(false);
+    };
+    fetchData();
+  }, [selectedStop]);
 
   const maxButtonBottom =
     typeof window !== "undefined" ? window.innerHeight * 0.7 : 300;
@@ -232,11 +308,14 @@ function Nearby() {
     transition: "bottom 0.3s ease",
   };
 
+  console.log("현재 중심좌표:", mapCenter);
+  // console.log("정류장 API 응답:", items);
+  // console.log("카카오 검색 결과:", searchResults);
+
   return (
     <div
-      className={`${styles["nearby-container"]} ${
-        selectedStop ? styles["three-columns"] : styles["two-columns"]
-      }`}
+      className={`${styles["nearby-container"]} ${selectedStop ? styles["three-columns"] : styles["two-columns"]
+        }`}
     >
       <Card
         className={`${styles["map-column"]} ${styles["card-fixed"]}`}
