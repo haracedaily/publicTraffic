@@ -19,9 +19,9 @@ function App() {
         <>
             <IosPwaGuide/>
             <div className={`common_mobile_header_nav ${navTab?"common_mobile_header_nav_open":"common_mobile_header_nav_close"}`}>
-                <div onClick={()=>{navigator("/")}} style={{cursor: "pointer"}}>HOME</div>
-                <div onClick={()=>{navigator("/my")}} style={{cursor: "pointer"}}>나의버스</div>
-                <div onClick={()=>{navigator("/nearby")}} style={{cursor: "pointer"}}>주변정류장</div>
+                <div onClick={()=>{navigator("/"); setNavTab(false);}} style={{cursor: "pointer"}}>HOME</div>
+                <div onClick={()=>{navigator("/my"); setNavTab(false);}} style={{cursor: "pointer"}}>나의버스</div>
+                <div onClick={()=>{navigator("/nearby"); setNavTab(false);}} style={{cursor: "pointer"}}>주변정류장</div>
                 <span style={{display:"flex",flexDirection:"column",alignItems:"center",gap:"0.5rem",paddingInlineEnd:"10vw",paddingBlockStart:"20vh", paddingBlockEnd:"5vh"}}>
                 <img  width={150} src={"/logo.svg"} alt="logo"/>
                 <img width={120} src={"/logo_word.svg"} alt="logo_word"/>
