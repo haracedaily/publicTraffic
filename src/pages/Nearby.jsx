@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { List, Card, Typography, Spin, message } from "antd";
 import { fetchArrivalInfo } from "../api/busApi";
 import KakaoMapView from "../components/KakaoMapView";
-import useGeoLocation from "../hooks/GeoLocation";
+// import useGeoLocation from "../hooks/GeoLocation";
 import { getDistance } from "../utils/distance";
 import { EnvironmentOutlined } from "@ant-design/icons";
 import kakaoMap from "../js/kakaoMap";
@@ -32,7 +32,7 @@ function Nearby() {
   const [arrivalData, setArrivalData] = useState([]);
   const [loadingStops, setLoadingStops] = useState(true);
   const [loadingArrivals, setLoadingArrivals] = useState(false);
-  const locationHook = useGeoLocation();
+  // const locationHook = useGeoLocation();
   const errorShownRef = useRef(false);
   const [arrivalMap, setArrivalMap] = useState({});
 
@@ -108,76 +108,92 @@ function Nearby() {
         setLoadingStops(false);
       },
       {
-        enableHighAccuracy: true,
-        timeout: 15000,
+        enableHighAccuracy: false,
+        timeout: 7000,
+        maximumAge:10000
       }
     );
   }, []);
 
-  useEffect(() => {
-    navigator.geolocation.getCurrentPosition((pos) => {
-      const lat = pos.coords.latitude;
-      const lng = pos.coords.longitude;
-      setLocation({ lat, lng });
-      setMapCenter({ lat, lng });
-    });
-  }, []);
+  // useEffect(() => {
+  //   navigator.geolocation.getCurrentPosition((pos) => {
+  //     const lat = pos.coords.latitude;
+  //     const lng = pos.coords.longitude;
+  //     setLocation({ lat, lng });
+  //     setMapCenter({ lat, lng });
+  //   });
+  // }, []);
+
+  const prevCenterRef = useRef(null);
 
   useEffect(() => {
-    if (!mapCenter?.lat || !mapCenter?.lng) return;
+  if (!mapCenter?.lat || !mapCenter?.lng) return;
 
-    const fetchNearbyStops = async () => {
-      setLoadingStops(true);
+  const isSameLocation = () => {
+    if (!prevCenterRef.current) return false;
+    const { lat, lng } = prevCenterRef.current;
+    return (
+      Math.abs(lat - mapCenter.lat) < 0.0005 &&
+      Math.abs(lng - mapCenter.lng) < 0.0005
+    );
+  };
+
+  if (isSameLocation()) return;
+  prevCenterRef.current = mapCenter;
+
+  const fetchNearbyStops = async () => {
+    setLoadingStops(true);
+    try {
+      const url = `https://apis.data.go.kr/1613000/BusSttnInfoInqireService/getCrdntPrxmtSttnList?serviceKey=l7L9HOYK5mFEJAehYbro5q9qXaJofTBB7nv0fYzNNIqJE%2FYGs2d7Gn6%2FDb6qrv9D1F9v5iEm%2BpXpQ%2FCINV59DA%3D%3D&gpsLati=${mapCenter.lat}&gpsLong=${mapCenter.lng}&radius=1000&_type=json`;
+      const res = await fetch(url);
+      const json = await res.json();
+      let items = json.response?.body?.items?.item ?? [];
+
+      items = items.filter((item) => item?.nodeid?.includes("DGB"));
+
+      let searchResults = [];
       try {
-        const url = `https://apis.data.go.kr/1613000/BusSttnInfoInqireService/getCrdntPrxmtSttnList?serviceKey=l7L9HOYK5mFEJAehYbro5q9qXaJofTBB7nv0fYzNNIqJE%2FYGs2d7Gn6%2FDb6qrv9D1F9v5iEm%2BpXpQ%2FCINV59DA%3D%3D&gpsLati=${mapCenter.lat}&gpsLong=${mapCenter.lng}&radius=1000&_type=json`;
-        const res = await fetch(url);
-        const json = await res.json();
-        let items = json.response?.body?.items?.item ?? [];
-
-        items = items.filter((item) => item?.nodeid?.includes("DGB"));
-
-        let searchResults = [];
-        try {
-          searchResults = await kakaoMap.getSearchTotal("");
-        } catch (searchErr) {
-          console.error("카카오맵 검색 실패:", searchErr);
-        }
-
-        const stops = items
-          .map((item) => {
-            const matched = searchResults.find((sr) => sr.bsNm === item.nodenm);
-            if (!matched) return null;
-            const converted = convertNGISToKakao(
-              matched.ngisXPos,
-              matched.ngisYPos
-            );
-            return {
-              name: item.nodenm,
-              bsId: matched.bsId,
-              arsId: item.nodeid,
-              lat: converted.lat,
-              lng: converted.lng,
-              distance: getDistance(
-                location.lat,
-                location.lng,
-                converted.lat,
-                converted.lng
-              ),
-            };
-          })
-          .filter(Boolean);
-
-        setBusStops(stops);
-      } catch (err) {
-        console.error("정류장 불러오기 실패:", err);
-        message.error("정류장을 불러오는 데 실패했습니다");
-      } finally {
-        setLoadingStops(false);
+        searchResults = await kakaoMap.getSearchTotal("");
+      } catch (searchErr) {
+        console.error("카카오맵 검색 실패:", searchErr);
       }
-    };
 
-    fetchNearbyStops();
-  }, [mapCenter?.lat, mapCenter?.lng]);
+      const stops = items
+        .map((item) => {
+          const matched = searchResults.find((sr) => sr.bsNm === item.nodenm);
+          if (!matched) return null;
+          const converted = convertNGISToKakao(
+            matched.ngisXPos,
+            matched.ngisYPos
+          );
+          return {
+            name: item.nodenm,
+            bsId: matched.bsId,
+            arsId: item.nodeid,
+            lat: converted.lat,
+            lng: converted.lng,
+            distance: getDistance(
+              location.lat,
+              location.lng,
+              converted.lat,
+              converted.lng
+            ),
+          };
+        })
+        .filter(Boolean);
+
+      setBusStops(stops);
+    } catch (err) {
+      console.error("정류장 불러오기 실패:", err);
+      message.error("정류장을 불러오는 데 실패했습니다");
+    } finally {
+      setLoadingStops(false);
+    }
+  };
+
+  fetchNearbyStops();
+}, [mapCenter]);
+
 
   useEffect(() => {
     if (!selectedStop?.bsId) return;
