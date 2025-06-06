@@ -104,9 +104,9 @@ function SearchTotal(props) {
                 <MobileKakaoMap {...props} />
             </div>
             }
-            <div className={props.isCommonMobile?"jh_search_result_mobile":""} style={{height:`${props.isCommonMobile?"calc(100% - 50vh - 72px + "+calcHeight+")":"auto"}`}} data-height={calcHeight} onMouseDown={draggableSide} onTouchStart={draggableTouch}>
-                {props.isCommonMobile&&<div style={{display:"flex",justifyContent:"center",marginBottom:"1rem",alignItems:"center",height:"20px",position:"sticky",top:0,zIndex:30000,backgroundColor:"white"}}>
-                    <div style={{width:"10%",height:"5px",borderRadius:"3px",backgroundColor:"#dddddd"}}></div>
+            <div className={props.isCommonMobile?"jh_search_result_mobile":"none"} style={{height:`${props.isCommonMobile?"calc(100% - 50vh - 72px + "+calcHeight+")":"auto"}`}} data-height={calcHeight} onMouseDown={draggableSide} onTouchStart={draggableTouch}>
+                {props.isCommonMobile&&<div style={{display:"flex",justifyContent:"center",paddingTop:"1rem",marginBottom:"1rem",alignItems:"center",height:"20px",position:"sticky",top:0,zIndex:30000,backgroundColor:"white"}}>
+                    <div className={styles.upper_btn} style={{width:"10px",height:"10px",borderRadius:"3px",borderTop:"5px solid #dddddd",borderRight:"5px solid #dddddd"}}></div>
                 </div>
                 }
                 <div>
@@ -192,8 +192,8 @@ function SearchTotal(props) {
                                                     item.arrState === "전전" ? "#faad14" : item.arrState ==='도착예정' ? "#aaaaaa" :"#1890ff",
                                                 fontWeight: "bold"
                                             }}>
-                                                {item.arrState === "전" ? "곧 도착" :
-                                                    item.arrState === "전전" ? "곧 도착 예정" : item.arrState ==='도착예정' ? "차고지 대기" :
+                                                {item.arrState === "전" ? "전" :
+                                                    item.arrState === "전전" ? "전전" : item.arrState ==='도착예정' ? "차고지 대기" :
                                                         `${item.arrState} 후 도착`}
                                                 {props?.selectedRoute?.routeId === item.routeId && props.selectedRouteList && (
                                                     <div style={{display:"flex",width:"100%",justifyContent:"end"}}>
