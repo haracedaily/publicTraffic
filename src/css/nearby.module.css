@@ -97,8 +97,8 @@
   /* border-bottom: 1px solid black; */
 }
 
-.arrival-column,
-.stops-column {
+.stops-column,
+.arrival-column {
   height:60vh; 
   overflow-y: auto;
 }
