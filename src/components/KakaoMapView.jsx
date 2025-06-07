@@ -31,10 +31,19 @@ export default function KakaoMapView({
 
   // 📌 busStops 바뀌었을 때 selectedStop 유지 (있는 경우만)
   useEffect(() => {
-    if (!selectedStop) return;
-    const found = busStops.find((b) => b.bsId === selectedStop.bsId);
-    if (!found) setSelectedStop(null);
-  }, [busStops]);
+  if (!selectedStop) return;
+
+  const found = busStops.find((b) =>
+    (b.bsId && selectedStop.bsId && b.bsId === selectedStop.bsId) ||
+    (b.arsId && selectedStop.arsId && b.arsId === selectedStop.arsId)
+  );
+
+  if (!found) {
+    console.log("🛑 selectedStop 값 유지됨: busStops에서 못 찾음");
+    // ❌ 절대 selectedStop을 날리지 않음
+    // → 유지하도록 함
+  }
+}, [busStops]);
 
   return (
     <div

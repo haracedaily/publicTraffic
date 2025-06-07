@@ -8,7 +8,6 @@ import { EnvironmentOutlined } from "@ant-design/icons";
 import kakaoMap from "../js/kakaoMap";
 import proj4 from "proj4";
 // import "../css/nearby.css";
-// import "../css/nearby.module.css";
 import styles from "../css/nearby.module.css";
 
 proj4.defs(
@@ -104,14 +103,27 @@ function Nearby() {
       // ✅ 모바일이면 실시간 위치 추적
       const watchId = navigator.geolocation.watchPosition(
         (pos) => {
-          setLocation({
-            lat: pos.coords.latitude,
-            lng: pos.coords.longitude,
-          });
-          setMapCenter({
-            lat: pos.coords.latitude,
-            lng: pos.coords.longitude,
-          });
+          // setLocation({
+          //   lat: pos.coords.latitude,
+          //   lng: pos.coords.longitude,
+          // });
+          // setMapCenter({
+          //   lat: pos.coords.latitude,
+          //   lng: pos.coords.longitude,
+          // });
+
+          const { latitude, longitude } = pos.coords;
+
+          // 위치 변경이 크지 않으면 무시
+          if (
+            Math.abs(latitude - (location.lat || 0)) < 0.0001 &&
+            Math.abs(longitude - (location.lng || 0)) < 0.0001
+          ) {
+            return;
+          }
+
+          setLocation({ lat: latitude, lng: longitude });
+          setMapCenter({ lat: latitude, lng: longitude });
         },
         (err) => {
           message.error("위치를 가져오지 못했습니다.");
@@ -211,12 +223,16 @@ function Nearby() {
             arsId: item.nodeid,
             lat: converted.lat,
             lng: converted.lng,
-            distance: getDistance(
-              location.lat,
-              location.lng,
-              converted.lat,
-              converted.lng
-            ),
+            distance:
+              // getDistance(
+              //   location.lat,
+              //   location.lng,
+              //   converted.lat,
+              //   converted.lng
+              // ),
+              location.lat && location.lng
+                ? getDistance(location.lat, location.lng, converted.lat, converted.lng)
+                : null
           };
         })
         .filter(Boolean);
@@ -235,7 +251,7 @@ function Nearby() {
     let timer;
     return (...args) => {
       clearTimeout(timer);
-      timer = setTimeout(() => {void fn(...args)}, delay);
+      timer = setTimeout(() => { void fn(...args) }, delay);
     };
   };
 
@@ -244,7 +260,7 @@ function Nearby() {
   useEffect(() => {
     console.log("🧭 mapCenter 변경됨", mapCenter);
 
-    if (!mapCenter?.lat || !mapCenter?.lng) return;
+    if (!mapCenter?.lat || !mapCenter?.lng || !location.lat || !location.lng) return;
     const { lat, lng } = mapCenter;
     if (
       prevCenterRef.current &&
@@ -257,44 +273,32 @@ function Nearby() {
     // if (isSameLocation()) return;
     prevCenterRef.current = mapCenter;
     debouncedFetchStops.current(mapCenter);
-  }, [mapCenter]);
+  }, [mapCenter, location]);
 
 
   useEffect(() => {
     if (!selectedStop?.bsId) return;
 
-    if (!arrivalMap[selectedStop.bsId]) {
-      const fetchData = async () => {
-        setLoadingArrivals(true);
-        const result = await fetchArrivalInfo(selectedStop.bsId);
-        setArrivalMap((prev) => ({
-          ...prev,
-          [selectedStop.bsId]: result,
-        }));
-        setArrivalData(result);
-        setLoadingArrivals(false);
-      };
-      fetchData();
-    } else {
-      setArrivalData(arrivalMap[selectedStop.bsId]);
-    }
-  }, [selectedStop]);
+    const stopId = selectedStop.bsId;
 
-  // useEffect(() => {
-  //   if (selectedStop?.bsId && arrivalMap[selectedStop.bsId]) {
-  //     setArrivalData(arrivalMap[selectedStop.bsId]);
-  //   }
-  // }, [isMobile, selectedStop, arrivalMap]);
-  useEffect(() => {
-    if (!selectedStop?.bsId || arrivalMap[selectedStop.bsId]) return;
-    const fetchData = async () => {
+    // 이미 캐시에 있으면 그대로 사용
+    if (arrivalMap[stopId]) {
+      setArrivalData(arrivalMap[stopId]);
+      return;
+    }
+
+    // 없으면 새로 API 호출
+    const fetchArrivalData = async () => {
       setLoadingArrivals(true);
-      const result = await fetchArrivalInfo(selectedStop.bsId);
-      setArrivalMap((prev) => ({ ...prev, [selectedStop.bsId]: result }));
-      setArrivalData(result);
+      const result = await fetchArrivalInfo(stopId);
+      const list = result?.body?.list ?? [];
+
+      setArrivalMap((prev) => ({ ...prev, [stopId]: list }));
+      setArrivalData(list);
       setLoadingArrivals(false);
     };
-    fetchData();
+
+    fetchArrivalData();
   }, [selectedStop]);
 
   const maxButtonBottom =
@@ -308,9 +312,9 @@ function Nearby() {
     transition: "bottom 0.3s ease",
   };
 
-  console.log("현재 중심좌표:", mapCenter);
-  // console.log("정류장 API 응답:", items);
-  // console.log("카카오 검색 결과:", searchResults);
+  useEffect(() => {
+    console.log("🧭 selectedStop 변경됨:", selectedStop);
+  }, [selectedStop]);
 
   return (
     <div
@@ -393,22 +397,20 @@ function Nearby() {
                     }}
                     styles={{ body: { padding: "8px 12px" } }}
                     onClick={async () => {
-                      if (selectedStop?.bsId === item.bsId) {
-                        setSelectedStop(null);
-                        return;
-                      }
+                      const stopId = item.arsId || item.bsId;
+                      const selectedId = selectedStop?.arsId || selectedStop?.bsId;
+                      const isSameStop = stopId === selectedId;
 
+                      // 같은 정류장이어도 항상 도착정보 갱신
                       setSelectedStop(item);
+                      setLoadingArrivals(true);
 
-                      if (!arrivalMap[item.bsId]) {
-                        setLoadingArrivals(true);
-                        const result = await fetchArrivalInfo(item.bsId);
-                        setArrivalMap((prev) => ({
-                          ...prev,
-                          [item.bsId]: result,
-                        }));
-                        setLoadingArrivals(false);
-                      }
+                      const result = await fetchArrivalInfo(stopId);
+                      const list = result?.body?.list ?? [];
+
+                      setArrivalData(list);
+                      setArrivalMap((prev) => ({ ...prev, [stopId]: list }));
+                      setLoadingArrivals(false);
                     }}
                   >
                     <div
@@ -421,7 +423,9 @@ function Nearby() {
                         {index + 1}. {item.name}
                       </Text>
                       <div>
-                        <Text>{(item.distance / 1000).toFixed(1)} km</Text>
+                        <Text>
+                          {item.distance != null ? `${(item.distance / 1000).toFixed(1)} km` : "거리 계산 중"}
+                        </Text>
                       </div>
                     </div>
                     <div style={{ color: "#888", fontSize: "0.8rem" }}>
@@ -566,32 +570,29 @@ function Nearby() {
           </div>
 
           {busStops.map((item, index) => {
-            const isSelected = selectedStop?.arsId
-              ? selectedStop.arsId === item.arsId
-              : selectedStop?.bsId === item.bsId;
+            const isSelected =
+              (selectedStop?.arsId || selectedStop?.bsId) ===
+              (item.arsId || item.bsId);
             return (
               <div
                 key={item.arsId}
                 onClick={async () => {
-                  const isNowSelected = selectedStop?.arsId === item.arsId;
-                  if (isNowSelected) {
-                    setSelectedStop(null);
-                    return;
-                  }
+                  const stopId = item.arsId || item.bsId;
+                  const selectedId = selectedStop?.arsId || selectedStop?.bsId;
+                  const isSameStop = stopId === selectedId;
+
+                  // 같은 정류장이어도 항상 도착정보 갱신
                   setSelectedStop(item);
                   setLoadingArrivals(true);
 
-                  const arrivals = await fetchArrivalInfo(item.arsId);
-                  const list = arrivals?.body?.list ?? [];
+                  const result = await fetchArrivalInfo(stopId);
+                  const list = result?.body?.list ?? [];
 
-                  console.log("도착 정보:", list);
                   setArrivalData(list);
-                  setArrivalMap((prev) => ({
-                    ...prev,
-                    [item.arsId]: list,
-                  }));
+                  setArrivalMap((prev) => ({ ...prev, [stopId]: list }));
                   setLoadingArrivals(false);
                 }}
+
                 style={{
                   padding: "12px 16px",
                   borderBottom: "1px solid #eee",
@@ -617,6 +618,12 @@ function Nearby() {
                       borderTop: "1px dashed #ccc",
                     }}
                   >
+                    {console.log("🧾 렌더 시 조건", {
+                      isSelected,
+                      loadingArrivals,
+                      arrivalData,
+                    })}
+
                     {loadingArrivals ? (
                       <Spin tip="도착 정보를 불러오는 중..." fullscreen />
                     ) : Array.isArray(arrivalData) && arrivalData.length > 0 ? (
