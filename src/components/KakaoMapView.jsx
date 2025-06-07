@@ -8,81 +8,60 @@ const { Text } = Typography;
 
 export default function KakaoMapView({
   center,
+  mapCenter,
+  myLocation,
+  onCenterChanged,
   markers = [],
   busStops = [],
   selectedStop,
-  setSelectedStop = () => {},
-  setArrivalData = () => {},
-  setArrivalMap = () => {},
+  setSelectedStop = () => { },
+  setArrivalData = () => { },
+  setArrivalMap = () => { },
   arrivalMap = {},
   onRelocate,
   loadingArrivals,
   setLoadingArrivals,
+  mapViewStyle
 }) {
   const mapRef = useRef(null);
-  const containerRef = useRef(null);
-  const dragHandleRef = useRef(null);
-  const [panelHeight, setPanelHeight] = useState(250);
-  const [isDragging, setIsDragging] = useState(false);
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 1024);
+  // const containerRef = useRef(null);
+  // const dragHandleRef = useRef(null);
+  // const [panelHeight, setPanelHeight] = useState(250);
+  // const [isDragging, setIsDragging] = useState(false);
+  // const [isMobile, setIsMobile] = useState(window.innerWidth <= 1024);
 
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth <= 1024);
-    };
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
+  // useEffect(() => {
+  //   const handleResize = () => {
+  //     setIsMobile(window.innerWidth <= 1024);
+  //   };
+  //   window.addEventListener("resize", handleResize);
+  //   return () => window.removeEventListener("resize", handleResize);
+  // }, []);
 
   const handleClick = () => {
-    if (mapRef.current && window.kakao?.maps) {
-      const kakaoLatLng = new window.kakao.maps.LatLng(center.lat, center.lng);
+    // if (mapRef.current && window.kakao?.maps) {
+    //   const kakaoLatLng = new window.kakao.maps.LatLng(center.lat, center.lng);
+    //   mapRef.current.setCenter(kakaoLatLng);
+    // }
+    if (
+      mapRef.current &&
+      window.kakao?.maps &&
+      myLocation?.lat &&
+      myLocation?.lng
+    ) {
+      const kakaoLatLng = new window.kakao.maps.LatLng(
+        myLocation.lat,
+        myLocation.lng
+      );
       mapRef.current.setCenter(kakaoLatLng);
+      onCenterChanged(myLocation);
     }
     onRelocate?.();
   };
 
-  const handleDrag = (clientY) => {
-    const newHeight = window.innerHeight - clientY;
-    setPanelHeight(Math.max(100, Math.min(newHeight, window.innerHeight * 0.9)));
-  };
-
-  const handleMouseDown = (e) => {
-    e.preventDefault();
-    setIsDragging(true);
-  };
-
-  useEffect(() => {
-    const handleMouseMove = (e) => {
-      if (isDragging) {
-        handleDrag(e.clientY);
-      }
-    };
-    const handleTouchMove = (e) => {
-      if (isDragging && e.touches.length === 1) {
-        handleDrag(e.touches[0].clientY);
-      }
-    };
-    const stopDrag = () => {
-      setIsDragging(false);
-    };
-
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("mouseup", stopDrag);
-    window.addEventListener("touchmove", handleTouchMove);
-    window.addEventListener("touchend", stopDrag);
-
-    return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mouseup", stopDrag);
-      window.removeEventListener("touchmove", handleTouchMove);
-      window.removeEventListener("touchend", stopDrag);
-    };
-  }, [isDragging]);
-
   return (
     <div
-      ref={containerRef}
+      // ref={containerRef}
       style={{
         width: "100%",
         height: "100%",
@@ -91,15 +70,20 @@ export default function KakaoMapView({
       }}
     >
       <Map
-        center={center}
+        center={mapCenter || { lat: 35.8714, lng: 128.6014 }}
         ref={mapRef}
         style={{ width: "100%", height: "100%" }}
         level={4}
+        onDragEnd={(map) => {
+          const latlng = map.getCenter();
+          onCenterChanged({ lat: latlng.getLat(), lng: latlng.getLng() });
+        }}
       >
         <MapView
-          position={center}
+          position={myLocation}
           onClick={handleClick}
-          style={{ zIndex: "90" }}
+          style={mapViewStyle}
+
         />
         {markers.map((marker, idx) => (
           <MapMarker
@@ -107,6 +91,24 @@ export default function KakaoMapView({
             position={{ lat: marker.lat, lng: marker.lng }}
             title={marker.name}
             clickable={true}
+            onClick={async () => {
+              if (selectedStop?.bsId === marker.bsId) {
+                setSelectedStop(null);
+                setArrivalData([]);
+                return;
+              }
+
+              setSelectedStop(marker);
+              setLoadingArrivals(true);
+              const result = await fetchArrivalInfo(marker.bsId);
+              setArrivalMap((prev) => ({ ...prev, [marker.bsId]: result }));
+              setLoadingArrivals(false);
+            }}
+            image={{
+              src: "/stop_marker.png",
+              size: { width: 40, height: 45 },
+              // options: { offset: { x: 25, y: 50 } },
+            }}
           >
             {selectedStop?.bsId === marker.bsId && (
               <div
@@ -116,6 +118,7 @@ export default function KakaoMapView({
                   background: "#fff",
                   border: "1px solid #ccc",
                   borderRadius: "8px",
+                  textAlign: "center",
                   fontSize: "12px",
                   fontWeight: "bold",
                 }}
@@ -127,7 +130,7 @@ export default function KakaoMapView({
         ))}
       </Map>
 
-      {isMobile && (
+      {/* {isMobile && (
         <div
           style={{
             position: "absolute",
@@ -221,7 +224,7 @@ export default function KakaoMapView({
             );
           })}
         </div>
-      )}
+      )} */}
     </div>
   );
 }

@@ -3,6 +3,8 @@ import { List, Card, Button } from "antd";
 import { ReloadOutlined, StarFilled } from "@ant-design/icons";
 import axios from "axios";
 import MySearch from "../component/MySearch";
+import styles from "../css/My.module.css";
+import Myloca from "../component/Myloca.jsx";
 
 const My = () => {
     const [favorites, setFavorites] = useState([]);
@@ -13,6 +15,9 @@ const My = () => {
     useEffect(() => {
         const savedFavorites = JSON.parse(localStorage.getItem("favorites") || "[]");
         setFavorites(savedFavorites);
+        if (savedFavorites.length > 0) {
+            setSelectedStop(savedFavorites[0]);
+        }
     }, []);
 
     useEffect(() => {
@@ -26,15 +31,23 @@ const My = () => {
                 `https://businfo.daegu.go.kr:8095/dbms_web_api/realtime/arr/${selectedStop.bsId}`
             )
             .then((response) => {
+                // console.log("API 응답:", response.data);
                 if (response.data.header.success) {
-                    let data = [...response.data.body.list].filter(item=>item.arrState==="도착예정");
-                    response.data.body.list.splice(response.data.body.list.findIndex(item=>item.arrState==="도착예정"),1);
-                    response.data.body.list.push(...data);
-                    setArrivalInfo(response.data.body);
+                    const list = [...response.data.body.list];
+                    const arrivingSoon = list.filter(item => item.arrState === "도착예정");
+                    const otherItems = list.filter(item => item.arrState !== "도착예정");
+                    const reorderedList = [...otherItems, ...arrivingSoon];
+                    const updatedArrivalInfo = { ...response.data.body, list: reorderedList };
+                    setArrivalInfo(updatedArrivalInfo);
+                    // console.log("업데이트된 arrivalInfo:", updatedArrivalInfo);
+                } else {
+                    console.warn("API 응답 성공하지 않음:", response.data.header);
+                    setArrivalInfo(null);
                 }
             })
             .catch((error) => {
                 console.error("도착 정보 조회 실패:", error);
+                setArrivalInfo(null);
             });
     }, [selectedStop]);
 
@@ -64,7 +77,15 @@ const My = () => {
         setFavorites((prev) => {
             const isFavorite = prev.some((fav) => fav.bsId === stop.bsId);
             if (isFavorite) {
-                return prev.filter((fav) => fav.bsId !== stop.bsId);
+                const newFavorites = prev.filter((fav) => fav.bsId !== stop.bsId);
+
+                if (newFavorites.length > 0) {
+                    setSelectedStop(newFavorites[0]);
+                } else {
+                    setSelectedStop(null);
+                    setArrivalInfo(null);
+                }
+                return newFavorites;
             } else {
                 return [...prev, stop];
             }
@@ -82,89 +103,74 @@ const My = () => {
     };
 
     return (
-        <div style={{ padding: "1rem" }}>
-            <MySearch
-                onSelectStop={handleSelectStop}
-                onToggleFavorite={handleToggleFavorite}
-                favorites={favorites}
-            />
-            <div
-                style={{
-                    display: "flex",
-                    flexDirection: "row",
-                    gap: "1rem",
-                    marginTop: "1rem",
-                    flexWrap: "wrap",
-                }}
-                className="container"
-            >
-                <div style={{ flex: "1", minWidth: "300px" }}>
-                    <h3>즐겨찾기 목록</h3>
+        <div className={styles.container}>
+            <MySearch onToggleFavorite={handleToggleFavorite} favorites={favorites} />
+            <div className={styles.contentWrapper}>
+                <div className={styles.favoritesWrapper}>
+                    <h3 className={styles.favoritesTitle}>나의 버스 목록</h3>
                     {favorites.length === 0 ? (
-                        <p>즐겨찾기가 없습니다.</p>
+                        <p className={styles.noFavorites}>나의 버스 목록이 없습니다.</p>
                     ) : (
                         <List
                             bordered
                             dataSource={favorites}
                             renderItem={(item) => (
                                 <List.Item
-                                    actions={[
-                                        <span
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleToggleFavorite(item);
-                                            }}
-                                            style={{ cursor: "pointer" }}
-                                        >
-                      <StarFilled style={{ color: "#fadb14" }} />
-                    </span>,
-                                    ]}
                                     onClick={() => handleSelectStop(item)}
-                                    style={{ cursor: "pointer" }}
+                                    className={styles.listItem}
                                 >
-                                    <div style={{ width: "100%" }}>
-                                        <div
-                                            style={{
-                                                fontWeight: "bold",
-                                                fontSize: "1.1em",
-                                                marginBottom: "4px",
-                                            }}
-                                        >
-                                            {item.bsNm}
+                                    <div className={styles.listItemContent}>
+                                        <div className={styles.textContent}>
+                                            <div className={styles.stopName} title={item.bsNm}>
+                                                {item.bsNm}
+                                            </div>
+                                            <div className={styles.stopId} title={`정류장 ID: ${item.bsId}`}>
+                                                정류장 ID: {item.bsId}
+                                            </div>
+                                            <div
+                                                className={styles.routeList}
+                                                title={`경유 노선: ${item.routeList}`}
+                                            >
+                                                경유 노선: {item.routeList}
+                                            </div>
                                         </div>
-                                        <div
-                                            style={{
-                                                color: "#666",
-                                                fontSize: "0.9em",
-                                                marginBottom: "4px",
-                                            }}
-                                        >
-                                            정류장 ID: {item.bsId}
-                                        </div>
-                                        <div style={{ color: "#1890ff", fontSize: "0.9em" }}>
-                                            경유 노선: {item.routeList}
+                                        <div className={styles.actions}>
+                                            <Myloca stop={item} />
+                                            <span
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleToggleFavorite(item);
+                                                }}
+                                                className={styles.favoriteIcon}
+                                            >
+                        <StarFilled style={{ color: "#fadb14" }} />
+                      </span>
                                         </div>
                                     </div>
                                 </List.Item>
                             )}
-                            style={{ maxHeight: "400px", overflowY: "auto" }}
+                            className={styles.favoritesList}
                         />
                     )}
                 </div>
                 {selectedStop && (
-                    <div style={{ flex: "1", minWidth: "300px" }}>
+                    <div className={styles.cardWrapper}>
+                        <h3
+                            className={styles.favoritesTitle2}>버스 도착정보</h3>
                         <Card
+                            style={{padding: '0px'}}
+                            className={styles.noPadding}
                             title={
-                                <div style={{ display: "flex", alignItems: "center" }}>
-                                    <span>{`${selectedStop.bsNm} 실시간 도착 정보`}</span>
-                                    <span style={{ marginLeft: "1rem", color: "#1890ff" }}>
-                    {`${secondsRemaining}초 후 갱신`}
-                  </span>
+                                <div className={styles.cardTitle}>
+            <span className={styles.cardTitleText} title={selectedStop.bsNm}>
+                {`${selectedStop.bsNm} 도착 정보`}
+            </span>
                                     <Button
-                                        icon={<ReloadOutlined />}
                                         onClick={handleRefresh}
-                                        style={{ marginLeft: "1rem" }}
+                                        className={styles.refreshButton}
                                     >
+                                        {`${secondsRemaining}초 후`}
+                                        <ReloadOutlined style={{ marginLeft: '3px' }} />
                                     </Button>
                                 </div>
                             }
@@ -173,53 +179,59 @@ const My = () => {
                                 <List
                                     dataSource={arrivalInfo.list}
                                     renderItem={(item) => (
-                                        <List.Item>
-                                            <div style={{ width: "100%" }}>
-                                                <div
-                                                    style={{
-                                                        display: "flex",
-                                                        justifyContent: "space-between",
-                                                        alignItems: "center",
-                                                        marginBottom: "4px",
-                                                    }}
-                                                >
-                                                    <div style={{ fontWeight: "bold", fontSize: "1.1em" }}>
-                                                        {item.routeNo} {item.routeNote && `(${item.routeNote})`}
+                                        <List.Item className={styles.arrivalItem}>
+                                            <div className={styles.arrivalContent}>
+                                                <div className={styles.routeInfo}>
+                                                    <div
+                                                        className={styles.routeNo}
+                                                        title={`${item.routeNo} ${item.routeNote || ""}`}
+                                                    >
+                                                        🚌 {item.routeNo} {item.routeNote && `(${item.routeNote})`}
                                                     </div>
                                                     <div
+                                                        className={styles.arrivalState}
                                                         style={{
-                                                            color:
-                                                                item.arrState === "전"
-                                                                    ? "#52c41a"
-                                                                    : item.arrState === "전전"
-                                                                        ? "#faad14"
-                                                                        :item.arrState ==='도착예정' ? "#aaaaaa" : "#1890ff",
-                                                            fontWeight: "bold",
+                                                            color: item.arrState === "전" ? "#52c41a" :
+                                                                item.arrState === "전전" ? "#faad14" : item.arrState ==='도착예정' ? "#aaaaaa" :"#1890ff",
+                                                            fontWeight: "bold"
                                                         }}
+                                                        title={
+                                                            item.arrState === "전"
+                                                                ? "전"
+                                                                : item.arrState === "전전"
+                                                                    ? "전전"
+                                                                    : item.arrState === "도착예정"
+                                                                        ? "차고지 대기"
+                                                                        : item.arrState
+                                                                            ? `${item.arrState} 후 도착`
+                                                                            : "정보 없음"
+                                                        }
                                                     >
                                                         {item.arrState === "전"
-                                                            ? "곧 도착"
+                                                            ? "전"
                                                             : item.arrState === "전전"
-                                                                ? "곧 도착 예정"
-                                                                : item.arrState ==='도착예정' ? "차고지 대기" : `${item.arrState} 후 도착`}
+                                                                ? "전전"
+                                                                : item.arrState === "도착예정"
+                                                                    ? "차고지 대기"
+                                                                    : item.arrState
+                                                                        ? `${item.arrState} 후 도착`
+                                                                        : "정보 없음"}
                                                     </div>
-                                                </div>
-                                                <div style={{ color: "#666", fontSize: "0.9em" }}>
-                                                    버스 번호: {item.vhcNo2}
                                                 </div>
                                             </div>
                                         </List.Item>
                                     )}
-                                    style={{ maxHeight: "400px", overflowY: "auto" }}
+                                    className={styles.arrivalList}
                                 />
                             ) : (
-                                <div>도착 정보를 불러오는 중...</div>
+                                <div className={styles.loadingMessage}>
+                                    도착 정보를 불러오는 중...
+                                </div>
                             )}
                         </Card>
                     </div>
                 )}
             </div>
-
         </div>
     );
 };

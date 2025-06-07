@@ -1,16 +1,19 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Radio} from "antd";
 import SearchTotal from "../pages/SearchTotal.jsx";
 import BusRoute from "../pages/busRoute.jsx";
 import styles from "../css/side.module.css";
 function Side(props) {
-    // console.log(props);
     const [navTab, setNavTab] = useState('search');
     const handleTabClick = (e) => {
         setNavTab(e.target.value);
+        props.setOpenFind(false);
+        props.setSelectedStop(null);
+        props.setMarkerClicked(false);
+        props.setOpenedRoute(false);
     }
     return (
-        <nav ref={props.sideRef} className={styles.side_nav}>
+        <nav ref={props.sideRef} className={props.isCommonMobile?styles.is_mobile_side:styles.side_nav}>
             <article id={styles.nav_header}>
                 <img src="/bus.svg" alt="bus" />
                 <h4>버스정보조회</h4>
@@ -19,7 +22,7 @@ function Side(props) {
                 <Radio.Button value="search" style={{borderRadius:0,height:"auto"}} className={"navSideTotalSearchBtn navSideRouteBtn"}>
                     <div style={{display:"flex",flexDirection:"column",justifyContent:"center",alignItems:"center"}}>
                         <img src={"/search_i.svg"} width={30} alt={"search_i"}/>
-                        <h2 >통합검색</h2>
+                        <h2 >정류장검색</h2>
                     </div>
                 </Radio.Button>
                 <Radio.Button value="route" style={{borderRadius:0, height:"auto"}} className={"navSideRouteBtn"}>
@@ -29,7 +32,7 @@ function Side(props) {
                     </div>
                 </Radio.Button>
             </Radio.Group>
-            {navTab === 'search' ? <SearchTotal {...props} />:<BusRoute />}
+            {navTab === 'search' ? <SearchTotal {...props} />:<BusRoute {...props} />}
         </nav>
     );
 }

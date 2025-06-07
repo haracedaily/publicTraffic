@@ -19,8 +19,7 @@ async function getArrivalInfo(bsId) {
         // console.log("도착 정보 : ",res);
         if (res.status === 200) {
             if (res?.data?.body?.list?.length > 0) {
-                let data = [...res.data.body.list].filter(item=>item.arrState==="도착예정");
-                res.data.body.list.splice(res.data.body.list.findIndex(item=>item.arrState==="도착예정"),1);
+                let data = res.data.body.list.splice(res.data.body.list.findIndex(item=>item.arrState==="도착예정"),1);
                 res.data.body.list.push(...data);
                 return res.data.body;
             } else {
@@ -65,12 +64,25 @@ async function getRouteLocation(routeId){
     }
 }
 
+async function getRouteLink(routeId){
+    try{
+        let res = await axios.get(`https://apis.data.go.kr/6270000/dbmsapi01/getLink?serviceKey=${import.meta.env.VITE_DAEGU_ENC_KEY}&routeId=${routeId}`);
+        // console.log("route별 링크 : ",res);
+        return res;
+    }catch (error) {
+        let res = error.response;
+        res.message="에러사항 발생";
+        return res;
+    }
+}
+
 export const kakaoMap = {
     defaultMove,
     getSearchTotal,
     getArrivalInfo,
     getRouteInfo,
-    getRouteLocation
+    getRouteLocation,
+    getRouteLink,
 }
 
 export default kakaoMap;
