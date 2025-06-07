@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { MapMarker, CustomOverlayMap } from "react-kakao-maps-sdk";
 
-function MapView({ position, onClick }) {
+function MapView({ position, onClick, style }) {
   const [heading, setHeading] = useState(0);
   const [deviceType, setDeviceType] = useState("desktop"); // "android" | "ios" | "desktop"
+  const prevHeadingRef = useRef(null);
 
   useEffect(() => {
     const userAgent = navigator.userAgent.toLowerCase();
@@ -18,39 +19,54 @@ function MapView({ position, onClick }) {
   }, []);
 
   useEffect(() => {
-    if (
-      (deviceType === "android" || deviceType === "ios") &&
-      window.DeviceOrientationEvent
-    ) {
-      const handleOrientation = (event) => {
-        if (event.alpha !== null) {
-          setHeading(event.alpha); // 0~360도: 북쪽 기준 회전 각도
-        }
-      };
+    // if (
+    //   (deviceType === "android" || deviceType === "ios") &&
+    //   window.DeviceOrientationEvent
+    // ) {
+    //   const handleOrientation = (event) => {
+    //     if (event.alpha !== null) {
+    //       setHeading(event.alpha); // 0~360도: 북쪽 기준 회전 각도
+    //     }
+    //   };
 
-      // iOS는 권한 요청 필요
-      if (
-        deviceType === "ios" &&
-        typeof DeviceOrientationEvent.requestPermission === "function"
-      ) {
-        DeviceOrientationEvent.requestPermission()
-          .then((response) => {
-            if (response === "granted") {
-              window.addEventListener(
-                "deviceorientation",
-                handleOrientation,
-                true
-              );
-            }
-          })
-          .catch(console.error);
-      } else {
-        window.addEventListener("deviceorientation", handleOrientation, true);
-      }
+    //   // iOS는 권한 요청 필요
+    //   if (
+    //     deviceType === "ios" &&
+    //     typeof DeviceOrientationEvent.requestPermission === "function"
+    //   ) {
+    //     DeviceOrientationEvent.requestPermission()
+    //       .then((response) => {
+    //         if (response === "granted") {
+    //           window.addEventListener(
+    //             "deviceorientation",
+    //             handleOrientation,
+    //             true
+    //           );
+    //         }
+    //       })
+    //       .catch(console.error);
+    //   } else {
+    //     window.addEventListener("deviceorientation", handleOrientation, true);
+    //   }
 
-      return () => {
-        window.removeEventListener("deviceorientation", handleOrientation);
-      };
+    //   return () => {
+    //     window.removeEventListener("deviceorientation", handleOrientation);
+    //   };
+    // }
+
+    if (deviceType === "android" || deviceType === "ios") {
+      const watchId = navigator.geolocation.watchPosition(
+        (pos) => {
+          const headingValue = pos.coords.heading;
+          if (headingValue !== null && headingValue !== prevHeadingRef.current) {
+            setHeading(headingValue);
+            prevHeadingRef.current = headingValue;
+          }
+        },
+        (err) => console.error(err),
+        { enableHighAccuracy: true, maximumAge: 10000, timeout: 5000 }
+      );
+      return () => navigator.geolocation.clearWatch(watchId);
     }
   }, [deviceType]);
 
@@ -81,15 +97,15 @@ function MapView({ position, onClick }) {
   // 고정 마커 (데스크탑 전용)
   return (
     <>
-    <MapMarker
-      position={position}
-      image={{
-        src: "/location.png",
-        size: { width: 50, height: 50 },
-        options: { offset: { x: 25, y: 50 } },
-      }}
-    >
-      {/* <div
+      <MapMarker
+        position={position}
+        image={{
+          src: "/location.png",
+          size: { width: 50, height: 50 },
+          options: { offset: { x: 25, y: 50 } },
+        }}
+      >
+        {/* <div
         style={{
           color: "#000",
           background: "#fff",
@@ -99,8 +115,8 @@ function MapView({ position, onClick }) {
       >
         여기 계신가요?
       </div> */}
-    </MapMarker>
-     {/* 현재 위치 복귀 버튼 */}
+      </MapMarker>
+      {/* 현재 위치 복귀 버튼 */}
       <div
         onClick={onClick}
         style={{
@@ -109,8 +125,12 @@ function MapView({ position, onClick }) {
           right: "20px",
           width: "55px",
           height: "55px",
-          cursor: "pointer",
           zIndex: 1000,
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          cursor: "pointer",
+          ...style, // KakaoMapView에서 내려온 bottom, right 등 포함됨
         }}
       >
         <img
