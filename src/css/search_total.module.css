@@ -56,3 +56,36 @@
 .side_list_border>div>div>ul>li:last-child{
     border-bottom: none !important;
 }
+
+.upper_btn{
+    animation:upper_blink 0.7s infinite;
+    transition:all 0.5s ease-in-out;
+}
+.lower_btn{
+    animation:lower_blink 0.5s infinite;
+    transition:all 0.5s ease;
+}
+
+@keyframes upper_blink{
+    0%{
+        transform:translateY(0) rotate(-45deg);
+    }
+    50%{
+        transform:translateY(-5px) rotate(-45deg);
+    }
+    100%{
+        transform:translateY(0) rotate(-45deg);
+    }
+}
+
+@keyframes lower_blink{
+    0%{
+        transform:translateY(0) rotate(-135deg);
+    }
+    50%{
+        transform:translateY(-5px) rotate(-135deg);
+    }
+    100%{
+        transform:translateY(0) rotate(-135deg);
+    }
+}
