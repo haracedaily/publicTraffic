@@ -1,13 +1,14 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { MapMarker, CustomOverlayMap } from "react-kakao-maps-sdk";
 
-function MapView({ position, onClick, style = {} }) {
+function MapView({ position, onClick, style }) {
   const [heading, setHeading] = useState(0);
-  const [deviceType, setDeviceType] = useState("desktop");
+  const [deviceType, setDeviceType] = useState("desktop"); // "android" | "ios" | "desktop"
   const prevHeadingRef = useRef(null);
 
   useEffect(() => {
     const userAgent = navigator.userAgent.toLowerCase();
+
     if (/android/i.test(userAgent)) {
       setDeviceType("android");
     } else if (/iphone|ipad|ipod/i.test(userAgent)) {
@@ -18,6 +19,41 @@ function MapView({ position, onClick, style = {} }) {
   }, []);
 
   useEffect(() => {
+    // if (
+    //   (deviceType === "android" || deviceType === "ios") &&
+    //   window.DeviceOrientationEvent
+    // ) {
+    //   const handleOrientation = (event) => {
+    //     if (event.alpha !== null) {
+    //       setHeading(event.alpha); // 0~360도: 북쪽 기준 회전 각도
+    //     }
+    //   };
+
+    //   // iOS는 권한 요청 필요
+    //   if (
+    //     deviceType === "ios" &&
+    //     typeof DeviceOrientationEvent.requestPermission === "function"
+    //   ) {
+    //     DeviceOrientationEvent.requestPermission()
+    //       .then((response) => {
+    //         if (response === "granted") {
+    //           window.addEventListener(
+    //             "deviceorientation",
+    //             handleOrientation,
+    //             true
+    //           );
+    //         }
+    //       })
+    //       .catch(console.error);
+    //   } else {
+    //     window.addEventListener("deviceorientation", handleOrientation, true);
+    //   }
+
+    //   return () => {
+    //     window.removeEventListener("deviceorientation", handleOrientation);
+    //   };
+    // }
+
     if (deviceType === "android" || deviceType === "ios") {
       const watchId = navigator.geolocation.watchPosition(
         (pos) => {
@@ -68,7 +104,7 @@ function MapView({ position, onClick, style = {} }) {
           size: { width: 50, height: 50 },
           options: { offset: { x: 25, y: 50 } },
         }}
-      />
+      >
         {/* <div
         style={{
           color: "#000",
@@ -79,13 +115,13 @@ function MapView({ position, onClick, style = {} }) {
       >
         여기 계신가요?
       </div> */}
-      {/* </MapMarker> */}
+      </MapMarker>
       {/* 현재 위치 복귀 버튼 */}
       <div
         onClick={onClick}
         style={{
           position: "absolute",
-          bottom: "100px",
+          bottom: "20px",
           right: "20px",
           width: "55px",
           height: "55px",

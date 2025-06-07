@@ -2,13 +2,13 @@ import React, { useState, useEffect, useRef } from "react";
 import { List, Card, Typography, Spin, message } from "antd";
 import { fetchArrivalInfo } from "../api/busApi";
 import KakaoMapView from "../components/KakaoMapView";
-// import useGeoLocation from "../hooks/GeoLocation";
+import useGeoLocation from "../hooks/GeoLocation";
 import { getDistance } from "../utils/distance";
 import { EnvironmentOutlined } from "@ant-design/icons";
 import kakaoMap from "../js/kakaoMap";
 import proj4 from "proj4";
 // import "../css/nearby.css";
-import styles from "../css/nearby.module.css";
+import styles from "../css/nearby.module.css"
 
 proj4.defs(
   "EPSG:5182",
@@ -39,6 +39,17 @@ function Nearby() {
   const dragHandleRef = useRef(null);
   const [panelHeight, setPanelHeight] = useState(250);
   const [isDragging, setIsDragging] = useState(false);
+
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 1024);
+
+  // useEffect(() => {
+  //   const handleResize = () => {
+  //     setIsMobile(window.innerWidth <= 1024);
+  //   };
+
+  //   window.addEventListener("resize", handleResize);
+  //   return () => window.removeEventListener("resize", handleResize);
+  // }, []);
 
   const handleMouseDown = (e) => {
     e.preventDefault();
@@ -79,7 +90,94 @@ function Nearby() {
     };
   }, [isDragging]);
 
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 1024);
+  // useEffect(() => {
+  //   navigator.geolocation.watchPosition(
+  //     (pos) => {
+  //       setLocation({
+  //         lat: pos.coords.latitude,
+  //         lng: pos.coords.longitude,
+  //       });
+  //     },
+  //     (err) => {
+  //       message.error("위치를 가져오지 못했습니다.");
+  //       setLoadingStops(false);
+  //     },
+  //     {
+  //       enableHighAccuracy: true,
+  //       timeout: 15000,
+  //     }
+  //   );
+  // }, []);
+
+  useEffect(() => {
+    const target = mapCenter || location;
+    if (!target?.lat || !target?.lng) return;
+
+    const fetchNearbyStops = async () => {
+      setLoadingStops(true);
+      try {
+        const url = `https://apis.data.go.kr/1613000/BusSttnInfoInqireService/getCrdntPrxmtSttnList?serviceKey=l7L9HOYK5mFEJAehYbro5q9qXaJofTBB7nv0fYzNNIqJE%2FYGs2d7Gn6%2FDb6qrv9D1F9v5iEm%2BpXpQ%2FCINV59DA%3D%3D&gpsLati=${target.lat}&gpsLong=${target.lng}&radius=1000&_type=json`;
+        const res = await fetch(url);
+        const json = await res.json();
+        const items = json.response.body.items?.item ?? [];
+
+        // const searchResults = await kakaoMap.getSearchTotal("");
+        // const searchMap = new Map(searchResults.map(sr => [sr.bsNm, sr]));
+
+        // const stops = items
+        //   .filter((item) => item.nodeid.includes("DGB"))
+        //   .map((item) => {
+        //     const matched = searchResults.find((sr) => sr.bsNm === item.nodenm);
+        //     if (!matched) return null;
+        //     const converted = convertNGISToKakao(matched.ngisXPos, matched.ngisYPos);
+        //     return {
+        //       name: item.nodenm,
+        //       bsId: matched.bsId,
+        //       arsId: item.nodeid ?? "",
+        //       lat: converted.lat,
+        //       lng: converted.lng,
+        //       distance: getDistance(target.lat, target.lng, converted.lat, converted.lng),
+        //     };
+        //   })
+        //   .filter(Boolean);
+        const stops = items
+          .filter((item) => item.nodeid.includes("DGB"))
+          .map((item) => {
+            const lat = parseFloat(item.gpslati);
+            const lng = parseFloat(item.gpslong);
+            return {
+              name: item.nodenm,
+              bsId: item.nodeid.replace("DGB", ""),
+              arsId: item.nodeid,
+              lat,
+              lng,
+              distance: getDistance(target.lat, target.lng, lat, lng),
+            };
+          })
+          .filter(Boolean);
+
+        setBusStops(stops);
+      } catch (err) {
+        console.error("정류장 불러오기 실패:", err);
+        message.error("정류장을 불러오는 데 실패했습니다");
+      } finally {
+        setLoadingStops(false);
+      }
+    };
+
+    fetchNearbyStops();
+  }, [mapCenter, location]); // 둘 중 하나만 바뀌어도 작동
+
+  useEffect(() => {
+    if (!selectedStop) return;
+    const fetchData = async () => {
+      setLoadingArrivals(true);
+      const result = await fetchArrivalInfo(selectedStop.bsId);
+      setArrivalData(result);
+      setLoadingArrivals(false);
+    };
+    fetchData();
+  }, [selectedStop]);
 
   const handleMapCenterChanged = (newCenter) => {
     if (
@@ -103,14 +201,14 @@ function Nearby() {
       // ✅ 모바일이면 실시간 위치 추적
       const watchId = navigator.geolocation.watchPosition(
         (pos) => {
-          // setLocation({
-          //   lat: pos.coords.latitude,
-          //   lng: pos.coords.longitude,
-          // });
-          // setMapCenter({
-          //   lat: pos.coords.latitude,
-          //   lng: pos.coords.longitude,
-          // });
+          setLocation({
+            lat: pos.coords.latitude,
+            lng: pos.coords.longitude,
+          });
+          setMapCenter({
+            lat: pos.coords.latitude,
+            lng: pos.coords.longitude,
+          });
 
           const { latitude, longitude } = pos.coords;
 
@@ -158,149 +256,6 @@ function Nearby() {
     }
   }, [isMobile]);
 
-  // useEffect(() => {
-  //   navigator.geolocation.getCurrentPosition((pos) => {
-  //     const lat = pos.coords.latitude;
-  //     const lng = pos.coords.longitude;
-  //     setLocation({ lat, lng });
-  //     setMapCenter({ lat, lng });
-  //   });
-  // }, []);
-
-  const prevCenterRef = useRef(null);
-
-  // useEffect(() => {
-  //   if (!mapCenter?.lat || !mapCenter?.lng) return;
-
-  //   const isSameLocation = () => {
-  //     if (!prevCenterRef.current) return false;
-  //     const { lat, lng } = prevCenterRef.current;
-  //     return (
-  //       Math.abs(lat - mapCenter.lat) < 0.0005 &&
-  //       Math.abs(lng - mapCenter.lng) < 0.0005
-  //     );
-  //   };
-
-  //   if (isSameLocation()) return;
-  //   prevCenterRef.current = mapCenter;
-
-  const fetchNearbyStops = async (center) => {
-    console.log("📡 fetchNearbyStops 호출됨", center);
-    if (!center?.lat || !center?.lng) return;
-    console.warn("center가 없음. 실행 안 됨");
-    setLoadingStops(false);
-    try {
-      const url = `https://apis.data.go.kr/1613000/BusSttnInfoInqireService/getCrdntPrxmtSttnList?serviceKey=l7L9HOYK5mFEJAehYbro5q9qXaJofTBB7nv0fYzNNIqJE%2FYGs2d7Gn6%2FDb6qrv9D1F9v5iEm%2BpXpQ%2FCINV59DA%3D%3D&gpsLati=${center.lat}&gpsLong=${center.lng}&radius=1000&_type=json`;
-      const res = await fetch(url);
-      const json = await res.json();
-      let items = json.response?.body?.items?.item ?? [];
-      items = items.filter((item) => item?.nodeid?.includes("DGB"));
-
-      if (!items.length) {
-        setBusStops([]);
-        setLoadingStops(false);
-        return;
-      }
-
-      let searchResults = [];
-      try {
-        searchResults = await kakaoMap.getSearchTotal("");
-      } catch (searchErr) {
-        console.error("카카오맵 검색 실패:", searchErr);
-      }
-
-      const stops = items
-        .map((item) => {
-          const matched = searchResults.find((sr) => sr.bsNm === item.nodenm);
-          if (!matched) return null;
-          const converted = convertNGISToKakao(
-            matched.ngisXPos,
-            matched.ngisYPos
-          );
-          return {
-            name: item.nodenm,
-            bsId: matched.bsId,
-            arsId: item.nodeid,
-            lat: converted.lat,
-            lng: converted.lng,
-            distance:
-              // getDistance(
-              //   location.lat,
-              //   location.lng,
-              //   converted.lat,
-              //   converted.lng
-              // ),
-              location.lat && location.lng
-                ? getDistance(location.lat, location.lng, converted.lat, converted.lng)
-                : null
-          };
-        })
-        .filter(Boolean);
-
-      setBusStops(stops);
-    } catch (err) {
-      console.error("정류장 불러오기 실패:", err);
-      message.error("정류장을 불러오는 데 실패했습니다");
-    } finally {
-      console.log("🔁 로딩 중단됨");
-      setLoadingStops(false);
-    }
-  };
-
-  const debounce = (fn, delay) => {
-    let timer;
-    return (...args) => {
-      clearTimeout(timer);
-      timer = setTimeout(() => { void fn(...args) }, delay);
-    };
-  };
-
-  const debouncedFetchStops = useRef(debounce(fetchNearbyStops, 500));
-
-  useEffect(() => {
-    console.log("🧭 mapCenter 변경됨", mapCenter);
-
-    if (!mapCenter?.lat || !mapCenter?.lng || !location.lat || !location.lng) return;
-    const { lat, lng } = mapCenter;
-    if (
-      prevCenterRef.current &&
-      Math.abs(lat - prevCenterRef.current.lat) < 0.001 &&
-      Math.abs(lng - prevCenterRef.current.lng) < 0.001
-    ) {
-      console.log("📍 위치 변화 미미 — fetch 안 함");
-      return;
-    }
-    // if (isSameLocation()) return;
-    prevCenterRef.current = mapCenter;
-    debouncedFetchStops.current(mapCenter);
-  }, [mapCenter, location]);
-
-
-  useEffect(() => {
-    if (!selectedStop?.bsId) return;
-
-    const stopId = selectedStop.bsId;
-
-    // 이미 캐시에 있으면 그대로 사용
-    if (arrivalMap[stopId]) {
-      setArrivalData(arrivalMap[stopId]);
-      return;
-    }
-
-    // 없으면 새로 API 호출
-    const fetchArrivalData = async () => {
-      setLoadingArrivals(true);
-      const result = await fetchArrivalInfo(stopId);
-      const list = result?.body?.list ?? [];
-
-      setArrivalMap((prev) => ({ ...prev, [stopId]: list }));
-      setArrivalData(list);
-      setLoadingArrivals(false);
-    };
-
-    fetchArrivalData();
-  }, [selectedStop]);
-
   const maxButtonBottom =
     typeof window !== "undefined" ? window.innerHeight * 0.7 : 300;
 
@@ -312,10 +267,6 @@ function Nearby() {
     transition: "bottom 0.3s ease",
   };
 
-  useEffect(() => {
-    console.log("🧭 selectedStop 변경됨:", selectedStop);
-  }, [selectedStop]);
-
   return (
     <div
       className={`${styles["nearby-container"]} ${selectedStop ? styles["three-columns"] : styles["two-columns"]
@@ -325,6 +276,24 @@ function Nearby() {
         className={`${styles["map-column"]} ${styles["card-fixed"]}`}
         styles={{ body: { height: "100%" } }}
       >
+        {/* <KakaoMapView
+          center={{ lat: location.lat, lng: location.lng }}
+          markers={busStops}
+          selectedStop={selectedStop}
+          setSelectedStop={setSelectedStop}
+          setArrivalMap={setArrivalMap}
+          loadingArrivals={loadingArrivals}
+          setLoadingArrivals={setLoadingArrivals}
+          onRelocate={() => {
+            navigator.geolocation.getCurrentPosition((pos) => {
+              setLocation({
+                lat: pos.coords.latitude,
+                lng: pos.coords.longitude,
+              });
+            });
+          }}
+        /> */}
+
         <KakaoMapView
           mapCenter={mapCenter}
           myLocation={location}
@@ -362,166 +331,176 @@ function Nearby() {
               현재 위치 근처의 버스 정류장 목록입니다.
             </Text>
           </div>
-          <div style={{ position: "relative", flex: 1, overflow: "hidden" }}>
-            <Card
-              className={`${styles["stops-column"]} ${styles["card-fixed"]}`}
-              style={{ overflowY: "auto", maxHeight: "100vh" }}
-              styles={{ body: { padding: 8 } }}
-            >
-              {loadingStops && (
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "45%",
-                    left: "50%",
-                    transform: "translate(-50%, -50%)",
-                    zIndex: 10,
-                    textAlign: "center",
+          <Card
+            className={`${styles["stops-column"]} ${styles["card-fixed"]}`}
+            style={{ overflowY: "auto", maxHeight: "100vh" }}
+            styles={{ body: { padding: 8 } }}
+          >
+            {loadingStops && (
+              <div
+                style={{
+                  position: "absolute",
+                  top: "45%",
+                  left: "50%",
+                  transform: "translate(-50%, -50%)",
+                  zIndex: 10,
+                  textAlign: "center",
+                }}
+              >
+                <Spin />
+                <div style={{ marginTop: 8, color: "#666" }}>
+                  정류장을 불러오는 중...
+                </div>
+              </div>
+            )}
+            <div style={{ opacity: loadingStops ? 0.2 : 1 }}>
+              {busStops.map((item, index) => (
+                <Card
+                  key={item.arsId}
+                  style={{ marginBottom: 8, cursor: "pointer", minHeight: 70 }}
+                  styles={{ body: { padding: "8px 12px" } }}
+                  // onClick={async () => {
+                  //   if (selectedStop?.bsId === item.bsId) {
+                  //     setSelectedStop(null);
+                  //     setArrivalData([]);
+                  //     return;
+                  //   }
+                  //   setSelectedStop(item);
+                  //   setLoadingArrivals(true);
+                  //   const result = await fetchArrivalInfo(item.bsId);
+                  //   setArrivalData(result);
+                  //   setLoadingArrivals(false);
+                  // }}
+                  onClick={async () => {
+                    if (selectedStop?.bsId === item.bsId) {
+                      setSelectedStop(null);
+                      setArrivalData([]);
+                      return;
+                    }
+
+                    setSelectedStop(item);
+
+                    if (!arrivalMap[item.bsId]) {
+                      setLoadingArrivals(true);
+                      const result = await fetchArrivalInfo(item.bsId);
+                      setArrivalMap((prev) => ({ ...prev, [item.bsId]: result }));
+                      setLoadingArrivals(false);
+                    }
                   }}
                 >
-                  <Spin />
-                  <div style={{ marginTop: 8, color: "#666" }}>
-                    정류장을 불러오는 중...
-                  </div>
-                </div>
-              )}
-              <div style={{ opacity: loadingStops ? 0.2 : 1 }}>
-                {busStops.map((item, index) => (
-                  <Card
-                    key={item.arsId}
+                  <div
                     style={{
-                      margin: "4px 0",
-                      marginBottom: 8,
-                      cursor: "pointer",
-                      minHeight: 70,
-                    }}
-                    styles={{ body: { padding: "8px 12px" } }}
-                    onClick={async () => {
-                      const stopId = item.arsId || item.bsId;
-                      const selectedId = selectedStop?.arsId || selectedStop?.bsId;
-                      const isSameStop = stopId === selectedId;
-
-                      // 같은 정류장이어도 항상 도착정보 갱신
-                      setSelectedStop(item);
-                      setLoadingArrivals(true);
-
-                      const result = await fetchArrivalInfo(stopId);
-                      const list = result?.body?.list ?? [];
-
-                      setArrivalData(list);
-                      setArrivalMap((prev) => ({ ...prev, [stopId]: list }));
-                      setLoadingArrivals(false);
+                      display: "flex",
+                      justifyContent: "space-between",
                     }}
                   >
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                      }}
-                    >
-                      <Text strong>
-                        {index + 1}. {item.name}
-                      </Text>
-                      <div>
-                        <Text>
-                          {item.distance != null ? `${(item.distance / 1000).toFixed(1)} km` : "거리 계산 중"}
-                        </Text>
-                      </div>
+                    <Text strong>
+                      {index + 1}. {item.name}
+                    </Text>
+                    <div>
+                      <Text>{(item.distance / 1000).toFixed(1)} km</Text>
                     </div>
-                    <div style={{ color: "#888", fontSize: "0.8rem" }}>
-                      정류장 ID: {item.arsId}
-                    </div>
-                  </Card>
-                ))}
-              </div>
-            </Card>
-          </div>
+                  </div>
+                  <div style={{ color: "#888", fontSize: "0.8rem" }}>
+                    정류장 ID: {item.arsId}
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </Card>
         </div>
       )}
 
       {selectedStop && (
         <div>
-          <div style={{ textAlign: "center", marginBottom: 12 }}>
-            <Title level={4} style={{ display: "inline-block", margin: 0 }}>
-              🚌 {selectedStop.name} 도착 정보
-            </Title>
-            <Text type="secondary" style={{ display: "block", marginTop: 4 }}>
-              현재 버스 도착 정보입니다.
-            </Text>
+          <div>
+            <div style={{ textAlign: "center", marginBottom: 12 }}>
+              <Title level={4} style={{ display: "inline-block", margin: 0 }}>
+                🚌 {selectedStop.name} 도착 정보
+              </Title>
+              <Text type="secondary" style={{ display: "block", marginTop: 4 }}>
+                현재 버스 도착 정보입니다.
+              </Text>
+            </div>
+            <Card
+              className={`${styles["arrival-column"]} ${styles["card-fixed"]}`}
+              style={{ overflowY: "auto", maxHeight: "100vh" }}
+              styles={{ body: { padding: 8 } }}
+            >
+              {loadingArrivals ? (
+                <Spin tip="도착 정보를 불러오는 중..." fullscreen />
+              ) : arrivalData.length > 0 ? (
+                <List
+                  dataSource={arrivalData}
+                  renderItem={(bus) => {
+                    const getColorByState = (state) => {
+                      switch (state) {
+                        case "전":
+                          return "#52c41a";
+                        case "전전":
+                          return "#faad14";
+                        case "도착예정":
+                          return "#aaaaaa";
+                        default:
+                          return "#1890ff";
+                      }
+                    };
+                    const getStateText = (state) => {
+                      switch (state) {
+                        case "전":
+                          return "곧 도착";
+                        case "전전":
+                          return "곧 도착 예정";
+                        case "도착예정":
+                          return "차고지 대기";
+                        default:
+                          return `${state} 후 도착`;
+                      }
+                    };
+                    return (
+                      <List.Item>
+                        {/* <Card
+                          style={{
+                            width: "100%",
+                            minHeight: 100,
+                            fontSize: "0.9rem",
+                          }}
+                          styles={{ body: { padding: "8px 12px" } }}
+                        >
+                          <div
+                            style={{
+                              display: "flex",
+                              justifyContent: "space-between",
+                              marginBottom: 4,
+                            }}
+                          > */}
+                        <Text strong>🚌 {bus.routeName}</Text>
+                        <Text
+                          strong
+                          style={{ color: getColorByState(bus.arrState) }}
+                        >
+                          {getStateText(bus.arrState)}
+                        </Text>
+                        {/* </div>
+                          {bus.vhcNo2 && (
+                            <>
+                              <br />
+                              <Text>🆔 차량번호: {bus.vhcNo2}</Text>
+                            </>
+                          )}
+                        </Card> */}
+                      </List.Item>
+                    );
+                  }}
+                />
+              ) : (
+                <Text type="secondary">도착 정보가 없습니다.</Text>
+              )}
+            </Card>
           </div>
-          <Card
-            className={`${styles["arrival-column"]} ${styles["card-fixed"]}`}
-            style={{ overflowY: "auto", maxHeight: "100vh" }}
-            styles={{ body: { padding: "6px 8px" } }}
-          >
-            {loadingArrivals ? (
-              <Spin tip="도착 정보를 불러오는 중..." fullscreen />
-            ) : arrivalData.length > 0 ? (
-              <List
-                dataSource={arrivalData}
-                renderItem={(bus) => {
-                  const getColorByState = (state) => {
-                    switch (state) {
-                      case "전":
-                        return "#52c41a";
-                      case "전전":
-                        return "#faad14";
-                      case "도착예정":
-                        return "#aaaaaa";
-                      default:
-                        return "#1890ff";
-                    }
-                  };
-                  const getStateText = (state) => {
-                    switch (state) {
-                      case "전":
-                        return "전";
-                      case "전전":
-                        return "전전";
-                      case "도착예정":
-                        return "차고지 대기";
-                      default:
-                        return `${state} 후 도착`;
-                    }
-                  };
-                  return (
-                    <List.Item
-                    // className={`${styles["ant-list-item"]}`}
-                    >
-                      {/* <Card
-                        style={{
-                          width: "100%",
-                          minHeight: 100,
-                          fontSize: "0.9rem",
-                        }}
-                        styles={{ body: { padding: "12px" } }}
-                      > */}
-                      {/* <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "center",
-                          margin: "10px auto"
-                          // marginBottom: 4,
-                        }}
-                      > */}
-                      <Text strong>🚌 {bus.routeName}</Text>
-                      <Text
-                        strong
-                        style={{ color: getColorByState(bus.arrState) }}
-                      >
-                        {getStateText(bus.arrState)}
-                      </Text>
-                    </List.Item>
-                  );
-                }}
-              />
-            ) : (
-              <Text type="secondary">도착 정보가 없습니다.</Text>
-            )}
-          </Card>
         </div>
-      )}
+      )
+      }
 
       {isMobile && (
         <div
@@ -569,94 +548,113 @@ function Nearby() {
             />
           </div>
 
+          <div style={{ textAlign: "center", marginBottom: 12 }}>
+            <EnvironmentOutlined
+              style={{ fontSize: 24, color: "#2d6ae0", marginRight: 8 }}
+            />
+            <Title level={4} style={{ display: "inline-block", margin: 0 }}>
+              주변 정류장
+            </Title>
+            <Text type="secondary" style={{ display: "block", marginTop: 4 }}>
+              현재 위치 근처의 버스 정류장 목록입니다.
+            </Text>
+          </div>
+
           {busStops.map((item, index) => {
             const isSelected =
               (selectedStop?.arsId || selectedStop?.bsId) ===
               (item.arsId || item.bsId);
             return (
-              <div
-                key={item.arsId}
-                onClick={async () => {
-                  const stopId = item.arsId || item.bsId;
-                  const selectedId = selectedStop?.arsId || selectedStop?.bsId;
-                  const isSameStop = stopId === selectedId;
-
-                  // 같은 정류장이어도 항상 도착정보 갱신
-                  setSelectedStop(item);
-                  setLoadingArrivals(true);
-
-                  const result = await fetchArrivalInfo(stopId);
-                  const list = result?.body?.list ?? [];
-
-                  setArrivalData(list);
-                  setArrivalMap((prev) => ({ ...prev, [stopId]: list }));
-                  setLoadingArrivals(false);
-                }}
-
-                style={{
-                  padding: "12px 16px",
-                  borderBottom: "1px solid #eee",
-                  cursor: "pointer",
-                  background: isSelected ? "#f0f9ff" : "white",
-                }}
-              >
-                <strong style={{ fontSize: "1rem", fontWeight: "bold" }}>
-                  {index + 1}. {item.name}
-                </strong>
+              <>
                 <div
-                  style={{ fontSize: "0.75rem", color: "#999", marginTop: 4 }}
+                  key={item.arsId}
+                  onClick={async () => {
+                    const stopId = item.arsId || item.bsId;
+                    const selectedId = selectedStop?.arsId || selectedStop?.bsId;
+                    const isSameStop = stopId === selectedId;
+
+                    if (isSameStop) {
+                      setSelectedStop(null);       // 도착정보 칸 안 보이게
+                      setArrivalData([]);          // 도착정보 초기화
+                      return;
+                    }
+
+                    // 같은 정류장이어도 항상 도착정보 갱신
+                    setSelectedStop(item);
+                    setLoadingArrivals(true);
+
+                    const result = await fetchArrivalInfo(stopId);
+                    const list = result?.body?.list ?? [];
+
+                    setArrivalData(list);
+                    setArrivalMap((prev) => ({ ...prev, [stopId]: list }));
+                    setLoadingArrivals(false);
+                  }}
+
+                  style={{
+                    padding: "12px 16px",
+                    borderBottom: "1px solid #eee",
+                    cursor: "pointer",
+                    background: isSelected ? "#f0f9ff" : "white",
+                  }}
                 >
-                  ID: {item.arsId}
-                </div>
-                <div>거리: {(item.distance / 1000).toFixed(1)} km</div>
-
-                {isSelected && (
+                  <strong style={{ fontSize: "1rem", fontWeight: "bold" }}>
+                    {index + 1}. {item.name}
+                  </strong>
                   <div
-                    style={{
-                      marginTop: 10,
-                      paddingTop: 8,
-                      borderTop: "1px dashed #ccc",
-                    }}
+                    style={{ fontSize: "0.75rem", color: "#999", marginTop: 4 }}
                   >
-                    {console.log("🧾 렌더 시 조건", {
-                      isSelected,
-                      loadingArrivals,
-                      arrivalData,
-                    })}
+                    ID: {item.arsId}
+                  </div>
+                  <div>거리: {(item.distance / 1000).toFixed(1)} km</div>
 
-                    {loadingArrivals ? (
-                      <Spin tip="도착 정보를 불러오는 중..." fullscreen />
-                    ) : Array.isArray(arrivalData) && arrivalData.length > 0 ? (
-                      <List
-                        dataSource={arrivalData}
-                        renderItem={(bus) => {
-                          const getColorByState = (state) => {
-                            switch (state) {
-                              case "전":
-                                return "#52c41a";
-                              case "전전":
-                                return "#faad14";
-                              case "도착예정":
-                                return "#aaaaaa";
-                              default:
-                                return "#1890ff";
-                            }
-                          };
-                          const getStateText = (state) => {
-                            switch (state) {
-                              case "전":
-                                return "곧 도착";
-                              case "전전":
-                                return "곧 도착 예정";
-                              case "도착예정":
-                                return "차고지 대기";
-                              default:
-                                return `${state} 후 도착`;
-                            }
-                          };
-                          return (
-                            <List.Item>
-                              {/* <Card
+                  {isSelected && (
+                    <div
+                      style={{
+                        marginTop: 10,
+                        paddingTop: 8,
+                        borderTop: "1px dashed #ccc",
+                      }}
+                    >
+                      {console.log("🧾 렌더 시 조건", {
+                        isSelected,
+                        loadingArrivals,
+                        arrivalData,
+                      })}
+
+                      {loadingArrivals ? (
+                        <Spin tip="도착 정보를 불러오는 중..." fullscreen />
+                      ) : Array.isArray(arrivalData) && arrivalData.length > 0 ? (
+                        <List
+                          dataSource={arrivalData}
+                          renderItem={(bus) => {
+                            const getColorByState = (state) => {
+                              switch (state) {
+                                case "전":
+                                  return "#52c41a";
+                                case "전전":
+                                  return "#faad14";
+                                case "도착예정":
+                                  return "#aaaaaa";
+                                default:
+                                  return "#1890ff";
+                              }
+                            };
+                            const getStateText = (state) => {
+                              switch (state) {
+                                case "전":
+                                  return "곧 도착";
+                                case "전전":
+                                  return "곧 도착 예정";
+                                case "도착예정":
+                                  return "차고지 대기";
+                                default:
+                                  return `${state} 후 도착`;
+                              }
+                            };
+                            return (
+                              <List.Item>
+                                {/* <Card
                                 style={{
                                   width: "100%",
                                   minHeight: 100,
@@ -664,39 +662,41 @@ function Nearby() {
                                 }}
                                 styles={{ body: { padding: "12px" } }}
                               > */}
-                              {/* <div
+                                {/* <div
                                   style={{
                                     display: "flex",
                                     justifyContent: "space-between",
                                     marginBottom: 4,
                                   }}
                                 > */}
-                              <Text strong>🚌 {bus.routeName}</Text>
-                              <Text
-                                strong
-                                style={{
-                                  color: getColorByState(bus.arrState),
-                                }}
-                              >
-                                {getStateText(bus.arrState)}
-                              </Text>
-                              {/* </div> */}
-                              {/* </Card> */}
-                            </List.Item>
-                          );
-                        }}
-                      />
-                    ) : (
-                      <Text type="secondary">도착 정보가 없습니다.</Text>
-                    )}
-                  </div>
-                )}
-              </div>
+                                <Text strong>🚌 {bus.routeName}</Text>
+                                <Text
+                                  strong
+                                  style={{
+                                    color: getColorByState(bus.arrState),
+                                  }}
+                                >
+                                  {getStateText(bus.arrState)}
+                                </Text>
+                                {/* </div> */}
+                                {/* </Card> */}
+                              </List.Item>
+                            );
+                          }}
+                        />
+                      ) : (
+                        <Text type="secondary">도착 정보가 없습니다.</Text>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </>
             );
           })}
         </div>
-      )}
-    </div>
+      )
+      }
+    </div >
   );
 }
 
