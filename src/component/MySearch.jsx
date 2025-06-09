@@ -9,6 +9,10 @@ import Myloca from "./Myloca.jsx";
 const MySearch = ({ onToggleFavorite, favorites }) => {
     const key = "one_key";
 
+    message.config({
+        top: '10%',
+    });
+
     const [searchResults, setSearchResults] = useState([]);
     const [isSearched, setIsSearched] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -199,14 +203,12 @@ const MySearch = ({ onToggleFavorite, favorites }) => {
                         onSearch={handleSearchButton}
                     />
                 </AutoComplete>
-                {isSearched && (
                     <Button
                         icon={<ReloadOutlined />}
                         onClick={handleReset}
                         size="large"
                         className={styles.resetButton}
                     />
-                )}
             </div>
             {isSearched && (
                 <div className={styles.resultsWrapper}>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { List, Card, Button } from "antd";
+import {List, Card, Button, message} from "antd";
 import { ReloadOutlined, StarFilled } from "@ant-design/icons";
 import axios from "axios";
 import MySearch from "../component/MySearch";
@@ -7,6 +7,12 @@ import styles from "../css/My.module.css";
 import Myloca from "../component/Myloca.jsx";
 
 const My = () => {
+    const key = "one_key";
+
+    message.config({
+        top: '10%',
+    });
+
     const [favorites, setFavorites] = useState([]);
     const [selectedStop, setSelectedStop] = useState(null);
     const [arrivalInfo, setArrivalInfo] = useState(null);
@@ -85,9 +91,20 @@ const My = () => {
                     setSelectedStop(null);
                     setArrivalInfo(null);
                 }
+                message.success({
+                    content: "나의 버스에서 제거되었습니다.",
+                    key,
+                    duration: 2,
+                });
                 return newFavorites;
             } else {
-                return [...prev, stop];
+                setSelectedStop(stop);
+                message.success({
+                    content: "나의 버스에 추가되었습니다.",
+                    key,
+                    duration: 2,
+                });
+                return [stop, ...prev];
             }
         });
     };
