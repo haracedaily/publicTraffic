@@ -118,7 +118,7 @@ function SearchTotal(props) {
             }
             <div className={props.isCommonMobile?"jh_search_result_mobile":"none"} style={{height:`${props.isCommonMobile?"calc(100% - 50vh - 72px + "+calcHeight+")":"auto"}`}} data-height={calcHeight}>
                 {props.isCommonMobile&&
-                    <div style={{display:"flex",justifyContent:"center",paddingTop:"1rem",marginBottom:"1rem",alignItems:"center",height:"20px",position:"sticky",top:0,zIndex:30000,backgroundColor:"white", cursor:"pointer"}} onClick={toggleStart}>
+                    <div style={{display:"flex",justifyContent:"center",paddingTop:"1rem",paddingBottom:"1rem",alignItems:"center",height:"20px",position:"sticky",top:0,zIndex:30000,backgroundColor:"white", cursor:"pointer"}} onClick={toggleStart}>
                     <div className={`${calcHeight==="0px"?styles.upper_btn:styles.lower_btn} ${toggleMove.current?calcHeight==="0px"?styles.upper_change:styles.lower_change:""} toggleBtn`} style={{width:"10px",height:"10px",borderRadius:"3px",borderTop:"5px solid #dddddd",borderRight:"5px solid #dddddd"}}></div>
                 </div>
                 }
