@@ -19,41 +19,6 @@ function MapView({ position, onClick, style }) {
   }, []);
 
   useEffect(() => {
-    // if (
-    //   (deviceType === "android" || deviceType === "ios") &&
-    //   window.DeviceOrientationEvent
-    // ) {
-    //   const handleOrientation = (event) => {
-    //     if (event.alpha !== null) {
-    //       setHeading(event.alpha); // 0~360도: 북쪽 기준 회전 각도
-    //     }
-    //   };
-
-    //   // iOS는 권한 요청 필요
-    //   if (
-    //     deviceType === "ios" &&
-    //     typeof DeviceOrientationEvent.requestPermission === "function"
-    //   ) {
-    //     DeviceOrientationEvent.requestPermission()
-    //       .then((response) => {
-    //         if (response === "granted") {
-    //           window.addEventListener(
-    //             "deviceorientation",
-    //             handleOrientation,
-    //             true
-    //           );
-    //         }
-    //       })
-    //       .catch(console.error);
-    //   } else {
-    //     window.addEventListener("deviceorientation", handleOrientation, true);
-    //   }
-
-    //   return () => {
-    //     window.removeEventListener("deviceorientation", handleOrientation);
-    //   };
-    // }
-
     if (deviceType === "android" || deviceType === "ios") {
       const watchId = navigator.geolocation.watchPosition(
         (pos) => {
@@ -105,16 +70,6 @@ function MapView({ position, onClick, style }) {
           options: { offset: { x: 25, y: 50 } },
         }}
       >
-        {/* <div
-        style={{
-          color: "#000",
-          background: "#fff",
-          padding: "2px",
-          borderRadius: "4px",
-        }}
-      >
-        여기 계신가요?
-      </div> */}
       </MapMarker>
       {/* 현재 위치 복귀 버튼 */}
       <div
