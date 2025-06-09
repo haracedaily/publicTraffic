@@ -9,6 +9,10 @@ import Myloca from "./Myloca.jsx";
 const MySearch = ({ onToggleFavorite, favorites }) => {
     const key = "one_key";
 
+    message.config({
+        top: '10%',
+    });
+
     const [searchResults, setSearchResults] = useState([]);
     const [isSearched, setIsSearched] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
