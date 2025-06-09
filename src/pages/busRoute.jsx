@@ -132,6 +132,10 @@ function BusRoute(props) {
 
   const key = "unique_noti_key";
 
+  useEffect(() => {
+    if (props.originRoute) props.handleRouteClick(filteredRouteList[selectedRouteIndex])
+  }, [props.originRoute])
+
   const handleSwap = () => {
     const prevOrigin = origin;
     const prevDestination = destination;
@@ -145,6 +149,7 @@ function BusRoute(props) {
   };
 
   const handleSearch = async () => {
+    setActiveKey(null);
     if (!selectedOrigin && !selectedDestination) {
       message.warning({
         content: "출발 정류장과 도착 정류장을 선택해주세요.",
@@ -223,9 +228,9 @@ function BusRoute(props) {
 
       const {header, body} = response.data;
 
-      console.log("Selected Route:", body);
-      console.log("Origin:", selectedOrigin);
-      console.log("Destination:", selectedDestination);
+      // console.log("Selected Route:", body);
+      // console.log("Origin:", selectedOrigin);
+      // console.log("Destination:", selectedDestination);
 
       if (header?.success && Array.isArray(body) && body.length > 0) {
         setRouteList(body);
@@ -306,7 +311,7 @@ function BusRoute(props) {
         )
         .then((response) => {
           if (response.data.header.success && response.data.body.length > 0) {
-            console.log("?", response.data.body);
+            // console.log("?", response.data.body);
 
             const firstStop = response.data.body[0];
             let data = response.data.body.map((el) => {
@@ -340,7 +345,12 @@ function BusRoute(props) {
           return null;
         })
         .catch((error) => {
-          console.log("정류장 검색에 실패했습니다:", error);
+          message.error({
+            content: "정류장 검색에 실패했습니다. 다시 시도해주세요.",
+            key: `search_error_${Date.now()}`,
+            duration: 2,
+          })
+          // console.log("정류장 검색에 실패했습니다:", error);
         });
   };
 
@@ -380,7 +390,10 @@ function BusRoute(props) {
   };
 
   const handleRouteSegmentClick = async (step) => {
-    console.log("경로 구간 클릭:", step.stBsNm, "->", step.edBsNm);
+    // console.log("경로 구간 클릭:", step.stBsNm, "->", step.edBsNm);
+
+    // 경로선 초기화
+    props.setCustomPathLink(null);
 
     // try {
     // 첫 번째 클릭 시 기존 경로선 초기화
@@ -390,8 +403,8 @@ function BusRoute(props) {
       // searchBusRoute(step.stBsNm, "origin", false), // 세부 구간 클릭 플래그 추가
       // searchBusRoute(step.edBsNm, "destination", false), // 세부 구간 클릭 플래그 추가
       // const [originStop, destinationStop] = await Promise.all([
-      searchBusRoute(step.stBsNm, "origin"),
-      searchBusRoute(step.edBsNm, "destination"),
+      searchBusRoute(step.stBsNm, "origin", 0, true),
+      searchBusRoute(step.edBsNm, "destination", 1, true),
     ]);
 
     if (originStop) {
@@ -416,6 +429,17 @@ function BusRoute(props) {
           !route.list.some((step) => step.routeNo.includes("지하철")) &&
           route.trans !== "환승"
   );
+
+  const handleRouteClick = (route, idx) => {
+    // 경로선 초기화
+    props.setCustomPathLink(null);
+
+    // 선택된 경로 인덱스 설정
+    setSelectedRouteIndex(idx);
+
+    // KaokaoMain의 handleRouteClick 호출
+    // props.handleRouteClick(route);
+  };
 
   return (
       <>
@@ -555,6 +579,8 @@ function BusRoute(props) {
               </div>
           )}
 
+          {/*isRouteSearched: 경로 검색이 완료되었는지 여부를 나타내는 상태*/}
+          {/*searchResults: 정류장 검색 결과 배열 (API 호출로 채워짐)*/}
           {!isRouteSearched && searchResults.length > 0 && (
               <div style={{padding: "10px"}}>
                 <List
@@ -644,10 +670,11 @@ function BusRoute(props) {
                                 padding: selectedRouteIndex === idx ? "8px" : "0",
                               }}
                               onClick={() => {
-                                console.log(route);
+                                // console.log(route);
                                 setSelectedRouteIndex(idx);
-                                props.handleRouteClick(route); // 지도에 경로와 마커를 렌더링
+                                handleRouteClick(route, idx); // 지도에 경로와 마커를 렌더링
                               }}
+
                           >
                             <div
                                 style={{
@@ -686,7 +713,7 @@ function BusRoute(props) {
                                         }}
                                         onClick={() => {
                                           handleRouteSegmentClick(step);
-                                          console.log("step", step);
+                                          // console.log("step", step);
                                         }}
                                     >
                                       <div
