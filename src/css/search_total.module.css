@@ -56,16 +56,37 @@
 .side_list_border>div>div>ul>li:last-child{
     border-bottom: none !important;
 }
-
+.toggleBtn{
+    transition : all 0.7s linear;
+}
 .upper_btn{
     animation:upper_blink 0.7s infinite;
-    transition:all 0.5s ease-in-out;
 }
 .lower_btn{
-    animation:lower_blink 0.5s infinite;
-    transition:all 0.5s ease;
+    animation:lower_blink 0.7s infinite;
 }
-
+.upper_change{
+    animation:upper_blink 0.7s infinite,upper_change .4s linear;
+}
+.lower_change {
+    animation:lower_blink 0.7s infinite,lower_change .4s linear;
+}
+@keyframes upper_change{
+    0%{
+        transform:rotate(-225deg);
+    }
+    100%{
+        transform:rotate(-45deg);
+    }
+}
+@keyframes lower_change{
+    0%{
+        transform:rotate(-45deg);
+    }
+    100%{
+        transform:rotate(-225deg);
+    }
+}
 @keyframes upper_blink{
     0%{
         transform:translateY(0) rotate(-45deg);
@@ -80,12 +101,12 @@
 
 @keyframes lower_blink{
     0%{
-        transform:translateY(0) rotate(-135deg);
+        transform:translateY(0) rotate(-225deg);
     }
     50%{
-        transform:translateY(-5px) rotate(-135deg);
+        transform:translateY(-5px) rotate(-225deg);
     }
     100%{
-        transform:translateY(0) rotate(-135deg);
+        transform:translateY(0) rotate(-225deg);
     }
 }
