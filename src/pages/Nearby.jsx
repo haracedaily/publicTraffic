@@ -650,7 +650,7 @@ function Nearby() {
         </div>
       )}
 
-      {isMobile && (
+      {/* {isMobile && (
       <div
             onClick={handleReturnToMyLocation}
             style={{
@@ -675,7 +675,7 @@ function Nearby() {
               style={{ width: "100%", height: "100%" }}
             />
           </div>
-      )}
+      )} */}
     </div>
   );
 }
