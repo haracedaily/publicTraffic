@@ -146,21 +146,38 @@ function Nearby() {
         //     };
         //   })
         //   .filter(Boolean);
+        // const stops = items
+        //   .filter((item) => item.nodeid.includes("DGB"))
+        //   .map((item) => {
+        //     const lat = parseFloat(item.gpslati);
+        //     const lng = parseFloat(item.gpslong);
+        //     return {
+        //       name: item.nodenm,
+        //       bsId: item.nodeid.replace("DGB", ""),
+        //       arsId: item.nodeid,
+        //       lat,
+        //       lng,
+        //       distance: getDistance(target.lat, target.lng, lat, lng),
+        //     };
+        //   })
+        //   .filter(Boolean);
+
         const stops = items
           .filter((item) => item.nodeid.includes("DGB"))
           .map((item) => {
             const lat = parseFloat(item.gpslati);
             const lng = parseFloat(item.gpslong);
+            const distance = getDistance(target.lat, target.lng, lat, lng);
             return {
               name: item.nodenm,
               bsId: item.nodeid.replace("DGB", ""),
               arsId: item.nodeid,
               lat,
               lng,
-              distance: getDistance(target.lat, target.lng, lat, lng),
+              distance,
             };
           })
-          .filter(Boolean);
+          .filter((item) => item.distance <= 1000);
 
         setBusStops(stops);
       } catch (err) {
