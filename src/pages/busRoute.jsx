@@ -8,8 +8,7 @@ import MobileKakaoMap from "../component/MobileKakaoMap";
 const {Panel} = Collapse;
 const styles = `
   .bus-route-container {
-    padding: 20px;
-    max-width: 100%;
+    width: 100%;
     margin: 0 auto;
     box-sizing: border-box;
   }
@@ -30,7 +29,6 @@ const styles = `
   }
 
   .button-space .ant-btn {
-    padding: 6px 12px;
     min-width: 100px;
     border-radius: 8px;
   }
@@ -42,10 +40,6 @@ const styles = `
     border-radius: 8px;
     padding: 5px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  }
-  
-  .search-history-card{
-  width: 320px;
   }
 
   .search-result-list {
@@ -64,17 +58,18 @@ const styles = `
 
   /* 425px 이하 (모바일) */
   @media (max-width: 425px) {
+  
     .button-space .ant-btn {
       min-width: 80px;
     }
 
     .search-history-card,
     .route-card {
-      padding: 5px;
+      margin-top: 10px;
     }
 
     .route-list-item {
-      padding: 8px;
+      padding: 0px;
     }
   }
 
@@ -85,9 +80,14 @@ const styles = `
       display: flex;
       flex-direction: column;
     }
-
+    
+    .search-history-card,
+    .route-card {
+      margin-top: 10px;
+    }
+    
     .button-space .ant-btn {
-      padding: 5px 10px;
+      
       min-width: 90px;
     }
   }
@@ -101,7 +101,7 @@ const styles = `
 
     .search-history-card,
     .route-card {
-      padding: 5px;
+      padding: 0px;
     }
   }
 `;
@@ -129,6 +129,7 @@ function BusRoute(props) {
   });
   const [activeKey, setActiveKey] = useState("1"); // Collpase 처음에는 열려 있음
   const [searchTerm, setSearchTerm] = useState("");
+  const [customPathLink, setCustomPathLink] = useState(null); // customPathLink 상태 추가
 
   const key = "unique_noti_key";
 
@@ -445,8 +446,8 @@ function BusRoute(props) {
       <>
         <style>{styles}</style>
         <div className="bus-route-container">
-          <div style={{display: "flex", gap: "25px"}}>
-            <div>
+          <div style={{display: "flex", gap: "25px", justifyContent: "center", marginTop: "20px"}}>
+            <div style={{padding: "0px", width: "60%"}}>
               <Space direction="vertical" className="input-space">
                 <Input.Search
                     id="originInput"
@@ -499,7 +500,7 @@ function BusRoute(props) {
             </div>
           </div>
 
-          <div style={{padding: "5px"}}>
+          <div style={{padding: "0px"}}>
             <Space className="button-space">
               <Button
                   type="primary"
@@ -518,6 +519,24 @@ function BusRoute(props) {
             </Space>
           </div>
 
+
+          {/*{props.isCommonMobile && (*/}
+          {/*    <div style={{ width: "100%", height: "50vh" }}>*/}
+          {/*      <MobileKakaoMap*/}
+          {/*          {...props}*/}
+          {/*          customPathLink={customPathLink}*/}
+          {/*          setCustomPathLink={setCustomPathLink} // props로 전달*/}
+          {/*          filteredRouteList={filteredRouteList}*/}
+          {/*          selectedRouteIndex={selectedRouteIndex}*/}
+          {/*      />*/}
+          {/*    </div>*/}
+          {/*)}*/}
+
+          {props.isCommonMobile && (
+              <div style={{width: "100%", height: "400px", marginTop: "10px"}}>
+                <MobileKakaoMap {...props} />
+              </div>
+          )}
 
           {/*<Card*/}
           {/*    style={{marginBottom: 16, borderRadius: 12, background: "#fafafa"}}*/}
@@ -572,12 +591,6 @@ function BusRoute(props) {
               </Panel>
             </Collapse>
           </div>
-
-          {props.isCommonMobile && (
-              <div style={{width: "100%", height: "400px", marginTop: "10px"}}>
-                <MobileKakaoMap {...props} />
-              </div>
-          )}
 
           {/*isRouteSearched: 경로 검색이 완료되었는지 여부를 나타내는 상태*/}
           {/*searchResults: 정류장 검색 결과 배열 (API 호출로 채워짐)*/}
