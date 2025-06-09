@@ -112,7 +112,7 @@ label.navSideRouteBtn{
 
 
 .none{
-  display:none;
+  display:none !important;
 }
 
 
