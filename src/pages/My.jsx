@@ -87,7 +87,8 @@ const My = () => {
                 }
                 return newFavorites;
             } else {
-                return [...prev, stop];
+                // return [...prev, stop];
+                return [stop, ...prev]
             }
         });
     };
