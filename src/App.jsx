@@ -23,7 +23,7 @@ function App() {
                 {isMobile ? <InstallButton/> : <nav>
                     <div onClick={()=>{navigator("/my")}}>나의버스</div>
                     <div onClick={()=>{navigator("/nearby")}}>주변정류장</div>
-                    <div>이용안내</div>
+                    <div onClick={()=>{navigator("/howto")}}>앱설치</div>
                     {/* <Button>로그인</Button> */}
                     <InstallButton/>
                 </nav>}

@@ -1,0 +1,214 @@
+.container {
+    min-height: 100vh;
+    /*background-color: #f4f4f9;*/
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+    margin: 0 auto;
+}
+
+.content {
+    max-width: 1200px;
+    width: 100%;
+}
+
+.header {
+    font-size: 2.5rem;
+    font-weight: bold;
+    text-align: center;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.subheader {
+    font-size: 1.2rem;
+    text-align: center;
+    color: #666;
+    margin-bottom: 40px;
+}
+
+.section {
+    background-color: #fff;
+    padding: 32px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin: 0 auto 32px;
+    max-width: 1000px;
+    width: 100%;
+}
+
+.sectionTitle {
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+}
+
+.sectionDescription {
+    font-size: 1rem;
+    color: #666;
+    margin-bottom: 24px;
+}
+
+.webIcon {
+    color: #3b82f6;
+    margin-right: 8px;
+    margin-top: 4px;
+}
+
+.androidIcon {
+    color: #34d399;
+    margin-right: 8px;
+    margin-top: 4px;
+}
+
+.iosIcon {
+    color: #4b5563;
+    margin-right: 8px;
+    margin-top: 4px;
+}
+
+.steps {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.stepsAndroid {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.step {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 24px;
+    width: 100%;
+    min-height: 300px;
+}
+
+.stepContent {
+    display: flex;
+    align-items: flex-start;
+}
+
+.step strong {
+    font-size: 1.1rem;
+    color: #333;
+}
+
+.step p {
+    font-size: 1rem;
+    color: #666;
+    margin: 4px 0 12px 0;
+    height: 39px;
+}
+
+.stepImage {
+    width: 100%;
+    max-width: 300px;
+    border-radius: 4px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+    margin: 0 auto;
+    display: block;
+}
+
+@media (min-width: 1024px) {
+    .steps {
+        flex-direction: row;
+        justify-content: space-between;
+    }
+
+    .stepsAndroid {
+        flex-direction: row;
+        justify-content: space-between;
+    }
+
+    .step {
+        width: 45%;
+        margin-bottom: 0;
+    }
+
+    .stepsAndroid .step {
+        width: 30%;
+    }
+
+    .stepImage {
+        max-width: 300px;
+    }
+}
+
+@media (max-width: 768px) {
+    .header {
+        font-size: 2rem;
+    }
+
+    .subheader {
+        font-size: 1rem;
+    }
+
+    .sectionTitle {
+        font-size: 1.5rem;
+    }
+
+    .section {
+        padding: 20px;
+        max-width: 100%;
+    }
+
+    .steps,
+    .stepsAndroid {
+        flex-direction: column;
+    }
+
+    .step {
+        width: 100%;
+        min-height: 280px;
+    }
+
+    .stepImage {
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 20px 10px;
+    }
+
+    .header {
+        font-size: 1.8rem;
+    }
+
+    .subheader {
+        font-size: 0.9rem;
+    }
+
+    .sectionTitle {
+        font-size: 1.3rem;
+    }
+
+    .step strong {
+        font-size: 1rem;
+    }
+
+    .step p {
+        font-size: 0.9rem;
+    }
+
+    .step {
+        min-height: 260px;
+    }
+
+    .stepImage {
+        max-width: 100%;
+    }
+}
