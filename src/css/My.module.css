@@ -125,7 +125,7 @@
     display: inline-flex;
     align-items: center;
     color: #1890ff;
-    width: 5rem;
+    min-width: 5rem;
     /*gap: 8px; */
 }
 
@@ -333,6 +333,7 @@
 
     .contentWrapper {
         padding: 0.25rem;
+        /*background-color: yellow;*/
     }
 
     .cardTitleText {
@@ -347,11 +348,13 @@
 
     .favoritesList,
     .arrivalList {
-        max-height: 150px;
+        max-height: 170px;
+        /*background-color: blue;*/
     }
 
     .listItemContent {
         min-height: 50px;
+        /*background-color: red;*/
     }
 
     .stopName,

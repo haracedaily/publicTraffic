@@ -267,10 +267,12 @@
     .resultsWrapper {
         max-height: 150px;
         padding: 0 0.1rem;
+        /*background-color: red;*/
     }
 
     .list {
         max-height: 150px;
+        /*background-color: blue;*/
     }
 
     .stopName,
