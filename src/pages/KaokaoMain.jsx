@@ -489,6 +489,8 @@ const drawLine = (data) => {
                 openFind={openFind}
                 setOpenFind={setOpenFind}
                 handleRouteClick={handleRouteClick}
+                customPathLink={customPathLink}
+                setCustomPathLink={setCustomPathLink}
             />
 
             {isCommonMobile ||
