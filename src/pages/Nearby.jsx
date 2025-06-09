@@ -48,15 +48,6 @@ function Nearby() {
     }
   };
 
-  // useEffect(() => {
-  //   const handleResize = () => {
-  //     setIsMobile(window.innerWidth <= 1024);
-  //   };
-
-  //   window.addEventListener("resize", handleResize);
-  //   return () => window.removeEventListener("resize", handleResize);
-  // }, []);
-
   const handleMouseDown = (e) => {
     e.preventDefault();
     setIsDragging(true);
@@ -95,25 +86,6 @@ function Nearby() {
       window.removeEventListener("touchend", stopDrag);
     };
   }, [isDragging]);
-
-  // useEffect(() => {
-  //   navigator.geolocation.watchPosition(
-  //     (pos) => {
-  //       setLocation({
-  //         lat: pos.coords.latitude,
-  //         lng: pos.coords.longitude,
-  //       });
-  //     },
-  //     (err) => {
-  //       message.error("위치를 가져오지 못했습니다.");
-  //       setLoadingStops(false);
-  //     },
-  //     {
-  //       enableHighAccuracy: true,
-  //       timeout: 15000,
-  //     }
-  //   );
-  // }, []);
 
   useEffect(() => {
     const target = mapCenter || location;
@@ -225,15 +197,6 @@ function Nearby() {
       // ✅ 모바일이면 실시간 위치 추적
       const watchId = navigator.geolocation.watchPosition(
         (pos) => {
-          // setLocation({
-          //   lat: pos.coords.latitude,
-          //   lng: pos.coords.longitude,
-          // });
-          // setMapCenter({
-          //   lat: pos.coords.latitude,
-          //   lng: pos.coords.longitude,
-          // });
-
           const { latitude, longitude } = pos.coords;
 
           // 위치 변경이 크지 않으면 무시
@@ -489,21 +452,6 @@ function Nearby() {
                     };
                     return (
                       <List.Item>
-                        {/* <Card
-                          style={{
-                            width: "100%",
-                            minHeight: 100,
-                            fontSize: "0.9rem",
-                          }}
-                          styles={{ body: { padding: "8px 12px" } }}
-                        >
-                          <div
-                            style={{
-                              display: "flex",
-                              justifyContent: "space-between",
-                              marginBottom: 4,
-                            }}
-                          > */}
                         <Text strong>🚌 {bus.routeName}</Text>
                         <Text
                           strong
@@ -511,14 +459,6 @@ function Nearby() {
                         >
                           {getStateText(bus.arrState)}
                         </Text>
-                        {/* </div>
-                          {bus.vhcNo2 && (
-                            <>
-                              <br />
-                              <Text>🆔 차량번호: {bus.vhcNo2}</Text>
-                            </>
-                          )}
-                        </Card> */}
                       </List.Item>
                     );
                   }}
@@ -635,7 +575,8 @@ function Nearby() {
                   >
                     ID: {item.arsId}
                   </div>
-                  <div>거리: {(item.distance / 1000).toFixed(1)} km</div>
+                  {/* <div>거리: {(item.distance / 1000).toFixed(1)} km</div> */}
+                  <Text>{Math.floor(item.distance.toFixed(1))} m</Text>
 
                   {isSelected && (
                     <div
@@ -684,21 +625,6 @@ function Nearby() {
                             };
                             return (
                               <List.Item>
-                                {/* <Card
-                                style={{
-                                  width: "100%",
-                                  minHeight: 100,
-                                  fontSize: "0.9rem",
-                                }}
-                                styles={{ body: { padding: "12px" } }}
-                              > */}
-                                {/* <div
-                                  style={{
-                                    display: "flex",
-                                    justifyContent: "space-between",
-                                    marginBottom: 4,
-                                  }}
-                                > */}
                                 <Text strong>🚌 {bus.routeName}</Text>
                                 <Text
                                   strong
@@ -708,8 +634,6 @@ function Nearby() {
                                 >
                                   {getStateText(bus.arrState)}
                                 </Text>
-                                {/* </div> */}
-                                {/* </Card> */}
                               </List.Item>
                             );
                           }}
@@ -726,6 +650,7 @@ function Nearby() {
         </div>
       )}
 
+      {isMobile && (
       <div
             onClick={handleReturnToMyLocation}
             style={{
@@ -747,10 +672,10 @@ function Nearby() {
             <img
               src="/location_icon.svg"
               alt="현재 위치로 이동"
-              style={{ width: "60%", height: "60%" }}
+              style={{ width: "100%", height: "100%" }}
             />
           </div>
-
+      )}
     </div>
   );
 }
