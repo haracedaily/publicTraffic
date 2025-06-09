@@ -228,13 +228,12 @@ function SearchTotal(props) {
                                             버스 번호: {item.vhcNo2}
                                         </div>*/}
 
-                                    {props.openedRoute && props?.selectedRoute?.routeId === item.routeId && props.selectedRouteList && (
+                                    {props.openedRoute && props?.selectedRoute?.routeNo === item.routeNo && props.selectedRouteList && (
 
                                         <List
                                             className={styles.jh_sideSelectedStopList}
                                             dataSource={props.selectedRouteList}
                                             renderItem={(item) => {
-
                                                 // if(item.bsId===props.selectedStop.bsId)document.querySelector(".jh_sideSelectedStop")?.scrollIntoView({behavior:"smooth",block:"center",inline:"nearest"});
                                                 return (
                                                 <Card className={`${item.moveDir==0?styles.origin_dir:styles.reverse_dir} ${item.bsId===props.selectedStop.bsId?"jh_sideSelectedStop":""}`} >
