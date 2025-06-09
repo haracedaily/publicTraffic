@@ -641,8 +641,8 @@ function MobileKakaoMap(props) {
                                             item.arrState === "전전" ? "#faad14" : item.arrState ==='도착예정' ? "#aaaaaa" : "#1890ff",
                                         fontWeight: "bold"
                                     }}>
-                                        {item.arrState.includes("전") ? "곧 도착" :
-                                            item.arrState === "전전" ? "곧 도착 예정" : item.arrState ==='도착예정' ? "차고지 대기" :
+                                        {item.arrState === "전" ? "전" :
+                                            item.arrState === "전전" ? "전전" : item.arrState ==='도착예정' ? "차고지 대기" :
                                                 `${item.arrState} 후 도착`}
                                     </div>
                                 </div>

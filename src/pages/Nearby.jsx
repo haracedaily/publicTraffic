@@ -48,15 +48,6 @@ function Nearby() {
     }
   };
 
-  // useEffect(() => {
-  //   const handleResize = () => {
-  //     setIsMobile(window.innerWidth <= 1024);
-  //   };
-
-  //   window.addEventListener("resize", handleResize);
-  //   return () => window.removeEventListener("resize", handleResize);
-  // }, []);
-
   const handleMouseDown = (e) => {
     e.preventDefault();
     setIsDragging(true);
@@ -96,25 +87,6 @@ function Nearby() {
     };
   }, [isDragging]);
 
-  // useEffect(() => {
-  //   navigator.geolocation.watchPosition(
-  //     (pos) => {
-  //       setLocation({
-  //         lat: pos.coords.latitude,
-  //         lng: pos.coords.longitude,
-  //       });
-  //     },
-  //     (err) => {
-  //       message.error("위치를 가져오지 못했습니다.");
-  //       setLoadingStops(false);
-  //     },
-  //     {
-  //       enableHighAccuracy: true,
-  //       timeout: 15000,
-  //     }
-  //   );
-  // }, []);
-
   useEffect(() => {
     const target = mapCenter || location;
     if (!target?.lat || !target?.lng) return;
@@ -146,21 +118,38 @@ function Nearby() {
         //     };
         //   })
         //   .filter(Boolean);
+        // const stops = items
+        //   .filter((item) => item.nodeid.includes("DGB"))
+        //   .map((item) => {
+        //     const lat = parseFloat(item.gpslati);
+        //     const lng = parseFloat(item.gpslong);
+        //     return {
+        //       name: item.nodenm,
+        //       bsId: item.nodeid.replace("DGB", ""),
+        //       arsId: item.nodeid,
+        //       lat,
+        //       lng,
+        //       distance: getDistance(target.lat, target.lng, lat, lng),
+        //     };
+        //   })
+        //   .filter(Boolean);
+
         const stops = items
           .filter((item) => item.nodeid.includes("DGB"))
           .map((item) => {
             const lat = parseFloat(item.gpslati);
             const lng = parseFloat(item.gpslong);
+            const distance = getDistance(target.lat, target.lng, lat, lng);
             return {
               name: item.nodenm,
               bsId: item.nodeid.replace("DGB", ""),
               arsId: item.nodeid,
               lat,
               lng,
-              distance: getDistance(target.lat, target.lng, lat, lng),
+              distance,
             };
           })
-          .filter(Boolean);
+          .filter((item) => item.distance <= 1000);
 
         setBusStops(stops);
       } catch (err) {
@@ -208,15 +197,6 @@ function Nearby() {
       // ✅ 모바일이면 실시간 위치 추적
       const watchId = navigator.geolocation.watchPosition(
         (pos) => {
-          setLocation({
-            lat: pos.coords.latitude,
-            lng: pos.coords.longitude,
-          });
-          // setMapCenter({
-          //   lat: pos.coords.latitude,
-          //   lng: pos.coords.longitude,
-          // });
-
           const { latitude, longitude } = pos.coords;
 
           // 위치 변경이 크지 않으면 무시
@@ -228,7 +208,7 @@ function Nearby() {
           }
 
           setLocation({ lat: latitude, lng: longitude });
-          // setMapCenter({ lat: latitude, lng: longitude });
+          setMapCenter({ lat: latitude, lng: longitude });
         },
         (err) => {
           message.error("위치를 가져오지 못했습니다.");
@@ -472,21 +452,6 @@ function Nearby() {
                     };
                     return (
                       <List.Item>
-                        {/* <Card
-                          style={{
-                            width: "100%",
-                            minHeight: 100,
-                            fontSize: "0.9rem",
-                          }}
-                          styles={{ body: { padding: "8px 12px" } }}
-                        >
-                          <div
-                            style={{
-                              display: "flex",
-                              justifyContent: "space-between",
-                              marginBottom: 4,
-                            }}
-                          > */}
                         <Text strong>🚌 {bus.routeName}</Text>
                         <Text
                           strong
@@ -494,14 +459,6 @@ function Nearby() {
                         >
                           {getStateText(bus.arrState)}
                         </Text>
-                        {/* </div>
-                          {bus.vhcNo2 && (
-                            <>
-                              <br />
-                              <Text>🆔 차량번호: {bus.vhcNo2}</Text>
-                            </>
-                          )}
-                        </Card> */}
                       </List.Item>
                     );
                   }}
@@ -618,7 +575,8 @@ function Nearby() {
                   >
                     ID: {item.arsId}
                   </div>
-                  <div>거리: {(item.distance / 1000).toFixed(1)} km</div>
+                  {/* <div>거리: {(item.distance / 1000).toFixed(1)} km</div> */}
+                  <Text>{Math.floor(item.distance.toFixed(1))} m</Text>
 
                   {isSelected && (
                     <div
@@ -667,21 +625,6 @@ function Nearby() {
                             };
                             return (
                               <List.Item>
-                                {/* <Card
-                                style={{
-                                  width: "100%",
-                                  minHeight: 100,
-                                  fontSize: "0.9rem",
-                                }}
-                                styles={{ body: { padding: "12px" } }}
-                              > */}
-                                {/* <div
-                                  style={{
-                                    display: "flex",
-                                    justifyContent: "space-between",
-                                    marginBottom: 4,
-                                  }}
-                                > */}
                                 <Text strong>🚌 {bus.routeName}</Text>
                                 <Text
                                   strong
@@ -691,8 +634,6 @@ function Nearby() {
                                 >
                                   {getStateText(bus.arrState)}
                                 </Text>
-                                {/* </div> */}
-                                {/* </Card> */}
                               </List.Item>
                             );
                           }}
@@ -707,6 +648,33 @@ function Nearby() {
             );
           })}
         </div>
+      )}
+
+      {isMobile && (
+      <div
+            onClick={handleReturnToMyLocation}
+            style={{
+              position: "absolute",
+              bottom: panelHeight + 16,
+              right: 16,
+              width: "55px",
+              height: "55px",
+              zIndex: 1000,
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              cursor: "pointer",
+              backgroundColor: "white",
+              borderRadius: "50%",
+              // boxShadow: "0 2px 6px rgba(0,0,0,0.3)",
+            }}
+          >
+            <img
+              src="/location_icon.svg"
+              alt="현재 위치로 이동"
+              style={{ width: "100%", height: "100%" }}
+            />
+          </div>
       )}
     </div>
   );
