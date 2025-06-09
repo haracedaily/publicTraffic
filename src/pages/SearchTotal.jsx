@@ -27,8 +27,8 @@ function SearchTotal(props) {
                     props.setArrivalInfo(res);
                 }
             })
-            .catch(error => {
-                console.error("도착 정보 조회 실패:", error);
+            .catch((error) => {
+                // console.error("도착 정보 조회 실패:", error);
             });
     };
     const convertNGISToKakao = (x, y) => {
