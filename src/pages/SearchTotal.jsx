@@ -67,7 +67,7 @@ function SearchTotal(props) {
     }
     const searchHeightHandler = (e) => {
         // console.log("마우스 이벤트",e,searchHeight.current);
-        console.log(e.view.outerHeight);
+        // console.log(e.view.outerHeight);
         let calc = searchHeight.current-e.screenY;
         if(calc<0)calc=0;
         setCalcHeight(calc+"px");
@@ -76,29 +76,49 @@ function SearchTotal(props) {
         window.removeEventListener("mousemove", searchHeightHandler);
         window.removeEventListener("mouseup", searchHeightEnd);
     }
+    const draggableTouch = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if(calcHeight!=="0px")searchHeight.current = parseInt(calcHeight.replace("px",""))+e.touches[0].screenY;
+        else
+            searchHeight.current = e.touches[0].screenY;
+        window.addEventListener("touchmove", searchHeightHandlerTouch)
+        window.addEventListener("touchend", searchHeightEndTouch);
+    }
+    const searchHeightHandlerTouch = (e) => {
+        let calc = searchHeight.current-e.touches[0].screenY;
+        if(calc<0)calc=0;
+        setCalcHeight(calc+"px");
+    }
+    const searchHeightEndTouch = () =>{
+        window.removeEventListener("touchmove", searchHeightHandlerTouch);
+        window.removeEventListener("touchend", searchHeightEndTouch);
+    }
     return (
         <div style={{height:"100%", position:"relative"}}>
             <Space.Compact id={"jh_searchTop"} style={{ width: '100%', padding: '20px' }}>
-                <Input.Search placeholder="버스번호 및 정류소" onSearch={searchTotal} allowClear />
+                <Input.Search placeholder="정류장명을 입력해주세요" onSearch={searchTotal} allowClear />
             </Space.Compact>
             {props.isCommonMobile&&
             <div style={{width:"100%",height:"50vh"}}>
                 <MobileKakaoMap {...props} />
             </div>
             }
-            <div className={props.isCommonMobile?"jh_search_result_mobile":""} style={{height:`${props.isCommonMobile?"calc(100% - 50vh - 72px + "+calcHeight+")":"auto"}`}} data-height={calcHeight} onMouseDown={draggableSide}>
-                {props.isCommonMobile&&<div style={{display:"flex",justifyContent:"center",marginBottom:"1rem",alignItems:"center",height:"20px",position:"sticky",top:0,zIndex:30000,backgroundColor:"white"}}>
-                    <div style={{width:"10%",height:"5px",borderRadius:"3px",backgroundColor:"#dddddd"}}></div>
+            <div className={props.isCommonMobile?"jh_search_result_mobile":"none"} style={{height:`${props.isCommonMobile?"calc(100% - 50vh - 72px + "+calcHeight+")":"auto"}`}} data-height={calcHeight} onMouseDown={draggableSide} onTouchStart={draggableTouch}>
+                {props.isCommonMobile&&<div style={{display:"flex",justifyContent:"center",paddingTop:"1rem",marginBottom:"1rem",alignItems:"center",height:"20px",position:"sticky",top:0,zIndex:30000,backgroundColor:"white"}}>
+                    <div className={styles.upper_btn} style={{width:"10px",height:"10px",borderRadius:"3px",borderTop:"5px solid #dddddd",borderRight:"5px solid #dddddd"}}></div>
                 </div>
                 }
                 <div>
 
                 <List
-                    style={{padding:"0.5rem"}}
+                    style={{padding:"0.5rem",margin:"0.8rem"}}
                     bordered
+                    className={styles.side_list_border}
                     dataSource={props.searchResults}
                     renderItem={(item) => (
                         <List.Item
+                            className={styles.side_li_border}
                             onClick={() => {
                                 props.setMarkerClicked(false);
                                 props.setSelectedRoute(null);
@@ -138,8 +158,8 @@ function SearchTotal(props) {
                     )}
                 />
             </div>
-            {props.isCommonMobile && props.selectedStop && (
-                <div style={{marginTop:"1rem", display:"flex",justifyContent:"flex-end"}}>
+            {props.isCommonMobile && props.selectedRoute && (
+                <div style={{margin:"1rem", display:"flex",justifyContent:"flex-end"}}>
                     <Button onClick={moveSelectedStop}>선택정류소</Button>
                 </div>
 
@@ -147,7 +167,7 @@ function SearchTotal(props) {
             {props.selectedStop && (
                 <Card
                     title={`${props.selectedStop.bsNm} 실시간 도착 정보`}
-                    style={{ marginTop: "1rem" }}
+                    style={{ margin: "0.8rem" }}
                 >
                     {props.arrivalInfo ? (
                         <List
@@ -160,7 +180,6 @@ function SearchTotal(props) {
                                             justifyContent: "space-between",
                                             alignItems: "center",
                                             marginBottom: "4px",
-                                            borderBottom: "1px solid #dddddd",
                                         }}>
                                             <div style={{
                                                 fontWeight: "bold",
@@ -173,8 +192,8 @@ function SearchTotal(props) {
                                                     item.arrState === "전전" ? "#faad14" : item.arrState ==='도착예정' ? "#aaaaaa" :"#1890ff",
                                                 fontWeight: "bold"
                                             }}>
-                                                {item.arrState === "전" ? "곧 도착" :
-                                                    item.arrState === "전전" ? "곧 도착 예정" : item.arrState ==='도착예정' ? "차고지 대기" :
+                                                {item.arrState === "전" ? "전" :
+                                                    item.arrState === "전전" ? "전전" : item.arrState ==='도착예정' ? "차고지 대기" :
                                                         `${item.arrState} 후 도착`}
                                                 {props?.selectedRoute?.routeId === item.routeId && props.selectedRouteList && (
                                                     <div style={{display:"flex",width:"100%",justifyContent:"end"}}>

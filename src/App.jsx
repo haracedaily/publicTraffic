@@ -1,26 +1,41 @@
 import './App.css'
-import {Button, Input, Space, Radio} from "antd";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import Main from "./layout/Main.jsx";
-import SearchTotal from "./pages/SearchTotal.jsx";
-import BusRoute from "./pages/busRoute.jsx";
 import {useMediaQuery} from "react-responsive";
-import {Map, useKakaoLoader} from "react-kakao-maps-sdk";
-import {BrowserRouter, useNavigate} from "react-router-dom";
+import {useNavigate} from "react-router-dom";
 import InstallButton from './components/InstallButton.jsx';
+import IosPwaGuide from "./components/IosPwaGuide.jsx";
 
 function App() {
 
     const isMobile = useMediaQuery({maxWidth: 900});
-    const isCommonMobile = useMediaQuery({maxWidth: 425});
+    const isCommonMobile = useMediaQuery({maxWidth: 580});
     const navigator = useNavigate();
-
+    const [navTab, setNavTab] = useState(false);
+    useEffect(() => {
+        setNavTab(false);
+    },[isMobile])
     return (
         <>
+            <IosPwaGuide/>
+            <div className={`common_mobile_header_nav ${navTab?"common_mobile_header_nav_open":"common_mobile_header_nav_close"}`}>
+                <div onClick={()=>{navigator("/"); setNavTab(false);}} style={{cursor: "pointer"}}>HOME</div>
+                <div onClick={()=>{navigator("/my"); setNavTab(false);}} style={{cursor: "pointer"}}>나의버스</div>
+                <div onClick={()=>{navigator("/nearby"); setNavTab(false);}} style={{cursor: "pointer"}}>주변정류장</div>
+                <span style={{display:"flex",flexDirection:"column",alignItems:"center",gap:"0.5rem",paddingInlineEnd:"10vw",paddingBlockStart:"20vh", paddingBlockEnd:"5vh"}}>
+                <img  width={150} src={"/logo.svg"} alt="logo"/>
+                <img width={120} src={"/logo_word.svg"} alt="logo_word"/>
+                <h2 style={navTab?{}:{display:"none"}}>대구광역시 버스정보시스템</h2>
+                </span>
+            </div>
             <header>
-                {isMobile ? <img width={150} src={"/logo_word.svg"} alt={"logo"} onClick={()=>{navigator("/")}} style={{cursor:"pointer"}} /> :
+                {isMobile ? <img width={150} src={"/logo_word.svg"} alt={"logo"} onClick={()=>{navigator("/")}} style={{cursor:"pointer",zIndex:9999999}} /> :
                     <img width={200} src={"/header_logo.svg"} alt={'logo'} onClick={()=>{navigator("/")}} style={{cursor:"pointer"}} />}
-                {isMobile ? <InstallButton/> : <nav>
+                {isMobile ? <div className={"hamburger_menu"} onClick={()=>setNavTab(!navTab)}>
+                    <div className={`hamburger_bar ${navTab?"hamburger_rotate_top":""}`}></div>
+                    <div className={`${navTab?"none":"hamburger_bar"} light_green`}></div>
+                    <div className={`hamburger_bar ${navTab?"hamburger_rotate_bottom":""}`}></div>
+                </div> : <nav>
                     <div onClick={()=>{navigator("/my")}}>나의버스</div>
                     <div onClick={()=>{navigator("/nearby")}}>주변정류장</div>
                     <div onClick={()=>{navigator("/howto")}}>앱설치</div>

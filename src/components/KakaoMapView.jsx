@@ -7,38 +7,42 @@ import { Spin, Typography } from "antd";
 const { Text } = Typography;
 
 export default function KakaoMapView({
-  // center,
-  mapCenter, //지도 중심
-  myLocation, //내 위치
+  center,
+  mapCenter,
+  myLocation,
   onCenterChanged,
   markers = [],
   busStops = [],
   selectedStop,
-  setSelectedStop = () => {},
-  setArrivalData = () => {},
-  setArrivalMap = () => {},
+  setSelectedStop = () => { },
+  setArrivalData = () => { },
+  setArrivalMap = () => { },
   arrivalMap = {},
   onRelocate,
   loadingArrivals,
   setLoadingArrivals,
-  arrivalData,
+  mapViewStyle
 }) {
   const mapRef = useRef(null);
-  const containerRef = useRef(null);
-  const dragHandleRef = useRef(null);
-  const [panelHeight, setPanelHeight] = useState(250);
-  const [isDragging, setIsDragging] = useState(false);
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 1024);
+  // const containerRef = useRef(null);
+  // const dragHandleRef = useRef(null);
+  // const [panelHeight, setPanelHeight] = useState(250);
+  // const [isDragging, setIsDragging] = useState(false);
+  // const [isMobile, setIsMobile] = useState(window.innerWidth <= 1024);
 
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth <= 1024);
-    };
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
+  // useEffect(() => {
+  //   const handleResize = () => {
+  //     setIsMobile(window.innerWidth <= 1024);
+  //   };
+  //   window.addEventListener("resize", handleResize);
+  //   return () => window.removeEventListener("resize", handleResize);
+  // }, []);
 
   const handleClick = () => {
+    // if (mapRef.current && window.kakao?.maps) {
+    //   const kakaoLatLng = new window.kakao.maps.LatLng(center.lat, center.lng);
+    //   mapRef.current.setCenter(kakaoLatLng);
+    // }
     if (
       mapRef.current &&
       window.kakao?.maps &&
@@ -55,61 +59,9 @@ export default function KakaoMapView({
     onRelocate?.();
   };
 
-  const handleDrag = (clientY) => {
-    const newHeight = window.innerHeight - clientY;
-    setPanelHeight(
-      Math.max(100, Math.min(newHeight, window.innerHeight * 0.9))
-    );
-  };
-
-  const handleMouseDown = (e) => {
-    e.preventDefault();
-    setIsDragging(true);
-  };
-
-  useEffect(() => {
-    const handleMouseMove = (e) => {
-      if (isDragging) {
-        handleDrag(e.clientY);
-      }
-    };
-    const handleTouchMove = (e) => {
-      if (isDragging && e.touches.length === 1) {
-        handleDrag(e.touches[0].clientY);
-      }
-    };
-    const stopDrag = () => {
-      setIsDragging(false);
-    };
-
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("mouseup", stopDrag);
-    window.addEventListener("touchmove", handleTouchMove);
-    window.addEventListener("touchend", stopDrag);
-
-    return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mouseup", stopDrag);
-      window.removeEventListener("touchmove", handleTouchMove);
-      window.removeEventListener("touchend", stopDrag);
-    };
-  }, [isDragging]);
-
-  useEffect(() => {
-    if (selectedStop?.bsId && arrivalMap[selectedStop.bsId]) {
-      setArrivalData(arrivalMap[selectedStop.bsId]);
-    }
-  }, [selectedStop?.bsId, arrivalMap]);
-
-  useEffect(() => {
-    if (busStops.length > 0) {
-      setSelectedStop(null); // 초기화
-    }
-  }, [busStops]);
-
   return (
     <div
-      ref={containerRef}
+      // ref={containerRef}
       style={{
         width: "100%",
         height: "100%",
@@ -118,12 +70,7 @@ export default function KakaoMapView({
       }}
     >
       <Map
-        center={
-          mapCenter?.lat && mapCenter?.lng
-            ? mapCenter
-            : { lat: 35.8714, lng: 128.6014 }
-        } // fallback 위치 추가
-        // center={mapCenter}
+        center={mapCenter || { lat: 35.8714, lng: 128.6014 }}
         ref={mapRef}
         style={{ width: "100%", height: "100%" }}
         level={4}
@@ -135,13 +82,8 @@ export default function KakaoMapView({
         <MapView
           position={myLocation}
           onClick={handleClick}
-          style={{
-            zIndex: "90",
-            position: "absolute",
-            bottom: isMobile ? panelHeight + 16 : 16, // ← 핵심!
-            right: 16,
-            transition: "bottom 0.3s ease",
-          }}
+          style={mapViewStyle}
+
         />
         {markers.map((marker, idx) => (
           <MapMarker
@@ -149,6 +91,19 @@ export default function KakaoMapView({
             position={{ lat: marker.lat, lng: marker.lng }}
             title={marker.name}
             clickable={true}
+            onClick={async () => {
+              if (selectedStop?.bsId === marker.bsId) {
+                setSelectedStop(null);
+                setArrivalData([]);
+                return;
+              }
+
+              setSelectedStop(marker);
+              setLoadingArrivals(true);
+              const result = await fetchArrivalInfo(marker.bsId);
+              setArrivalMap((prev) => ({ ...prev, [marker.bsId]: result }));
+              setLoadingArrivals(false);
+            }}
             image={{
               src: "/stop_marker.png",
               size: { width: 40, height: 45 },
@@ -163,6 +118,7 @@ export default function KakaoMapView({
                   background: "#fff",
                   border: "1px solid #ccc",
                   borderRadius: "8px",
+                  textAlign: "center",
                   fontSize: "12px",
                   fontWeight: "bold",
                 }}
@@ -172,33 +128,21 @@ export default function KakaoMapView({
             )}
           </MapMarker>
         ))}
-        {myLocation?.lat && (
-          <MapMarker
-            position={myLocation}
-            image={{
-              src: "/location.png",
-              size: { width: 50, height: 50 },
-            }}
-            zIndex={100}
-          />
-        )}
       </Map>
 
-      {isMobile && (
+      {/* {isMobile && (
         <div
-          ref={containerRef}
           style={{
             position: "absolute",
-            marginTop: "50px",
             bottom: 0,
             left: 0,
             width: "100%",
             height: `${panelHeight}px`,
-            background: "rgba(255,255,255,0.95)",
+            background: "white",
             borderTopLeftRadius: 12,
             borderTopRightRadius: 12,
             zIndex: 5,
-            boxShadow: "0 -2px 8px rgba(0,0,0,0.1)",
+            boxShadow: "0 -2px 8px rgba(0,0,0,0.15)",
             overflowY: "auto",
             transition: "height 0.2s ease",
           }}
@@ -208,146 +152,69 @@ export default function KakaoMapView({
             onMouseDown={handleMouseDown}
             onTouchStart={handleMouseDown}
             style={{
-              // width: "100%",
-              height: "24px",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
+              width: "100%",
+              height: "16px",
               cursor: "row-resize",
-              // background: "#ccc",
+              background: "#ccc",
               borderTopLeftRadius: 12,
               borderTopRightRadius: 12,
             }}
-          >
-            <div
-              style={{
-                width: "36px",
-                height: "5px",
-                background: "#ccc",
-                borderRadius: "3px",
-                marginTop: "4px",
-              }}
-            />
-          </div>
+          />
 
-          {markers.map((item, index) => {
-            const isSelected = selectedStop?.arsId === item.arsId
+          {busStops.map((item, index) => {
+            const isSelected = selectedStop?.arsId === item.arsId;
             return (
               <div
                 key={item.arsId}
                 onClick={async () => {
-                  const isNowSelected = selectedStop?.arsId === item.arsId;
-                  if (isNowSelected) {
+                  if (isSelected) {
                     setSelectedStop(null);
                     return;
                   }
                   setSelectedStop(item);
                   setLoadingArrivals(true);
-
-                  const arrivals = await fetchArrivalInfo(item.arsId);
-                  const list = arrivals?.body?.list ?? [];
-
-                  console.log("도착 정보:", list);
-                  setArrivalData(list);
-                  setArrivalMap((prev) => ({
-                    ...prev,
-                    [item.arsId]: list,
-                  }));
+                  const result = await fetchArrivalInfo(item.bsId);
+                  setArrivalData(result);
+                  setArrivalMap((prev) => ({ ...prev, [item.bsId]: result }));
                   setLoadingArrivals(false);
                 }}
                 style={{
-                  padding: "12px 16px",
+                  padding: "8px 12px",
                   borderBottom: "1px solid #eee",
                   cursor: "pointer",
-                  background: isSelected ? "#f0f9ff" : "white",
+                  background: isSelected ? "#f5faff" : "white",
                 }}
               >
-                <strong style={{ fontSize: "1rem", fontWeight: "bold" }}>
+                <strong>
                   {index + 1}. {item.name}
                 </strong>
-                <div
-                  style={{ fontSize: "0.75rem", color: "#999", marginTop: 4 }}
-                >
+                <div style={{ fontSize: "0.8rem", color: "#888" }}>
                   ID: {item.arsId}
                 </div>
-                <div>거리: {(item.distance / 1000).toFixed(1)} km</div>
+                <div>{(item.distance / 1000).toFixed(1)} km</div>
 
                 {isSelected && (
                   <div
                     style={{
-                      marginTop: 10,
+                      marginTop: 8,
                       paddingTop: 8,
                       borderTop: "1px dashed #ccc",
                     }}
                   >
                     {loadingArrivals ? (
-                      <Spin tip="도착 정보를 불러오는 중..." fullscreen />
-                    ) : Array.isArray(arrivalData) && arrivalData.length > 0 ? (
-                      <List
-                        dataSource={arrivalData}
-                        renderItem={(bus) => {
-                          const getColorByState = (state) => {
-                            switch (state) {
-                              case "전":
-                                return "#52c41a";
-                              case "전전":
-                                return "#faad14";
-                              case "도착예정":
-                                return "#aaaaaa";
-                              default:
-                                return "#1890ff";
-                            }
-                          };
-                          const getStateText = (state) => {
-                            switch (state) {
-                              case "전":
-                                return "곧 도착";
-                              case "전전":
-                                return "곧 도착 예정";
-                              case "도착예정":
-                                return "차고지 대기";
-                              default:
-                                return `${state} 후 도착`;
-                            }
-                          };
-                          return (
-                            <List.Item>
-                              <Card
-                                style={{
-                                  width: "100%",
-                                  minHeight: 100,
-                                  fontSize: "0.9rem",
-                                }}
-                                styles={{ body: { padding: "12px" } }}
-                              >
-                                <div
-                                  style={{
-                                    display: "flex",
-                                    justifyContent: "space-between",
-                                    marginBottom: 4,
-                                  }}
-                                >
-                                  <Text strong>🚌 {bus.routeNo}</Text>
-                                  <Text
-                                    strong
-                                    style={{
-                                      color: getColorByState(bus.arrState),
-                                    }}
-                                  >
-                                    {getStateText(bus.arrState)}
-                                  </Text>
-                                </div>
-                                {/* {bus.vhcNo2 && (
-                                  <>
-                                    <br />
-                                    <Text>🆔 차량번호: {bus.vhcNo2}</Text>
-                                  </>
-                                )} */}
-                              </Card>
-                            </List.Item>
-                          );
-                        }}
-                      />
+                      <Spin tip="도착 정보를 불러오는 중..." />
+                    ) : arrivalMap[item.bsId]?.length > 0 ? (
+                      arrivalMap[item.bsId].map((bus, idx) => (
+                        <div key={idx} style={{ marginBottom: 10 }}>
+                          <Text strong>🚌 {bus.routeName}</Text><br />
+                          <Text>
+                            ⏱ {bus.predictTime1 !== "-" ? `${bus.predictTime1}분` : "정보 없음"}
+                          </Text><br />
+                          {bus.locationNo1 !== "-" && (
+                            <Text>📍 남은 정류장: {bus.locationNo1}개</Text>
+                          )}
+                        </div>
+                      ))
                     ) : (
                       <Text type="secondary">도착 정보가 없습니다.</Text>
                     )}
@@ -357,7 +224,7 @@ export default function KakaoMapView({
             );
           })}
         </div>
-      )}
+      )} */}
     </div>
   );
 }

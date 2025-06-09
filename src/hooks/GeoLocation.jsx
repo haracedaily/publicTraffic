@@ -13,9 +13,9 @@ function useGeoLocation() {
             },
             (err) => console.error("위치 추적 에러:", err),
             {
-                enableHighAccuracy: true,
-                maximumAge: 5000,
-                timeout: 15000,
+                enableHighAccuracy: false,
+                timeout: 5000,
+                maximumAge: 10000,
             }
         );
 
