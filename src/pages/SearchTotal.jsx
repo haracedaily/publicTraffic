@@ -55,44 +55,51 @@ function SearchTotal(props) {
         }
 
     }
-    const draggableSide = (e) => {
-        if(calcHeight!=="0px")searchHeight.current = parseInt(calcHeight.replace("px",""))+e.screenY;
-        else
-            searchHeight.current = e.screenY;
-
-        window.addEventListener("mousemove", searchHeightHandler)
-        window.addEventListener("mouseup", searchHeightEnd);
-        e.preventDefault();
-        e.stopPropagation();
-    }
-    const searchHeightHandler = (e) => {
-        // console.log("마우스 이벤트",e,searchHeight.current);
-        // console.log(e.view.outerHeight);
-        let calc = searchHeight.current-e.screenY;
-        if(calc<0)calc=0;
-        setCalcHeight(calc+"px");
-    }
-    const searchHeightEnd = () =>{
-        window.removeEventListener("mousemove", searchHeightHandler);
-        window.removeEventListener("mouseup", searchHeightEnd);
-    }
-    const draggableTouch = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        if(calcHeight!=="0px")searchHeight.current = parseInt(calcHeight.replace("px",""))+e.touches[0].screenY;
-        else
-            searchHeight.current = e.touches[0].screenY;
-        window.addEventListener("touchmove", searchHeightHandlerTouch)
-        window.addEventListener("touchend", searchHeightEndTouch);
-    }
-    const searchHeightHandlerTouch = (e) => {
-        let calc = searchHeight.current-e.touches[0].screenY;
-        if(calc<0)calc=0;
-        setCalcHeight(calc+"px");
-    }
-    const searchHeightEndTouch = () =>{
-        window.removeEventListener("touchmove", searchHeightHandlerTouch);
-        window.removeEventListener("touchend", searchHeightEndTouch);
+    // const draggableSide = (e) => {
+    //     if(calcHeight!=="0px")searchHeight.current = parseInt(calcHeight.replace("px",""))+e.screenY;
+    //     else
+    //         searchHeight.current = e.screenY;
+    //
+    //     window.addEventListener("mousemove", searchHeightHandler)
+    //     window.addEventListener("mouseup", searchHeightEnd);
+    //     e.preventDefault();
+    //     e.stopPropagation();
+    // }
+    // const searchHeightHandler = (e) => {
+    //     // console.log("마우스 이벤트",e,searchHeight.current);
+    //     // console.log(e.view.outerHeight);
+    //     let calc = searchHeight.current-e.screenY;
+    //     if(calc<0)calc=0;
+    //     setCalcHeight(calc+"px");
+    // }
+    // const searchHeightEnd = () =>{
+    //     window.removeEventListener("mousemove", searchHeightHandler);
+    //     window.removeEventListener("mouseup", searchHeightEnd);
+    // }
+    // const draggableTouch = (e) => {
+    //     e.preventDefault();
+    //     e.stopPropagation();
+    //     if(calcHeight!=="0px")searchHeight.current = parseInt(calcHeight.replace("px",""))+e.touches[0].screenY;
+    //     else
+    //         searchHeight.current = e.touches[0].screenY;
+    //     window.addEventListener("touchmove", searchHeightHandlerTouch)
+    //     window.addEventListener("touchend", searchHeightEndTouch);
+    // }
+    // const searchHeightHandlerTouch = (e) => {
+    //     let calc = searchHeight.current-e.touches[0].screenY;
+    //     if(calc<0)calc=0;
+    //     setCalcHeight(calc+"px");
+    // }
+    // const searchHeightEndTouch = () =>{
+    //     window.removeEventListener("touchmove", searchHeightHandlerTouch);
+    //     window.removeEventListener("touchend", searchHeightEndTouch);
+    // }
+    const toggleStart = () => {
+        if(calcHeight === "0px"){
+            setCalcHeight("1000px");
+        }else{
+            setCalcHeight("0px");
+        }
     }
     return (
         <div style={{height:"100%", position:"relative"}}>
@@ -104,8 +111,9 @@ function SearchTotal(props) {
                 <MobileKakaoMap {...props} />
             </div>
             }
-            <div className={props.isCommonMobile?"jh_search_result_mobile":"none"} style={{height:`${props.isCommonMobile?"calc(100% - 50vh - 72px + "+calcHeight+")":"auto"}`}} data-height={calcHeight} onMouseDown={draggableSide} onTouchStart={draggableTouch}>
-                {props.isCommonMobile&&<div style={{display:"flex",justifyContent:"center",paddingTop:"1rem",marginBottom:"1rem",alignItems:"center",height:"20px",position:"sticky",top:0,zIndex:30000,backgroundColor:"white"}}>
+            <div className={props.isCommonMobile?"jh_search_result_mobile":"none"} style={{height:`${props.isCommonMobile?"calc(100% - 50vh - 72px + "+calcHeight+")":"auto"}`}} data-height={calcHeight}>
+                {props.isCommonMobile&&
+                    <div style={{display:"flex",justifyContent:"center",paddingTop:"1rem",marginBottom:"1rem",alignItems:"center",height:"20px",position:"sticky",top:0,zIndex:30000,backgroundColor:"white"}} onClick={toggleStart} onTouchStart={toggleStart}>
                     <div className={styles.upper_btn} style={{width:"10px",height:"10px",borderRadius:"3px",borderTop:"5px solid #dddddd",borderRight:"5px solid #dddddd"}}></div>
                 </div>
                 }
