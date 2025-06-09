@@ -25,7 +25,9 @@ function MobileKakaoMap(props) {
                 // console.log("링크확인 : ",res.data.body.items);
                 drawLine(res.data.body.items);
             })
-            .catch(error=>{console.log(error)})
+            .catch(error=>{
+                // console.log(error)
+            })
     }
 
     const drawLine = (data) => {
@@ -71,7 +73,7 @@ function MobileKakaoMap(props) {
     const handleRouteClick = async (route) => {
         props.setCustomPathLink(null); // 기존 경로 초기화
         await new Promise((resolve) => setTimeout(resolve, 0)); // 수정: 렌더링 대기 추가
-        console.log("Route clicked:", route); // 수정: 디버깅 로그 추가
+        // console.log("Route clicked:", route); // 수정: 디버깅 로그 추가
 
         props.setCustomPathLink(null); // 기존 경로 초기화
         if (
@@ -81,37 +83,37 @@ function MobileKakaoMap(props) {
             !props.originRoute ||
             !props.destyRoute
         ) {
-            console.error("필요한 데이터가 없습니다:", {
-                linkGeoJson,
-                route,
-                originRoute,
-                destyRoute,
-            });
-            alert("출발지, 도착지 또는 경로 데이터가 없습니다.");
+            // console.error("필요한 데이터가 없습니다:", {
+            //     linkGeoJson,
+            //     route,
+            //     originRoute,
+            //     destyRoute,
+            // });
+            // alert("출발지, 도착지 또는 경로 데이터가 없습니다.");
             props.setCustomPathLink(null);
             return;
         }
 
         try {
-            console.log("추천 경로 입력:", {
-                routeNo: route.list[0].routeNo,
-                routeId: route.list[0].routeId,
-                origin: props.originRoute,
-                desty: props.destyRoute,
-            });
+            // console.log("추천 경로 입력:", {
+            //     routeNo: route.list[0].routeNo,
+            //     routeId: route.list[0].routeId,
+            //     origin: props.originRoute,
+            //     desty: props.destyRoute,
+            // });
 
             // 1. API 호출로 링크 데이터 가져오기
             const step = route.list[0];
             const res = await kakaoMap.getRouteLink(step.routeId).catch((error) => {
-                console.error(`Route ${step.routeNo} API 호출 실패:`, error);
+                // console.error(`Route ${step.routeNo} API 호출 실패:`, error);
                 return { data: { body: { items: [] } } };
             });
             console.log("노선번호 경로 찾기 값 : ", res);
             if (!res.data?.body?.items) {
-                console.warn(
-                    `Route ${step.routeNo} API 응답이 유효하지 않습니다:`,
-                    res
-                );
+                // console.warn(
+                //     `Route ${step.routeNo} API 응답이 유효하지 않습니다:`,
+                //     res
+                // );
             }
             const links = res.data?.body?.items || [];
             // console.log(`Route ${step.routeNo} API 응답 (links):`, links);
@@ -134,14 +136,14 @@ function MobileKakaoMap(props) {
                         moveDir: matchedItem ? matchedItem.moveDir : 0,
                     };
                 });
-            console.log(
-                "API 기반 validLinks (필터링 전):",
-                validLinks.map((item) => ({
-                    linkId: item.linkId,
-                    routeNo: item.routeNo,
-                    moveDir: item.moveDir,
-                }))
-            );
+            // console.log(
+            //     "API 기반 validLinks (필터링 전):",
+            //     validLinks.map((item) => ({
+            //         linkId: item.linkId,
+            //         routeNo: item.routeNo,
+            //         moveDir: item.moveDir,
+            //     }))
+            // );
 
             // 3. 출발지와 도착지 사이의 경로 구성 (수정됨)
             const threshold = 0.02; // 0.02도 (약 2km 이내)
@@ -277,9 +279,9 @@ function MobileKakaoMap(props) {
 
             // 4. 대체 경로 탐색 (수정됨)
             if (!bestPath) {
-                console.warn(
-                    "출발지-도착지 간 유효한 경로를 찾지 못했습니다. 대체 경로 탐색 시도."
-                );
+                // console.warn(
+                //     "출발지-도착지 간 유효한 경로를 찾지 못했습니다. 대체 경로 탐색 시도."
+                // );
                 const candidates = props.linkGeoJson.features
                     .filter((link) => {
                         // API 링크와 일치하는 링크만 고려
@@ -373,30 +375,30 @@ function MobileKakaoMap(props) {
             // 5. 상태 업데이트
             if (bestPath) {
                 const variableList = [bestPath];
-                console.log("생성된 경로:", variableList); // 디버깅 로그 추가
+                // console.log("생성된 경로:", variableList); // 디버깅 로그 추가
                 props.setCustomPathLink(variableList);
 
                 props.setCustomPathLink(null); // 수정: 상태 초기화 추가
                 await new Promise((resolve) => setTimeout(resolve, 0)); // 수정: 렌더링 대기 추가
                 props.setCustomPathLink(variableList); // 수정: 최적 경로 설정
-                console.log("Updated customPathLink:", variableList);
+                // console.log("Updated customPathLink:", variableList);
 
                 props.setMapCenter({ lat: props.originRoute.lat, lng: props.originRoute.lng });
-                setMapLevel(5);
+                // props.setMapLevel(5);
                 props.setOpenedRoute(true);
             } else {
-                console.warn("유효한 경로를 찾을 수 없습니다:", {
-                    apiLinks: links.length,
-                    geoJsonLinks: props.linkGeoJson.features.length,
-                });
-                alert(
-                    "출발지와 도착지를 연결하는 경로를 찾을 수 없습니다. 다른 노선을 선택해주세요."
-                );
+                // console.warn("유효한 경로를 찾을 수 없습니다:", {
+                //     apiLinks: links.length,
+                //     geoJsonLinks: props.linkGeoJson.features.length,
+                // });
+                // alert(
+                //     "출발지와 도착지를 연결하는 경로를 찾을 수 없습니다. 다른 노선을 선택해주세요."
+                // );
                 props.setCustomPathLink(null);
             }
         } catch (error) {
-            console.error("handleRouteClick 오류:", error);
-            alert("경로를 처리하는 중 오류가 발생했습니다.");
+            // console.error("handleRouteClick 오류:", error);
+            // alert("경로를 처리하는 중 오류가 발생했습니다.");
             props.setCustomPathLink(null);
         }
     };
@@ -555,7 +557,7 @@ function MobileKakaoMap(props) {
                                         }
                                     })
                                     .catch(error => {
-                                        console.error("도착 정보 조회 실패:", error);
+                                        // console.error("도착 정보 조회 실패:", error);
                                     });
                             }}
                         />)

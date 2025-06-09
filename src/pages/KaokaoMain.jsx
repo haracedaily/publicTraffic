@@ -409,7 +409,9 @@ function KaokaoMain({isCommonMobile}) {
                 // console.log("링크확인 : ",res.data.body.items);
                 drawLine(res.data.body.items);
             })
-            .catch(error=>{console.log(error)})
+            .catch(error=>{
+                // console.log(error)
+            })
     }
 
 const drawLine = (data) => {
@@ -653,7 +655,7 @@ const drawLine = (data) => {
                                         }
                                     })
                                     .catch(error => {
-                                        console.error("도착 정보 조회 실패:", error);
+                                        // console.error("도착 정보 조회 실패:", error);
                                     });
                             }}
                         />)
