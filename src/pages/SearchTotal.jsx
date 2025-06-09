@@ -106,6 +106,7 @@ function SearchTotal(props) {
             setCalcHeight("0px");
         }
     }
+
     return (
         <div style={{height:"100%", position:"relative"}}>
             <Space.Compact id={"jh_searchTop"} style={{ width: '100%', padding: '20px' }}>
@@ -116,7 +117,7 @@ function SearchTotal(props) {
                 <MobileKakaoMap {...props} />
             </div>
             }
-            <div className={props.isCommonMobile?"jh_search_result_mobile":"none"} style={{height:`${props.isCommonMobile?"calc(100% - 50vh - 72px + "+calcHeight+")":"auto"}`}} data-height={calcHeight}>
+            <div className={props.isCommonMobile?"jh_search_result_mobile":""} style={{height:`${props.isCommonMobile?"calc(100% - 50vh - 72px + "+calcHeight+")":"auto"}`}} data-height={calcHeight}>
                 {props.isCommonMobile&&
                     <div style={{display:"flex",justifyContent:"center",paddingTop:"1rem",paddingBottom:"1rem",alignItems:"center",height:"20px",position:"sticky",top:0,zIndex:30000,backgroundColor:"white", cursor:"pointer"}} onClick={toggleStart}>
                     <div className={`${calcHeight==="0px"?styles.upper_btn:styles.lower_btn} ${toggleMove.current?calcHeight==="0px"?styles.upper_change:styles.lower_change:""} toggleBtn`} style={{width:"10px",height:"10px",borderRadius:"3px",borderTop:"5px solid #dddddd",borderRight:"5px solid #dddddd"}}></div>
@@ -211,7 +212,7 @@ function SearchTotal(props) {
                                                 {item.arrState === "전" ? "전" :
                                                     item.arrState === "전전" ? "전전" : item.arrState ==='도착예정' ? "차고지 대기" :
                                                         `${item.arrState} 후 도착`}
-                                                {props?.selectedRoute?.routeId === item.routeId && props.selectedRouteList && (
+                                                {props?.selectedRoute?.routeNo === item.routeNo && props.selectedRouteList && (
                                                     <div style={{display:"flex",width:"100%",justifyContent:"end"}}>
                                                         <img className={props.openedRoute?styles.jh_side_open:styles.jh_side_close} width={15} src={"/reverse_triangle.svg"} alt={"경로 닫기"}
                                                              onClick={()=>props.setOpenedRoute(!props.openedRoute)} style={{cursor:"pointer"}} />
