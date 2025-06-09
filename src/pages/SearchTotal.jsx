@@ -13,7 +13,7 @@ proj4.defs("EPSG:5182", "+proj=tmerc +lat_0=38 +lon_0=129 +k=1 +x_0=200000 +y_0=
 proj4.defs("EPSG:4326", "+proj=longlat +datum=WGS84 +no_defs");
 ///[^ㄱ-ㅎ가-힣a-zA-Z0-9]/g
 function SearchTotal(props) {
-    let searchHeight = useRef(0);
+    let toggleMove = useRef(false);
     const [calcHeight,setCalcHeight] = useState("0px");
     useEffect(() => {
         if(!props.isCommonMobile)
@@ -46,6 +46,9 @@ function SearchTotal(props) {
             if(res===404){
                 message.warning("검색결과가 존재하지 않습니다.");
             }else{
+                if(props.isCommonMobile){
+                    setCalcHeight("1000px");
+                }
                 props.setSearchResults(res);
                 props.setArrivalInfo(null);
                 props.setSelectedStop(null);
@@ -96,8 +99,10 @@ function SearchTotal(props) {
     // }
     const toggleStart = () => {
         if(calcHeight === "0px"){
+            toggleMove.current = true;
             setCalcHeight("1000px");
         }else{
+            toggleMove.current = true;
             setCalcHeight("0px");
         }
     }
@@ -113,8 +118,8 @@ function SearchTotal(props) {
             }
             <div className={props.isCommonMobile?"jh_search_result_mobile":"none"} style={{height:`${props.isCommonMobile?"calc(100% - 50vh - 72px + "+calcHeight+")":"auto"}`}} data-height={calcHeight}>
                 {props.isCommonMobile&&
-                    <div style={{display:"flex",justifyContent:"center",paddingTop:"1rem",marginBottom:"1rem",alignItems:"center",height:"20px",position:"sticky",top:0,zIndex:30000,backgroundColor:"white", cursor:"pointer"}} onClick={toggleStart} onTouchStart={toggleStart}>
-                    <div className={styles.upper_btn} style={{width:"10px",height:"10px",borderRadius:"3px",borderTop:"5px solid #dddddd",borderRight:"5px solid #dddddd"}}></div>
+                    <div style={{display:"flex",justifyContent:"center",paddingTop:"1rem",marginBottom:"1rem",alignItems:"center",height:"20px",position:"sticky",top:0,zIndex:30000,backgroundColor:"white", cursor:"pointer"}} onTouchEnd={toggleStart}>
+                    <div className={`${calcHeight==="0px"?styles.upper_btn:styles.lower_btn} ${toggleMove.current?calcHeight==="0px"?styles.upper_change:styles.lower_change:""} toggleBtn`} style={{width:"10px",height:"10px",borderRadius:"3px",borderTop:"5px solid #dddddd",borderRight:"5px solid #dddddd"}}></div>
                 </div>
                 }
                 <div>
@@ -137,6 +142,9 @@ function SearchTotal(props) {
                                 item.lng = lng;
                                 props.setSelectedStop(item);
                                 props.setMapCenter({lat,lng});
+                                if(props.isCommonMobile){
+                                    setCalcHeight("0px");
+                                }
                             }}
                             style={{ cursor: 'pointer' }}
                         >
