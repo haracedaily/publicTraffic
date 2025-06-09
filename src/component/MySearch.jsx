@@ -199,14 +199,12 @@ const MySearch = ({ onToggleFavorite, favorites }) => {
                         onSearch={handleSearchButton}
                     />
                 </AutoComplete>
-                {isSearched && (
                     <Button
                         icon={<ReloadOutlined />}
                         onClick={handleReset}
                         size="large"
                         className={styles.resetButton}
                     />
-                )}
             </div>
             {isSearched && (
                 <div className={styles.resultsWrapper}>
