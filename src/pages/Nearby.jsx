@@ -577,6 +577,31 @@ function Nearby() {
             />
           </div>
 
+          <div
+            onClick={handleReturnToMyLocation}
+            style={{
+              position: "absolute",
+              bottom: panelHeight + 16,
+              right: 16,
+              width: "55px",
+              height: "55px",
+              zIndex: 1000,
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              cursor: "pointer",
+              backgroundColor: "white",
+              borderRadius: "50%",
+              boxShadow: "0 2px 6px rgba(0,0,0,0.3)",
+            }}
+          >
+            <img
+              src="/location_icon.svg"
+              alt="현재 위치로 이동"
+              style={{ width: "60%", height: "60%" }}
+            />
+          </div>
+
           <div style={{ textAlign: "center", marginBottom: 12 }}>
             <EnvironmentOutlined
               style={{ fontSize: 24, color: "#2d6ae0", marginRight: 8 }}
