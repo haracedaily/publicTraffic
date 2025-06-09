@@ -8,7 +8,7 @@ import { EnvironmentOutlined } from "@ant-design/icons";
 import kakaoMap from "../js/kakaoMap";
 import proj4 from "proj4";
 // import "../css/nearby.css";
-import styles from "../css/nearby.module.css"
+import styles from "../css/nearby.module.css";
 
 proj4.defs(
   "EPSG:5182",
@@ -41,6 +41,12 @@ function Nearby() {
   const [isDragging, setIsDragging] = useState(false);
 
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 1024);
+
+  const handleReturnToMyLocation = () => {
+    if (location.lat && location.lng) {
+      setMapCenter({ lat: location.lat, lng: location.lng });
+    }
+  };
 
   // useEffect(() => {
   //   const handleResize = () => {
@@ -183,7 +189,8 @@ function Nearby() {
     if (
       Math.abs(newCenter.lat - (mapCenter?.lat || 0)) < 0.001 &&
       Math.abs(newCenter.lng - (mapCenter?.lng || 0)) < 0.001
-    ) return;
+    )
+      return;
     setMapCenter(newCenter);
   };
 
@@ -205,10 +212,10 @@ function Nearby() {
             lat: pos.coords.latitude,
             lng: pos.coords.longitude,
           });
-          setMapCenter({
-            lat: pos.coords.latitude,
-            lng: pos.coords.longitude,
-          });
+          // setMapCenter({
+          //   lat: pos.coords.latitude,
+          //   lng: pos.coords.longitude,
+          // });
 
           const { latitude, longitude } = pos.coords;
 
@@ -221,7 +228,7 @@ function Nearby() {
           }
 
           setLocation({ lat: latitude, lng: longitude });
-          setMapCenter({ lat: latitude, lng: longitude });
+          // setMapCenter({ lat: latitude, lng: longitude });
         },
         (err) => {
           message.error("위치를 가져오지 못했습니다.");
@@ -269,8 +276,9 @@ function Nearby() {
 
   return (
     <div
-      className={`${styles["nearby-container"]} ${selectedStop ? styles["three-columns"] : styles["two-columns"]
-        }`}
+      className={`${styles["nearby-container"]} ${
+        selectedStop ? styles["three-columns"] : styles["two-columns"]
+      }`}
     >
       <Card
         className={`${styles["map-column"]} ${styles["card-fixed"]}`}
@@ -306,14 +314,15 @@ function Nearby() {
           onCenterChanged={handleMapCenterChanged}
           isMobile={isMobile}
           mapViewStyle={mapViewStyle}
-          onRelocate={() => {
-            navigator.geolocation.getCurrentPosition((pos) => {
-              setLocation({
-                lat: pos.coords.latitude,
-                lng: pos.coords.longitude,
-              });
-            });
-          }}
+          // onRelocate={() => {
+          //   navigator.geolocation.getCurrentPosition((pos) => {
+          //     setLocation({
+          //       lat: pos.coords.latitude,
+          //       lng: pos.coords.longitude,
+          //     });
+          //   });
+          // }}
+          onRelocate={handleReturnToMyLocation}
         />
         <div style={mapViewStyle}></div>
       </Card>
@@ -383,7 +392,10 @@ function Nearby() {
                     if (!arrivalMap[item.bsId]) {
                       setLoadingArrivals(true);
                       const result = await fetchArrivalInfo(item.bsId);
-                      setArrivalMap((prev) => ({ ...prev, [item.bsId]: result }));
+                      setArrivalMap((prev) => ({
+                        ...prev,
+                        [item.bsId]: result,
+                      }));
                       setLoadingArrivals(false);
                     }
                   }}
@@ -398,7 +410,8 @@ function Nearby() {
                       {index + 1}. {item.name}
                     </Text>
                     <div>
-                      <Text>{(item.distance / 1000).toFixed(1)} km</Text>
+                      {/* <Text>{(item.distance / 1000).toFixed(1)} km</Text> */}
+                      <Text>{Math.floor(item.distance.toFixed(1))} m</Text>
                     </div>
                   </div>
                   <div style={{ color: "#888", fontSize: "0.8rem" }}>
@@ -499,8 +512,7 @@ function Nearby() {
             </Card>
           </div>
         </div>
-      )
-      }
+      )}
 
       {isMobile && (
         <div
@@ -570,12 +582,13 @@ function Nearby() {
                   key={item.arsId}
                   onClick={async () => {
                     const stopId = item.arsId || item.bsId;
-                    const selectedId = selectedStop?.arsId || selectedStop?.bsId;
+                    const selectedId =
+                      selectedStop?.arsId || selectedStop?.bsId;
                     const isSameStop = stopId === selectedId;
 
                     if (isSameStop) {
-                      setSelectedStop(null);       // 도착정보 칸 안 보이게
-                      setArrivalData([]);          // 도착정보 초기화
+                      setSelectedStop(null); // 도착정보 칸 안 보이게
+                      setArrivalData([]); // 도착정보 초기화
                       return;
                     }
 
@@ -590,7 +603,6 @@ function Nearby() {
                     setArrivalMap((prev) => ({ ...prev, [stopId]: list }));
                     setLoadingArrivals(false);
                   }}
-
                   style={{
                     padding: "12px 16px",
                     borderBottom: "1px solid #eee",
@@ -624,7 +636,8 @@ function Nearby() {
 
                       {loadingArrivals ? (
                         <Spin tip="도착 정보를 불러오는 중..." fullscreen />
-                      ) : Array.isArray(arrivalData) && arrivalData.length > 0 ? (
+                      ) : Array.isArray(arrivalData) &&
+                        arrivalData.length > 0 ? (
                         <List
                           dataSource={arrivalData}
                           renderItem={(bus) => {
@@ -694,9 +707,8 @@ function Nearby() {
             );
           })}
         </div>
-      )
-      }
-    </div >
+      )}
+    </div>
   );
 }
 

@@ -114,10 +114,10 @@ export default function KakaoMapView({
               <div
                 style={{
                   margin: "0 auto",
-                  padding: "4px 8px",
-                  background: "#fff",
-                  border: "1px solid #ccc",
-                  borderRadius: "8px",
+                  padding: "3px 8px",
+                  // background: "#fff",
+                  // border: "1px solid #ccc",
+                  // borderRadius: "8px",
                   textAlign: "center",
                   fontSize: "12px",
                   fontWeight: "bold",

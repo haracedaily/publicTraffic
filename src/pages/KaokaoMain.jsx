@@ -745,21 +745,6 @@ const drawLine = (data) => {
                         </CustomOverlayMap>
                     )}
                 </MarkerClusterer>
-                {myPosition && (
-                    <MapView
-                        position={myPosition}
-                        onClick={() => {
-                            console.log("내 위치 클릭");
-                            if (mapRef.current && window.kakao?.maps) {
-                                const kakaoLatLng = new window.kakao.maps.LatLng(
-                                    myPosition.lat,
-                                    myPosition.lng
-                                );
-                                mapRef.current.setCenter(kakaoLatLng);
-                            }
-                        }}
-                    />
-                )}
             </Map>
             </article>
             }
