@@ -249,7 +249,7 @@
         padding: 2rem;
         width: 100%;
         box-sizing: border-box;
-        min-height: 100vh;
+        /*min-height: 100vh;*/
     }
     .favoritesTitle2 {
         margin-top: 1rem;
