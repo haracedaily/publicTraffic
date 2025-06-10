@@ -27,8 +27,8 @@ function SearchTotal(props) {
                     props.setArrivalInfo(res);
                 }
             })
-            .catch(error => {
-                console.error("도착 정보 조회 실패:", error);
+            .catch((error) => {
+                // console.error("도착 정보 조회 실패:", error);
             });
     };
     const convertNGISToKakao = (x, y) => {
@@ -41,6 +41,7 @@ function SearchTotal(props) {
         document.querySelector(".jh_sideSelectedStop")?.scrollIntoView({behavior:"smooth",block:"center",inline:"center"});
     }
     const searchTotal = async (value) =>{
+        event.target.blur();
         if(value){
             let res = await kakaoMap.getSearchTotal(value);
             if(res===404){
@@ -177,7 +178,7 @@ function SearchTotal(props) {
             </div>
             {props.isCommonMobile && props.selectedRoute && (
                 <div style={{margin:"1rem", display:"flex",justifyContent:"flex-end"}}>
-                    <Button onClick={moveSelectedStop}>선택정류소</Button>
+                    <Button onClick={moveSelectedStop}>선택정류장</Button>
                 </div>
 
             )}
