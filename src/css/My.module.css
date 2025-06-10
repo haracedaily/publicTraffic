@@ -249,7 +249,7 @@
         padding: 2rem;
         width: 100%;
         box-sizing: border-box;
-        min-height: 100vh;
+        /*min-height: 100vh;*/
     }
     .favoritesTitle2 {
         margin-top: 1rem;
@@ -266,6 +266,7 @@
     .cardWrapper {
         width: 100%;
         padding: 0;
+        margin-bottom: 2rem;
     }
 
     .favoritesTitle {
@@ -344,6 +345,9 @@
     .refreshTimer {
         width: 60px;
         font-size: 0.75rem;
+    }
+    .cardWrapper {
+        margin-bottom: 2rem;
     }
 
     .favoritesList,
