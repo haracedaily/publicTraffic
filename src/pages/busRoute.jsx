@@ -441,7 +441,7 @@ function BusRoute(props) {
     // KaokaoMain의 handleRouteClick 호출
     // props.handleRouteClick(route);
   };
-console.log(filteredRouteList);
+// console.log(filteredRouteList);
   return (
       <>
         <style>{styles}</style>
