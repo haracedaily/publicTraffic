@@ -264,7 +264,7 @@ function Nearby() {
       style={{
         position: "relative",
         width: "100%",
-        height: isMobile ? "100vh" : "auto",
+        height: isMobile ? "100%" : "auto",
         overflow: "hidden",
       }}
     >
