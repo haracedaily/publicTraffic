@@ -52,6 +52,28 @@ export default function KakaoMapView({
         overflow: "hidden",
       }}
     >
+      <div
+        onClick={handleClick}
+        style={{
+          position: "absolute",
+          bottom: "20px",
+          right: "20px",
+          width: "55px",
+          height: "55px",
+          zIndex: 1000,
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          cursor: "pointer",
+          ...mapViewStyle, // KakaoMapView에서 내려온 bottom, right 등 포함됨
+        }}
+      >
+        <img
+          src="/location_icon.svg"
+          alt="현재 위치로 이동"
+          style={{ width: "100%", height: "100%" }}
+        />
+      </div>
       <Map
         center={mapCenter || { lat: 35.8714, lng: 128.6014 }}
         ref={mapRef}
@@ -62,6 +84,7 @@ export default function KakaoMapView({
           onCenterChanged({ lat: latlng.getLat(), lng: latlng.getLng() });
         }}
       >
+        
         <MapView
           position={myLocation}
           onClick={handleClick}

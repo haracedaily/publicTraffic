@@ -72,7 +72,7 @@ function MapView({ position, onClick, style }) {
       >
       </MapMarker>
       {/* 현재 위치 복귀 버튼 */}
-      <div
+      {/* <div
         onClick={onClick}
         style={{
           position: "absolute",
@@ -93,7 +93,7 @@ function MapView({ position, onClick, style }) {
           alt="현재 위치로 이동"
           style={{ width: "100%", height: "100%" }}
         />
-      </div>
+      </div> */}
     </>
   );
 }
