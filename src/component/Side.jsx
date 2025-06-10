@@ -11,6 +11,8 @@ function Side(props) {
         props.setSelectedStop(null);
         props.setMarkerClicked(false);
         props.setOpenedRoute(false);
+        props.setSelectedRoute(null);
+        props.setSelectedRouteList(null);
     }
     return (
         <nav ref={props.sideRef} className={props.isCommonMobile?styles.is_mobile_side:styles.side_nav}>
