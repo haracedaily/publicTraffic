@@ -94,7 +94,9 @@ function Nearby() {
     const fetchNearbyStops = async () => {
       setLoadingStops(true);
       try {
-        const url = `https://apis.data.go.kr/1613000/BusSttnInfoInqireService/getCrdntPrxmtSttnList?serviceKey=${import.meta.env.VITE_DAEGU_ENC_KEY}&gpsLati=${target.lat}&gpsLong=${target.lng}&radius=1000&_type=json`;
+        const url = `https://apis.data.go.kr/1613000/BusSttnInfoInqireService/getCrdntPrxmtSttnList?serviceKey=${
+          import.meta.env.VITE_DAEGU_ENC_KEY
+        }&gpsLati=${target.lat}&gpsLong=${target.lng}&radius=1000&_type=json`;
         const res = await fetch(url);
         const json = await res.json();
         const items = json.response.body.items?.item ?? [];
@@ -259,10 +261,16 @@ function Nearby() {
       className={`${styles["nearby-container"]} ${
         selectedStop ? styles["three-columns"] : styles["two-columns"]
       }`}
+      style={{
+        position: "relative",
+        width: "100%",
+        height: isMobile ? "100vh" : "auto",
+        overflow: "hidden",
+      }}
     >
       <Card
         className={`${styles["map-column"]} ${styles["card-fixed"]}`}
-        styles={{ body: { height: "100%" } }}
+        styles={{ body: { height: isMobile ? "100vh" : "100%" } }}
       >
         {/* <KakaoMapView
           center={{ lat: location.lat, lng: location.lng }}
@@ -650,7 +658,7 @@ function Nearby() {
         </div>
       )}
 
-      {/* {isMobile && (
+      {/*{isMobile && (
       <div
             onClick={handleReturnToMyLocation}
             style={{
@@ -675,7 +683,7 @@ function Nearby() {
               style={{ width: "100%", height: "100%" }}
             />
           </div>
-      )} */}
+      )}*/}
     </div>
   );
 }
