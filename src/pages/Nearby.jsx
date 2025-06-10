@@ -42,6 +42,8 @@ function Nearby() {
 
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 1024);
 
+  const didSetInitialCenterRef = useRef(false);
+
   const handleReturnToMyLocation = (cc) => {
     if (location.lat && location.lng) {
       setMapCenter({ lat: location.lat, lng: location.lng });
@@ -210,8 +212,16 @@ function Nearby() {
             return;
           }
 
-          setLocation({ lat: latitude, lng: longitude });
-          setMapCenter({ lat: latitude, lng: longitude });
+          // setLocation({ lat: latitude, lng: longitude });
+          // setMapCenter({ lat: latitude, lng: longitude });
+          const newLocation = { lat: latitude, lng: longitude };
+          setLocation(newLocation);
+
+          // ✅ 최초 1회만 지도 중심 설정
+          if (!didSetInitialCenterRef.current) {
+            setMapCenter(newLocation);
+            didSetInitialCenterRef.current = true;
+          }
         },
         (err) => {
           // message.error("위치를 가져오지 못했습니다.");
@@ -228,10 +238,21 @@ function Nearby() {
       // ✅ 데스크탑이면 한 번만 위치 요청
       navigator.geolocation.getCurrentPosition(
         (pos) => {
-          const lat = pos.coords.latitude;
-          const lng = pos.coords.longitude;
-          setLocation({ lat, lng });
-          setMapCenter({ lat, lng });
+          // const lat = pos.coords.latitude;
+          // const lng = pos.coords.longitude;
+          // setLocation({ lat, lng });
+          // setMapCenter({ lat, lng });
+
+          const newLocation = {
+            lat: pos.coords.latitude,
+            lng: pos.coords.longitude,
+          };
+          setLocation(newLocation);
+
+          if (!didSetInitialCenterRef.current) {
+            setMapCenter(newLocation);
+            didSetInitialCenterRef.current = true;
+          }
         },
         (err) => {
           // message.error("위치를 가져오지 못했습니다.");
