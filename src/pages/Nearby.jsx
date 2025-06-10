@@ -42,7 +42,7 @@ function Nearby() {
 
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 1024);
 
-  const handleReturnToMyLocation = () => {
+  const handleReturnToMyLocation = (cc) => {
     if (location.lat && location.lng) {
       setMapCenter({ lat: location.lat, lng: location.lng });
     }
@@ -94,11 +94,11 @@ function Nearby() {
     const fetchNearbyStops = async () => {
       setLoadingStops(true);
       try {
-        const url = `https://apis.data.go.kr/1613000/BusSttnInfoInqireService/getCrdntPrxmtSttnList?serviceKey=l7L9HOYK5mFEJAehYbro5q9qXaJofTBB7nv0fYzNNIqJE%2FYGs2d7Gn6%2FDb6qrv9D1F9v5iEm%2BpXpQ%2FCINV59DA%3D%3D&gpsLati=${target.lat}&gpsLong=${target.lng}&radius=1000&_type=json`;
+        const url = `https://apis.data.go.kr/1613000/BusSttnInfoInqireService/getCrdntPrxmtSttnList?serviceKey=${import.meta.env.VITE_DAEGU_ENC_KEY}&gpsLati=${target.lat}&gpsLong=${target.lng}&radius=1000&_type=json`;
         const res = await fetch(url);
         const json = await res.json();
         const items = json.response.body.items?.item ?? [];
-
+        console.log(items);
         // const searchResults = await kakaoMap.getSearchTotal("");
         // const searchMap = new Map(searchResults.map(sr => [sr.bsNm, sr]));
 
@@ -650,7 +650,11 @@ function Nearby() {
         </div>
       )}
 
+<<<<<<< HEAD
       {/* {isMobile && (
+=======
+      {/*{isMobile && (
+>>>>>>> main
       <div
             onClick={handleReturnToMyLocation}
             style={{
@@ -675,7 +679,11 @@ function Nearby() {
               style={{ width: "100%", height: "100%" }}
             />
           </div>
+<<<<<<< HEAD
       )} */}
+=======
+      )}*/}
+>>>>>>> main
     </div>
   );
 }
