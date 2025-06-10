@@ -533,7 +533,7 @@ console.log(filteredRouteList);
           {/*)}*/}
 
           {props.isCommonMobile && (
-              <div style={{width: "100%", height: "400px", marginTop: "10px"}}>
+              <div style={{width: "100%", height: "260px", marginTop: "10px"}}>
                 <MobileKakaoMap {...props} />
               </div>
           )}
