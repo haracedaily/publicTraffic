@@ -55,10 +55,10 @@ function KaokaoMain({isCommonMobile}) {
                 setMapLevel(4);
             },
             (err) => {
-                console.error("위치 오류:", err);
+                // console.error("위치 오류:", err);
                 setMyPosition(null);
                 setMapCenter({ lat: 35.8714, lng: 128.6014 });
-                setMapLevel(7);
+                setMapLevel(4);
             },
             { enableHighAccuracy: true, maximumAge: 0 }
         );
@@ -67,42 +67,45 @@ function KaokaoMain({isCommonMobile}) {
   const handleRouteClick = async (route) => {
     if (
         !linkGeoJson ||
-        !route.list ||
-        !route.list[0] ||
+        !route?.list ||
+        !route?.list[0] ||
         !originRoute ||
         !destyRoute
     ) {
-      console.error("필요한 데이터가 없습니다:", {
-        linkGeoJson,
-        route,
-        originRoute,
-        destyRoute,
-      });
-      alert("출발지, 도착지 또는 경로 데이터가 없습니다.");
+      // console.error("필요한 데이터가 없습니다:", {
+      //   linkGeoJson,
+      //   route,
+      //   originRoute,
+      //   destyRuteo,
+      // }
+      // );
+      //alert("출발지, 도착지 또는 경로 데이터가 없습니다.");
+      // 만약에 데이터를 불러와야하는 곳에서도 사용 중이면 alert를 띄우는거 반대하긴 애매함
+      // 단순히 조회 내역을 input으로 넣는 경우에는 alert를 띄우지 않음
       setCustomPathLink(null);
       return;
     }
 
     try {
-      console.log("추천 경로 입력:", {
-        routeNo: route.list[0].routeNo,
-        routeId: route.list[0].routeId,
-        origin: originRoute,
-        desty: destyRoute,
-      });
+      // console.log("추천 경로 입력:", {
+      //   routeNo: route.list[0].routeNo,
+      //   routeId: route.list[0].routeId,
+      //   origin: originRoute,
+      //   desty: destyRoute,
+      // });
 
       // 1. API 호출로 링크 데이터 가져오기
       const step = route.list[0];
       const res = await kakaoMap.getRouteLink(step.routeId).catch((error) => {
-        console.error(`Route ${step.routeNo} API 호출 실패:`, error);
+        // console.error(`Route ${step.routeNo} API 호출 실패:`, error);
         return { data: { body: { items: [] } } };
       });
-      console.log("노선번호 경로 찾기 값 : ", res);
+      // console.log("노선번호 경로 찾기 값 : ", res);
       if (!res.data?.body?.items) {
-        console.warn(
-            `Route ${step.routeNo} API 응답이 유효하지 않습니다:`,
-            res
-        );
+        // console.warn(
+        //     `Route ${step.routeNo} API 응답이 유효하지 않습니다:`,
+        //     res
+        // );
       }
       const links = res.data?.body?.items || [];
       // console.log(`Route ${step.routeNo} API 응답 (links):`, links);
@@ -125,14 +128,14 @@ function KaokaoMain({isCommonMobile}) {
               moveDir: matchedItem ? matchedItem.moveDir : 0,
             };
           });
-      console.log(
-          "API 기반 validLinks (필터링 전):",
-          validLinks.map((item) => ({
-            linkId: item.linkId,
-            routeNo: item.routeNo,
-            moveDir: item.moveDir,
-          }))
-      );
+      // console.log(
+      //     "API 기반 validLinks (필터링 전):",
+      //     validLinks.map((item) => ({
+      //       linkId: item.linkId,
+      //       routeNo: item.routeNo,
+      //       moveDir: item.moveDir,
+      //     }))
+      // );
 
       // 3. 출발지와 도착지 사이의 경로 구성 (수정됨)
       const threshold = 0.02; // 0.02도 (약 2km 이내)
@@ -268,9 +271,9 @@ function KaokaoMain({isCommonMobile}) {
 
       // 4. 대체 경로 탐색 (수정됨)
       if (!bestPath) {
-        console.warn(
-            "출발지-도착지 간 유효한 경로를 찾지 못했습니다. 대체 경로 탐색 시도."
-        );
+        // console.warn(
+        //     "출발지-도착지 간 유효한 경로를 찾지 못했습니다. 대체 경로 탐색 시도."
+        // );
         const candidates = linkGeoJson.features
             .filter((link) => {
               // API 링크와 일치하는 링크만 고려
@@ -364,24 +367,24 @@ function KaokaoMain({isCommonMobile}) {
       // 5. 상태 업데이트
       if (bestPath) {
         const variableList = [bestPath];
-        console.log("생성된 경로:", variableList); // 디버깅 로그 추가
+        // console.log("생성된 경로:", variableList); // 디버깅 로그 추가
         setCustomPathLink(variableList);
         setMapCenter({ lat: originRoute.lat, lng: originRoute.lng });
         setMapLevel(5);
         setOpenedRoute(true);
       } else {
-        console.warn("유효한 경로를 찾을 수 없습니다:", {
-          apiLinks: links.length,
-          geoJsonLinks: linkGeoJson.features.length,
-        });
+        // console.warn("유효한 경로를 찾을 수 없습니다:", {
+        //   apiLinks: links.length,
+        //   geoJsonLinks: linkGeoJson.features.length,
+        // });
         alert(
             "출발지와 도착지를 연결하는 경로를 찾을 수 없습니다. 다른 노선을 선택해주세요."
         );
         setCustomPathLink(null);
       }
-    } catch (error) {
-      console.error("handleRouteClick 오류:", error);
-      alert("경로를 처리하는 중 오류가 발생했습니다.");
+    } catch (e) {
+      // console.error("handleRouteClick 오류:", error);
+      // alert("경로를 처리하는 중 오류가 발생했습니다.");
       setCustomPathLink(null);
     }
   };
@@ -406,7 +409,9 @@ function KaokaoMain({isCommonMobile}) {
                 // console.log("링크확인 : ",res.data.body.items);
                 drawLine(res.data.body.items);
             })
-            .catch(error=>{console.log(error)})
+            .catch(error=>{
+                // console.log(error)
+            })
     }
 
 const drawLine = (data) => {
@@ -489,6 +494,8 @@ const drawLine = (data) => {
                 openFind={openFind}
                 setOpenFind={setOpenFind}
                 handleRouteClick={handleRouteClick}
+                customPathLink={customPathLink}
+                setCustomPathLink={setCustomPathLink}
             />
 
             {isCommonMobile ||
@@ -648,7 +655,7 @@ const drawLine = (data) => {
                                         }
                                     })
                                     .catch(error => {
-                                        console.error("도착 정보 조회 실패:", error);
+                                        // console.error("도착 정보 조회 실패:", error);
                                     });
                             }}
                         />)
@@ -734,8 +741,8 @@ const drawLine = (data) => {
                                                     item.arrState === "전전" ? "#faad14" : item.arrState ==='도착예정' ? "#aaaaaa" : "#1890ff",
                                                 fontWeight: "bold"
                                             }}>
-                                                {item.arrState.includes("전") ? "곧 도착" :
-                                                    item.arrState === "전전" ? "곧 도착 예정" : item.arrState ==='도착예정' ? "차고지 대기" :
+                                                {item.arrState==="전" ? "전" :
+                                                    item.arrState === "전전" ? "전전" : item.arrState ==='도착예정' ? "차고지 대기" :
                                                         `${item.arrState} 후 도착`}
                                             </div>
                                         </div>

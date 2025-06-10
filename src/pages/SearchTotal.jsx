@@ -27,8 +27,8 @@ function SearchTotal(props) {
                     props.setArrivalInfo(res);
                 }
             })
-            .catch(error => {
-                console.error("도착 정보 조회 실패:", error);
+            .catch((error) => {
+                // console.error("도착 정보 조회 실패:", error);
             });
     };
     const convertNGISToKakao = (x, y) => {
@@ -41,6 +41,7 @@ function SearchTotal(props) {
         document.querySelector(".jh_sideSelectedStop")?.scrollIntoView({behavior:"smooth",block:"center",inline:"center"});
     }
     const searchTotal = async (value) =>{
+        event.target.blur();
         if(value){
             let res = await kakaoMap.getSearchTotal(value);
             if(res===404){
@@ -106,6 +107,7 @@ function SearchTotal(props) {
             setCalcHeight("0px");
         }
     }
+
     return (
         <div style={{height:"100%", position:"relative"}}>
             <Space.Compact id={"jh_searchTop"} style={{ width: '100%', padding: '20px' }}>
@@ -116,9 +118,9 @@ function SearchTotal(props) {
                 <MobileKakaoMap {...props} />
             </div>
             }
-            <div className={props.isCommonMobile?"jh_search_result_mobile":"none"} style={{height:`${props.isCommonMobile?"calc(100% - 50vh - 72px + "+calcHeight+")":"auto"}`}} data-height={calcHeight}>
+            <div className={props.isCommonMobile?"jh_search_result_mobile":""} style={{height:`${props.isCommonMobile?"calc(100% - 50vh - 72px + "+calcHeight+")":"auto"}`}} data-height={calcHeight}>
                 {props.isCommonMobile&&
-                    <div style={{display:"flex",justifyContent:"center",paddingTop:"1rem",marginBottom:"1rem",alignItems:"center",height:"20px",position:"sticky",top:0,zIndex:30000,backgroundColor:"white", cursor:"pointer"}} onClick={toggleStart}>
+                    <div style={{display:"flex",justifyContent:"center",paddingTop:"1rem",paddingBottom:"1rem",alignItems:"center",height:"20px",position:"sticky",top:0,zIndex:30000,backgroundColor:"white", cursor:"pointer"}} onClick={toggleStart}>
                     <div className={`${calcHeight==="0px"?styles.upper_btn:styles.lower_btn} ${toggleMove.current?calcHeight==="0px"?styles.upper_change:styles.lower_change:""} toggleBtn`} style={{width:"10px",height:"10px",borderRadius:"3px",borderTop:"5px solid #dddddd",borderRight:"5px solid #dddddd"}}></div>
                 </div>
                 }
@@ -176,7 +178,7 @@ function SearchTotal(props) {
             </div>
             {props.isCommonMobile && props.selectedRoute && (
                 <div style={{margin:"1rem", display:"flex",justifyContent:"flex-end"}}>
-                    <Button onClick={moveSelectedStop}>선택정류소</Button>
+                    <Button onClick={moveSelectedStop}>선택정류장</Button>
                 </div>
 
             )}
@@ -211,7 +213,7 @@ function SearchTotal(props) {
                                                 {item.arrState === "전" ? "전" :
                                                     item.arrState === "전전" ? "전전" : item.arrState ==='도착예정' ? "차고지 대기" :
                                                         `${item.arrState} 후 도착`}
-                                                {props?.selectedRoute?.routeId === item.routeId && props.selectedRouteList && (
+                                                {props?.selectedRoute?.routeNo === item.routeNo && props.selectedRouteList && (
                                                     <div style={{display:"flex",width:"100%",justifyContent:"end"}}>
                                                         <img className={props.openedRoute?styles.jh_side_open:styles.jh_side_close} width={15} src={"/reverse_triangle.svg"} alt={"경로 닫기"}
                                                              onClick={()=>props.setOpenedRoute(!props.openedRoute)} style={{cursor:"pointer"}} />
@@ -227,13 +229,12 @@ function SearchTotal(props) {
                                             버스 번호: {item.vhcNo2}
                                         </div>*/}
 
-                                    {props.openedRoute && props?.selectedRoute?.routeId === item.routeId && props.selectedRouteList && (
+                                    {props.openedRoute && props?.selectedRoute?.routeNo === item.routeNo && props.selectedRouteList && (
 
                                         <List
                                             className={styles.jh_sideSelectedStopList}
                                             dataSource={props.selectedRouteList}
                                             renderItem={(item) => {
-
                                                 // if(item.bsId===props.selectedStop.bsId)document.querySelector(".jh_sideSelectedStop")?.scrollIntoView({behavior:"smooth",block:"center",inline:"nearest"});
                                                 return (
                                                 <Card className={`${item.moveDir==0?styles.origin_dir:styles.reverse_dir} ${item.bsId===props.selectedStop.bsId?"jh_sideSelectedStop":""}`} >
