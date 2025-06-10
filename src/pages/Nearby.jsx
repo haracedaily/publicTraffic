@@ -273,7 +273,7 @@ function Nearby() {
   const mapViewStyle = {
     zIndex: "90",
     position: "absolute",
-    bottom: isMobile ? Math.min(panelHeight + 12, maxButtonBottom) : 12,
+    bottom: isMobile ? Math.min(panelHeight + 16, maxButtonBottom) : 16,
     right: 16,
     transition: "bottom 0.3s ease",
   };
