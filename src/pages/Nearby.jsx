@@ -49,7 +49,7 @@ function Nearby() {
   };
 
   const handleMouseDown = (e) => {
-    e.preventDefault();
+    //e.preventDefault();
     setIsDragging(true);
   };
 
@@ -155,8 +155,8 @@ function Nearby() {
 
         setBusStops(stops);
       } catch (err) {
-        console.error("정류장 불러오기 실패:", err);
-        message.error("정류장을 불러오는 데 실패했습니다");
+        // console.error("정류장 불러오기 실패:", err);
+        // message.error("정류장을 불러오는 데 실패했습니다");
       } finally {
         setLoadingStops(false);
       }
@@ -177,6 +177,7 @@ function Nearby() {
   }, [selectedStop]);
 
   const handleMapCenterChanged = (newCenter) => {
+    console.log("chk");
     if (
       Math.abs(newCenter.lat - (mapCenter?.lat || 0)) < 0.001 &&
       Math.abs(newCenter.lng - (mapCenter?.lng || 0)) < 0.001
@@ -213,7 +214,7 @@ function Nearby() {
           setMapCenter({ lat: latitude, lng: longitude });
         },
         (err) => {
-          message.error("위치를 가져오지 못했습니다.");
+          // message.error("위치를 가져오지 못했습니다.");
           setLoadingStops(false);
         },
         {
@@ -233,7 +234,7 @@ function Nearby() {
           setMapCenter({ lat, lng });
         },
         (err) => {
-          message.error("위치를 가져오지 못했습니다.");
+          // message.error("위치를 가져오지 못했습니다.");
           setLoadingStops(false);
         },
         {
