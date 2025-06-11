@@ -42,6 +42,8 @@ function Nearby() {
 
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 1024);
 
+  const didSetInitialCenterRef = useRef(false);
+
   const handleReturnToMyLocation = (cc) => {
     if (location.lat && location.lng) {
       setMapCenter({ lat: location.lat, lng: location.lng });
@@ -49,7 +51,7 @@ function Nearby() {
   };
 
   const handleMouseDown = (e) => {
-    e.preventDefault();
+    //e.preventDefault();
     setIsDragging(true);
   };
 
@@ -94,7 +96,9 @@ function Nearby() {
     const fetchNearbyStops = async () => {
       setLoadingStops(true);
       try {
-        const url = `https://apis.data.go.kr/1613000/BusSttnInfoInqireService/getCrdntPrxmtSttnList?serviceKey=${import.meta.env.VITE_DAEGU_ENC_KEY}&gpsLati=${target.lat}&gpsLong=${target.lng}&radius=1000&_type=json`;
+        const url = `https://apis.data.go.kr/1613000/BusSttnInfoInqireService/getCrdntPrxmtSttnList?serviceKey=${
+          import.meta.env.VITE_DAEGU_ENC_KEY
+        }&gpsLati=${target.lat}&gpsLong=${target.lng}&radius=1000&_type=json`;
         const res = await fetch(url);
         const json = await res.json();
         const items = json.response.body.items?.item ?? [];
@@ -153,8 +157,8 @@ function Nearby() {
 
         setBusStops(stops);
       } catch (err) {
-        console.error("정류장 불러오기 실패:", err);
-        message.error("정류장을 불러오는 데 실패했습니다");
+        // console.error("정류장 불러오기 실패:", err);
+        // message.error("정류장을 불러오는 데 실패했습니다");
       } finally {
         setLoadingStops(false);
       }
@@ -175,6 +179,7 @@ function Nearby() {
   }, [selectedStop]);
 
   const handleMapCenterChanged = (newCenter) => {
+    console.log("chk");
     if (
       Math.abs(newCenter.lat - (mapCenter?.lat || 0)) < 0.001 &&
       Math.abs(newCenter.lng - (mapCenter?.lng || 0)) < 0.001
@@ -207,11 +212,19 @@ function Nearby() {
             return;
           }
 
-          setLocation({ lat: latitude, lng: longitude });
-          setMapCenter({ lat: latitude, lng: longitude });
+          // setLocation({ lat: latitude, lng: longitude });
+          // setMapCenter({ lat: latitude, lng: longitude });
+          const newLocation = { lat: latitude, lng: longitude };
+          setLocation(newLocation);
+
+          // ✅ 최초 1회만 지도 중심 설정
+          if (!didSetInitialCenterRef.current) {
+            setMapCenter(newLocation);
+            didSetInitialCenterRef.current = true;
+          }
         },
         (err) => {
-          message.error("위치를 가져오지 못했습니다.");
+          // message.error("위치를 가져오지 못했습니다.");
           setLoadingStops(false);
         },
         {
@@ -225,13 +238,24 @@ function Nearby() {
       // ✅ 데스크탑이면 한 번만 위치 요청
       navigator.geolocation.getCurrentPosition(
         (pos) => {
-          const lat = pos.coords.latitude;
-          const lng = pos.coords.longitude;
-          setLocation({ lat, lng });
-          setMapCenter({ lat, lng });
+          // const lat = pos.coords.latitude;
+          // const lng = pos.coords.longitude;
+          // setLocation({ lat, lng });
+          // setMapCenter({ lat, lng });
+
+          const newLocation = {
+            lat: pos.coords.latitude,
+            lng: pos.coords.longitude,
+          };
+          setLocation(newLocation);
+
+          if (!didSetInitialCenterRef.current) {
+            setMapCenter(newLocation);
+            didSetInitialCenterRef.current = true;
+          }
         },
         (err) => {
-          message.error("위치를 가져오지 못했습니다.");
+          // message.error("위치를 가져오지 못했습니다.");
           setLoadingStops(false);
         },
         {
@@ -249,7 +273,7 @@ function Nearby() {
   const mapViewStyle = {
     zIndex: "90",
     position: "absolute",
-    bottom: isMobile ? Math.min(panelHeight + 12, maxButtonBottom) : 12,
+    bottom: isMobile ? Math.min(panelHeight + 16, maxButtonBottom) : 16,
     right: 16,
     transition: "bottom 0.3s ease",
   };
@@ -259,10 +283,16 @@ function Nearby() {
       className={`${styles["nearby-container"]} ${
         selectedStop ? styles["three-columns"] : styles["two-columns"]
       }`}
+      style={{
+        position: "relative",
+        width: "100%",
+        height: isMobile ? "100%" : "auto",
+        overflow: "hidden",
+      }}
     >
       <Card
         className={`${styles["map-column"]} ${styles["card-fixed"]}`}
-        styles={{ body: { height: "100%" } }}
+        styles={{ body: { height: isMobile ? "100vh" : "100%" } }}
       >
         {/* <KakaoMapView
           center={{ lat: location.lat, lng: location.lng }}
