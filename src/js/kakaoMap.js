@@ -42,7 +42,7 @@ async function getArrivalInfo(bsId) {
 async function getRouteInfo(routeNo) {
     try{
         // let res = await axios.get(`https://businfo.daegu.go.kr:8095/dbms_web_api/bs_new/route?routeId=${routeNo}`);
-        let res = await axios.get(`https://apis.data.go.kr/6270000/dbmsapi01/getBs?serviceKey=${import.meta.env.VITE_DAEGU_ENC_KEY}&routeId=${routeNo}`);
+        let res = await axios.get(`https://apis.data.go.kr/6270000/dbmsapi02/getBs02?serviceKey=${import.meta.env.VITE_DAEGU_ENC_KEY}&routeId=${routeNo}`);
         // console.log("노선경유정류장 : ",res);
         return res;
     }catch (error) {
@@ -54,7 +54,7 @@ async function getRouteInfo(routeNo) {
 
 async function getRouteLocation(routeId){
     try{
-        let res = await axios.get(`https://apis.data.go.kr/6270000/dbmsapi01/getPos?serviceKey=${import.meta.env.VITE_DAEGU_ENC_KEY}&routeId=${routeId}`);
+        let res = await axios.get(`https://apis.data.go.kr/6270000/dbmsapi02/getPos02?serviceKey=${import.meta.env.VITE_DAEGU_ENC_KEY}&routeId=${routeId}`);
         // console.log("노선 현 위치 : ",res);
         return res;
     }catch (error) {
@@ -66,7 +66,7 @@ async function getRouteLocation(routeId){
 
 async function getRouteLink(routeId){
     try{
-        let res = await axios.get(`https://apis.data.go.kr/6270000/dbmsapi01/getLink?serviceKey=${import.meta.env.VITE_DAEGU_ENC_KEY}&routeId=${routeId}`);
+        let res = await axios.get(`https://apis.data.go.kr/6270000/dbmsapi02/getLink02?serviceKey=${import.meta.env.VITE_DAEGU_ENC_KEY}&routeId=${routeId}`);
         // console.log("route별 링크 : ",res);
         return res;
     }catch (error) {
